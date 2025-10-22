@@ -1,0 +1,35 @@
+{
+  "name": "vietnam-delivery-management",
+  "version": "1.0.0",
+  "description": "越南末端派送管理系统 - 专业的越南二段发运运单管理平台",
+  "main": "index.html",
+  "scripts": {
+    "start": "serve -s . -l 3000",
+    "build": "echo 'Static site - no build needed'",
+    "dev": "serve -s . -l 3000",
+    "deploy": "echo 'Ready for deployment'"
+  },
+  "keywords": [
+    "vietnam",
+    "delivery",
+    "logistics",
+    "shipping",
+    "management",
+    "二段发运",
+    "越南末端派送"
+  ],
+  "author": "JoyCode Development Team",
+  "license": "MIT",
+  "dependencies": {
+    "serve": "^14.2.1"
+  },
+  "devDependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/your-username/vietnam-delivery-management.git"
+  },
+  "homepage": "https://your-username.github.io/vietnam-delivery-management",
+  "engines": {
+    "node": ">=14.0.0"
+  }
+}

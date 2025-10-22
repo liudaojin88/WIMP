@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>越南末端派送管理系统</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            font-family: 'Microsoft YaHei', Arial, sans-serif;
+        }
+        
+        .main-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .welcome-card {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+            padding: 60px 40px;
+            text-align: center;
+            max-width: 800px;
+            width: 100%;
+        }
+        
+        .logo {
+            font-size: 4rem;
+            color: #667eea;
+            margin-bottom: 20px;
+        }
+        
+        .welcome-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .welcome-subtitle {
+            font-size: 1.2rem;
+            color: #666;
+            margin-bottom: 40px;
+            line-height: 1.6;
+        }
+        
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 30px;
+            margin: 40px 0;
+        }
+        
+        .feature-card {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 30px 20px;
+            text-align: center;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-5px);
+            border-color: #667eea;
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.2);
+        }
+        
+        .feature-icon {
+            font-size: 3rem;
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+        
+        .feature-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        
+        .feature-desc {
+            color: #666;
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+        
+        .btn-main {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 50px;
+            padding: 15px 40px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: white;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+        }
+        
+        .btn-main:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 40px rgba(102, 126, 234, 0.4);
+            color: white;
+        }
+        
+        .system-info {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-radius: 15px;
+            padding: 30px;
+            margin-top: 40px;
+            text-align: left;
+        }
+        
+        .info-title {
+            font-size: 1.4rem;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .info-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        
+        .info-list li {
+            padding: 8px 0;
+            color: #555;
+            display: flex;
+            align-items: center;
+        }
+        
+        .info-list li i {
+            color: #28a745;
+            margin-right: 10px;
+            width: 20px;
+        }
+        
+        .footer {
+            margin-top: 40px;
+            padding-top: 30px;
+            border-top: 1px solid #eee;
+            color: #999;
+            font-size: 0.9rem;
+        }
+        
+        @media (max-width: 768px) {
+            .welcome-card {
+                padding: 40px 20px;
+            }
+            
+            .welcome-title {
+                font-size: 2rem;
+            }
+            
+            .feature-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="main-container">
+        <div class="welcome-card">
+            <div class="logo">
+                <i class="bi bi-truck"></i>
+            </div>
+            
+            <h1 class="welcome-title">越南末端派送管理系统</h1>
+            <p class="welcome-subtitle">
+                专业的越南二段发运运单管理平台<br>
+                高效管理批次信息、订单商品、装箱装车及运输进度
+            </p>
+            
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="bi bi-search"></i>
+                    </div>
+                    <div class="feature-title">智能查询</div>
+                    <div class="feature-desc">支持14个查询维度，快速定位目标批次和订单信息</div>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="bi bi-list-check"></i>
+                    </div>
+                    <div class="feature-title">批次管理</div>
+                    <div class="feature-desc">完整的批次生命周期管理，从创建到妥投全程跟踪</div>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="bi bi-box-seam"></i>
+                    </div>
+                    <div class="feature-title">装箱装车</div>
+                    <div class="feature-desc">详细的装箱和装车信息管理，支持批量导入和编辑</div>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="bi bi-graph-up"></i>
+                    </div>
+                    <div class="feature-title">进度跟踪</div>
+                    <div class="feature-desc">实时运输进度展示，时间轴清晰展现每个环节</div>
+                </div>
+            </div>
+            
+            <a href="vietnam-delivery-list.html" class="btn-main">
+                <i class="bi bi-arrow-right-circle me-2"></i>进入系统
+            </a>
+            
+            <div class="system-info">
+                <div class="info-title">
+                    <i class="bi bi-info-circle me-2"></i>系统功能特性
+                </div>
+                <ul class="info-list">
+                    <li><i class="bi bi-check-circle-fill"></i>支持多币种金额显示（泰铢、美元、人民币）</li>
+                    <li><i class="bi bi-check-circle-fill"></i>越南语商品名称完整支持</li>
+                    <li><i class="bi bi-check-circle-fill"></i>响应式设计，支持移动端访问</li>
+                    <li><i class="bi bi-check-circle-fill"></i>批量操作和数据导入导出</li>
+                    <li><i class="bi bi-check-circle-fill"></i>完整的状态管理和权限控制</li>
+                    <li><i class="bi bi-check-circle-fill"></i>实时数据同步和进度跟踪</li>
+                </ul>
+            </div>
+            
+            <div class="footer">
+                <p>© 2024 越南末端派送管理系统 - 专业的物流管理解决方案</p>
+                <p>技术支持：现代化Web技术栈 | Bootstrap 5 + 响应式设计</p>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

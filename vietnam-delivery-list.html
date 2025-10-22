@@ -1,0 +1,1991 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>越南末端派送列表 - 履约管理</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Microsoft YaHei', Arial, sans-serif;
+            background-color: #f8f9fa;
+        }
+        
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100vh;
+            width: 280px;
+            background: linear-gradient(180deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            z-index: 1000;
+            overflow-y: auto;
+            transition: all 0.3s ease;
+        }
+        
+        .sidebar.collapsed {
+            width: 80px;
+        }
+        
+        .sidebar-header {
+            padding: 20px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            text-align: center;
+        }
+        
+        .sidebar-header .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .sidebar-header .subtitle {
+            font-size: 0.85rem;
+            opacity: 0.8;
+        }
+        
+        .sidebar.collapsed .sidebar-header .subtitle,
+        .sidebar.collapsed .nav-text {
+            display: none;
+        }
+        
+        .nav-menu {
+            padding: 20px 0;
+        }
+        
+        .nav-item {
+            margin-bottom: 5px;
+        }
+        
+        .nav-link {
+            color: rgba(255,255,255,0.9);
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            border-radius: 0;
+        }
+        
+        .nav-link:hover {
+            background: rgba(255,255,255,0.1);
+            color: white;
+        }
+        
+        .nav-link.active {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border-right: 4px solid white;
+        }
+        
+        .nav-link i {
+            width: 20px;
+            margin-right: 12px;
+            text-align: center;
+        }
+        
+        .sidebar.collapsed .nav-link {
+            padding: 12px 30px;
+            justify-content: center;
+        }
+        
+        .sidebar.collapsed .nav-link i {
+            margin-right: 0;
+        }
+        
+        .nav-group {
+            margin-bottom: 30px;
+        }
+        
+        .nav-group-title {
+            padding: 8px 20px;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            opacity: 0.7;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+        
+        .main-content {
+            margin-left: 280px;
+            min-height: 100vh;
+            transition: all 0.3s ease;
+        }
+        
+        .main-content.expanded {
+            margin-left: 80px;
+        }
+        
+        .top-navbar {
+            background: white;
+            padding: 15px 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .toggle-btn {
+            background: none;
+            border: none;
+            font-size: 1.2rem;
+            color: #495057;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+        }
+        
+        .toggle-btn:hover {
+            background: #f8f9fa;
+        }
+        
+        .content-area {
+            padding: 30px;
+        }
+        
+        .breadcrumb-nav {
+            background: white;
+            padding: 15px 0;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #e9ecef;
+        }
+        
+        .breadcrumb-nav .breadcrumb {
+            margin-bottom: 0;
+            background: none;
+            padding: 0;
+        }
+        
+        .breadcrumb-nav .breadcrumb-item + .breadcrumb-item::before {
+            content: "/";
+            color: #6c757d;
+        }
+        
+        .page-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px 0;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .search-section {
+            background: white;
+            border-radius: 10px;
+            padding: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.08);
+        }
+        
+        .results-section {
+            background: white;
+            border-radius: 10px;
+            padding: 25px;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.08);
+        }
+        
+        .section-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #495057;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e9ecef;
+        }
+        
+        .form-label {
+            font-weight: 600;
+            color: #495057;
+            margin-bottom: 8px;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 6px;
+            padding: 10px 25px;
+            font-weight: 500;
+        }
+        
+        .btn-success {
+            background: linear-gradient(135deg, #56ab2f 0%, #a8e6cf 100%);
+            border: none;
+            border-radius: 6px;
+            padding: 10px 20px;
+            font-weight: 500;
+        }
+        
+        .btn-info {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            border: none;
+            border-radius: 6px;
+            padding: 10px 20px;
+            font-weight: 500;
+        }
+        
+        .btn-warning {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            border: none;
+            border-radius: 6px;
+            padding: 10px 20px;
+            font-weight: 500;
+        }
+        
+        .btn-outline-secondary {
+            border-radius: 6px;
+            padding: 10px 20px;
+            font-weight: 500;
+        }
+        
+        .table {
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        .table thead th {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border: none;
+            font-weight: 600;
+            color: #495057;
+            padding: 15px;
+            white-space: nowrap;
+        }
+        
+        .table tbody td {
+            padding: 15px;
+            vertical-align: middle;
+            border-color: #f1f3f4;
+        }
+        
+        .table tbody tr:hover {
+            background-color: #f8f9fa;
+        }
+        
+        .expand-btn {
+            background: none;
+            border: none;
+            color: #007bff;
+            font-size: 1.2rem;
+            padding: 0;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+        }
+        
+        .expand-btn:hover {
+            background-color: #e3f2fd;
+            color: #0056b3;
+        }
+        
+        .expand-btn.expanded {
+            transform: rotate(90deg);
+        }
+        
+        .batch-details {
+            background-color: #f8f9fa;
+            border-left: 4px solid #007bff;
+        }
+        
+        .batch-details .table {
+            margin-bottom: 0;
+        }
+        
+        .batch-details .table thead th {
+            background: #e3f2fd;
+            font-size: 0.9rem;
+        }
+        
+        .batch-details .table tbody td {
+            padding: 10px;
+            font-size: 0.9rem;
+        }
+        
+        .status-badge {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        
+        .status-new {
+            background: #fff3cd;
+            color: #856404;
+        }
+        
+        .status-confirmed {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .status-pending {
+            background: #cce5ff;
+            color: #004085;
+        }
+        
+        .status-shipped {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+        
+        .status-delivered {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .status-deleted {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
+        .currency-amount {
+            font-weight: 600;
+            color: #28a745;
+        }
+        
+        .modal-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-bottom: none;
+        }
+        
+        .modal-header .btn-close {
+            filter: invert(1);
+        }
+        
+        .search-btn-group {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        
+        .action-buttons {
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+        
+        .action-buttons .btn {
+            margin-right: 10px;
+            margin-bottom: 5px;
+        }
+        
+        @media (max-width: 768px) {
+            .search-btn-group {
+                flex-direction: column;
+                width: 100%;
+            }
+            
+            .search-btn-group .btn {
+                width: 100%;
+            }
+            
+            .action-buttons .btn {
+                width: 100%;
+                margin-right: 0;
+                margin-bottom: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 侧边栏 -->
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="logo">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 2L2 7v10c0 5.55 3.84 9.74 9 11 5.16-1.26 9-5.45 9-11V7l-10-5z"/>
+                    <path d="M9 12l2 2 4-4" stroke="white" stroke-width="2" fill="none"/>
+                </svg>
+                <span class="nav-text">WIMP</span>
+            </div>
+            <div class="subtitle">
+                <span class="nav-text">工采国际</span>
+            </div>
+        </div>
+        
+        <nav class="nav-menu">
+            <div class="nav-group">
+                <div class="nav-group-title">
+                    <span class="nav-text">主要功能</span>
+                </div>
+                <div class="nav-item">
+                    <a href="dashboard.html" class="nav-link">
+                        <i class="bi bi-house-door"></i>
+                        <span class="nav-text">系统首页</span>
+                    </a>
+                </div>
+                <div class="nav-item">
+                    <a href="vietnam-order-list.html" class="nav-link">
+                        <i class="bi bi-list-ul"></i>
+                        <span class="nav-text">越南订单列表</span>
+                    </a>
+                </div>
+            </div>
+            
+            <div class="nav-group">
+                <div class="nav-group-title">
+                    <span class="nav-text">履约管理</span>
+                </div>
+                <div class="nav-item">
+                    <a href="vietnam-delivery-list.html" class="nav-link active">
+                        <i class="bi bi-truck"></i>
+                        <span class="nav-text">越南末端派送列表</span>
+                    </a>
+                </div>
+                <div class="nav-item">
+                    <a href="shipment-batch-management.html" class="nav-link">
+                        <i class="bi bi-box-seam"></i>
+                        <span class="nav-text">跨境发货批次管理</span>
+                    </a>
+                </div>
+            </div>
+            
+            <div class="nav-group">
+                <div class="nav-group-title">
+                    <span class="nav-text">批次管理</span>
+                </div>
+                <div class="nav-item">
+                    <a href="vietnam-batch-edit.html" class="nav-link">
+                        <i class="bi bi-pencil-square"></i>
+                        <span class="nav-text">运输批次编辑</span>
+                    </a>
+                </div>
+            </div>
+            
+            <div class="nav-group">
+                <div class="nav-group-title">
+                    <span class="nav-text">系统设置</span>
+                </div>
+                <div class="nav-item">
+                    <a href="#" class="nav-link">
+                        <i class="bi bi-gear"></i>
+                        <span class="nav-text">系统设置</span>
+                    </a>
+                </div>
+                <div class="nav-item">
+                    <a href="#" class="nav-link">
+                        <i class="bi bi-person-circle"></i>
+                        <span class="nav-text">用户管理</span>
+                    </a>
+                </div>
+            </div>
+        </nav>
+    </div>
+    
+    <!-- 主内容区域 -->
+    <div class="main-content" id="mainContent">
+        <!-- 顶部导航栏 -->
+        <div class="top-navbar">
+            <div class="d-flex align-items-center">
+                <button class="toggle-btn" onclick="toggleSidebar()">
+                    <i class="bi bi-list"></i>
+                </button>
+                <h5 class="mb-0 ms-3">越南末端派送列表</h5>
+            </div>
+            <div class="d-flex align-items-center">
+                <span class="text-muted me-3">欢迎您，管理员</span>
+                <div class="dropdown">
+                    <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                        <i class="bi bi-person-circle me-1"></i>账户
+                    </button>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="#"><i class="bi bi-person me-2"></i>个人资料</a></li>
+                        <li><a class="dropdown-item" href="#"><i class="bi bi-gear me-2"></i>设置</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="#"><i class="bi bi-box-arrow-right me-2"></i>退出登录</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 内容区域 -->
+        <div class="content-area">
+            <!-- 面包屑导航 -->
+            <div class="breadcrumb-nav">
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="dashboard.html" class="text-decoration-none">首页</a></li>
+                        <li class="breadcrumb-item"><a href="#" class="text-decoration-none">履约管理</a></li>
+                        <li class="breadcrumb-item active" aria-current="page">越南末端派送列表</li>
+                    </ol>
+                </nav>
+            </div>
+
+
+    <div class="container">
+        <!-- 查询条件区域 -->
+        <div class="search-section">
+            <div class="section-title">
+                <i class="bi bi-search me-2"></i>查询条件
+            </div>
+            
+            <form id="searchForm">
+                <div class="row g-3">
+                    <!-- 第一行 -->
+                    <div class="col-md-4">
+                        <label for="orderNumbers" class="form-label">订单编号</label>
+                        <textarea 
+                            class="form-control" 
+                            id="orderNumbers" 
+                            rows="3" 
+                            placeholder="输入国际订单号，支持多个查询，回车隔开，不支持模糊查询"
+                        ></textarea>
+                    </div>
+                    
+                    <div class="col-md-4">
+                        <label for="parentOrderNumbers" class="form-label">父单号</label>
+                        <textarea 
+                            class="form-control" 
+                            id="parentOrderNumbers" 
+                            rows="3" 
+                            placeholder="输入国际订单父单号，支持多个查询，回车隔开，不支持模糊查询"
+                        ></textarea>
+                    </div>
+                    
+                    <div class="col-md-4">
+                        <label for="thirdPartyOrderNumbers" class="form-label">第三方订单号</label>
+                        <textarea 
+                            class="form-control" 
+                            id="thirdPartyOrderNumbers" 
+                            rows="3" 
+                            placeholder="输入第三方订单号，支持多个查询，回车隔开，不支持模糊查询"
+                        ></textarea>
+                    </div>
+                    
+                    <!-- 第二行 -->
+                    <div class="col-md-3">
+                        <label for="localBatchNumber" class="form-label">本地发运批次</label>
+                        <input type="text" class="form-control" id="localBatchNumber" placeholder="输入单个批次号，支持右模糊查询">
+                    </div>
+                    
+                    <div class="col-md-3">
+                        <label for="transportMode" class="form-label">运输方式</label>
+                        <select class="form-select" id="transportMode">
+                            <option value="">全部</option>
+                            <option value="express">快递运输</option>
+                            <option value="vehicle">车辆运输</option>
+                        </select>
+                    </div>
+                    
+                    <div class="col-md-3">
+                        <label for="customerName" class="form-label">客户名称</label>
+                        <input type="text" class="form-control" id="customerName" placeholder="输入客户名称，支持模糊查询">
+                    </div>
+                    
+                    <div class="col-md-3">
+                        <label for="distributionCenter" class="form-label">企配中心名称</label>
+                        <input type="text" class="form-control" id="distributionCenter" placeholder="输入企配中心名称，支持模糊查询">
+                    </div>
+                    
+                    <!-- 第三行 -->
+                    <div class="col-md-3">
+                        <label for="warehouseName" class="form-label">备货仓名称</label>
+                        <input type="text" class="form-control" id="warehouseName" placeholder="输入备货仓名称，支持模糊查询">
+                    </div>
+                    
+                    <div class="col-md-3">
+                        <label for="customsDeclaration" class="form-label">是否报关</label>
+                        <select class="form-select" id="customsDeclaration">
+                            <option value="">全部</option>
+                            <option value="yes">是</option>
+                            <option value="no">否</option>
+                        </select>
+                    </div>
+                    
+                    <div class="col-md-3">
+                        <label for="mkuCodes" class="form-label">MKU</label>
+                        <input type="text" class="form-control" id="mkuCodes" placeholder="输入MKU，支持多个查询，回车隔开">
+                    </div>
+                    
+                    <div class="col-md-3">
+                        <label for="internationalSku" class="form-label">国际SKU</label>
+                        <input type="text" class="form-control" id="internationalSku" placeholder="输入国际SKU，支持多个查询，回车隔开">
+                    </div>
+                    
+                    <!-- 第四行 -->
+                    <div class="col-md-4">
+                        <label for="customerMaterialCode" class="form-label">客户物料号</label>
+                        <input type="text" class="form-control" id="customerMaterialCode" placeholder="输入客户物料号，支持多个查询，回车隔开">
+                    </div>
+                    
+                    <div class="col-md-4">
+                        <label class="form-label">订单确认时间</label>
+                        <div class="row g-2">
+                            <div class="col-6">
+                                <input type="datetime-local" class="form-control" id="orderConfirmStartTime">
+                            </div>
+                            <div class="col-6">
+                                <input type="datetime-local" class="form-control" id="orderConfirmEndTime">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-4">
+                        <label class="form-label">企配收货时间</label>
+                        <div class="row g-2">
+                            <div class="col-6">
+                                <input type="datetime-local" class="form-control" id="distributionReceiveStartTime">
+                            </div>
+                            <div class="col-6">
+                                <input type="datetime-local" class="form-control" id="distributionReceiveEndTime">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 查询按钮 -->
+                    <div class="col-12 d-flex justify-content-end">
+                        <div class="search-btn-group">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-search me-2"></i>查询
+                            </button>
+                            <button type="reset" class="btn btn-outline-secondary">
+                                <i class="bi bi-arrow-clockwise me-2"></i>重置
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <!-- 查询结果区域 -->
+        <div class="results-section">
+            <div class="section-title">
+                <i class="bi bi-list-ul me-2"></i>查询结果
+            </div>
+            
+            <!-- 操作按钮区域 -->
+            <div class="action-buttons">
+                <button type="button" class="btn btn-success" onclick="batchConfirm()">
+                    <i class="bi bi-check-circle me-2"></i>批量确认
+                </button>
+                <button type="button" class="btn btn-info" onclick="updatePlannedShipTime()">
+                    <i class="bi bi-calendar-event me-2"></i>更新计划发货时间
+                </button>
+                <button type="button" class="btn btn-warning" onclick="updatePlannedDeliveryTime()">
+                    <i class="bi bi-calendar-check me-2"></i>更新计划送达时间
+                </button>
+                <button type="button" class="btn btn-outline-primary" onclick="exportBatchInfo()">
+                    <i class="bi bi-download me-2"></i>导出批次信息
+                </button>
+                <button type="button" class="btn btn-outline-secondary" onclick="exportBatchOrderInfo()">
+                    <i class="bi bi-file-earmark-spreadsheet me-2"></i>导出批次订单信息
+                </button>
+            </div>
+            
+            <!-- 结果表格 -->
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th width="50">
+                                <input type="checkbox" class="form-check-input" id="selectAll" onchange="toggleSelectAll()">
+                            </th>
+                            <th width="50">展开</th>
+                            <th>本地发运批次号</th>
+                            <th>客户名称</th>
+                            <th>订单数量</th>
+                            <th>MKU数量</th>
+                            <th>订单金额（币种）</th>
+                            <th>订单金额（人民币）</th>
+                            <th>状态</th>
+                            <th width="200">操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="batchTableBody">
+                        <!-- 示例数据 -->
+                        <tr data-batch-id="VN202410001">
+                            <td>
+                                <input type="checkbox" class="form-check-input batch-checkbox" value="VN202410001">
+                            </td>
+                            <td>
+                                <button class="expand-btn" onclick="toggleBatchDetails(this, 'VN202410001')">
+                                    <i class="bi bi-chevron-right"></i>
+                                </button>
+                            </td>
+                            <td>VN202410001</td>
+                            <td>越南客户A</td>
+                            <td>25</td>
+                            <td>15</td>
+                            <td>
+                                <div class="currency-amount">฿ 125,680.50</div>
+                                <div class="currency-amount">$ 3,245.20</div>
+                            </td>
+                            <td class="currency-amount">¥ 23,456.78</td>
+                            <td><span class="status-badge status-new">新建</span></td>
+                            <td>
+                                <button class="btn btn-sm btn-outline-primary me-1" onclick="editBatch('VN202410001')">
+                                    <i class="bi bi-pencil"></i> 编辑
+                                </button>
+                                <button class="btn btn-sm btn-outline-info me-1" onclick="viewBatchDetails('VN202410001')">
+                                    <i class="bi bi-eye"></i> 详情
+                                </button>
+                                <button class="btn btn-sm btn-outline-success me-1" onclick="confirmBatch('VN202410001')">
+                                    <i class="bi bi-check"></i> 确认
+                                </button>
+                                <button class="btn btn-sm btn-outline-danger" onclick="deleteBatch('VN202410001')">
+                                    <i class="bi bi-trash"></i> 删除
+                                </button>
+                            </td>
+                        </tr>
+                        
+                        <tr data-batch-id="VN202410002">
+                            <td>
+                                <input type="checkbox" class="form-check-input batch-checkbox" value="VN202410002">
+                            </td>
+                            <td>
+                                <button class="expand-btn" onclick="toggleBatchDetails(this, 'VN202410002')">
+                                    <i class="bi bi-chevron-right"></i>
+                                </button>
+                            </td>
+                            <td>VN202410002</td>
+                            <td>越南客户B</td>
+                            <td>18</td>
+                            <td>12</td>
+                            <td>
+                                <div class="currency-amount">฿ 98,750.30</div>
+                            </td>
+                            <td class="currency-amount">¥ 18,234.56</td>
+                            <td><span class="status-badge status-confirmed">已确认</span></td>
+                            <td>
+                                <button class="btn btn-sm btn-outline-warning me-1" onclick="sendToDistribution('VN202410002')">
+                                    <i class="bi bi-send"></i> 下发企配
+                                </button>
+                                <button class="btn btn-sm btn-outline-secondary me-1" onclick="cancelConfirm('VN202410002')">
+                                    <i class="bi bi-x-circle"></i> 取消确认
+                                </button>
+                                <button class="btn btn-sm btn-outline-info" onclick="viewBatchDetails('VN202410002')">
+                                    <i class="bi bi-eye"></i> 详情
+                                </button>
+                            </td>
+                        </tr>
+                        
+                        <tr data-batch-id="VN202410003">
+                            <td>
+                                <input type="checkbox" class="form-check-input batch-checkbox" value="VN202410003">
+                            </td>
+                            <td>
+                                <button class="expand-btn" onclick="toggleBatchDetails(this, 'VN202410003')">
+                                    <i class="bi bi-chevron-right"></i>
+                                </button>
+                            </td>
+                            <td>VN202410003</td>
+                            <td>河内贸易公司</td>
+                            <td>32</td>
+                            <td>18</td>
+                            <td>
+                                <div class="currency-amount">฿ 156,890.75</div>
+                                <div class="currency-amount">$ 4,125.60</div>
+                            </td>
+                            <td class="currency-amount">¥ 29,876.45</td>
+                            <td><span class="status-badge status-pending">待发运</span></td>
+                            <td>
+                                <button class="btn btn-sm btn-outline-primary me-1" onclick="downloadHandover('VN202410003')">
+                                    <i class="bi bi-download"></i> 下载交接单
+                                </button>
+                                <button class="btn btn-sm btn-outline-info" onclick="viewBatchDetails('VN202410003')">
+                                    <i class="bi bi-eye"></i> 详情
+                                </button>
+                            </td>
+                        </tr>
+                        
+                        <tr data-batch-id="VN202410004">
+                            <td>
+                                <input type="checkbox" class="form-check-input batch-checkbox" value="VN202410004">
+                            </td>
+                            <td>
+                                <button class="expand-btn" onclick="toggleBatchDetails(this, 'VN202410004')">
+                                    <i class="bi bi-chevron-right"></i>
+                                </button>
+                            </td>
+                            <td>VN202410004</td>
+                            <td>胡志明电子商务</td>
+                            <td>45</td>
+                            <td>28</td>
+                            <td>
+                                <div class="currency-amount">฿ 234,567.80</div>
+                                <div class="currency-amount">$ 6,789.12</div>
+                            </td>
+                            <td class="currency-amount">¥ 45,123.67</td>
+                            <td><span class="status-badge status-shipped">已发运</span></td>
+                            <td>
+                                <button class="btn btn-sm btn-outline-primary me-1" onclick="downloadHandover('VN202410004')">
+                                    <i class="bi bi-download"></i> 下载交接单
+                                </button>
+                                <button class="btn btn-sm btn-outline-info" onclick="viewBatchDetails('VN202410004')">
+                                    <i class="bi bi-eye"></i> 详情
+                                </button>
+                            </td>
+                        </tr>
+                        
+                        <tr data-batch-id="VN202410005">
+                            <td>
+                                <input type="checkbox" class="form-check-input batch-checkbox" value="VN202410005">
+                            </td>
+                            <td>
+                                <button class="expand-btn" onclick="toggleBatchDetails(this, 'VN202410005')">
+                                    <i class="bi bi-chevron-right"></i>
+                                </button>
+                            </td>
+                            <td>VN202410005</td>
+                            <td>岘港进出口有限公司</td>
+                            <td>22</td>
+                            <td>14</td>
+                            <td>
+                                <div class="currency-amount">฿ 87,654.32</div>
+                            </td>
+                            <td class="currency-amount">¥ 16,234.89</td>
+                            <td><span class="status-badge status-delivered">已妥投</span></td>
+                            <td>
+                                <button class="btn btn-sm btn-outline-primary me-1" onclick="downloadHandover('VN202410005')">
+                                    <i class="bi bi-download"></i> 下载交接单
+                                </button>
+                                <button class="btn btn-sm btn-outline-success me-1" onclick="downloadPOD('VN202410005')">
+                                    <i class="bi bi-file-check"></i> 下载POD
+                                </button>
+                                <button class="btn btn-sm btn-outline-info" onclick="viewBatchDetails('VN202410005')">
+                                    <i class="bi bi-eye"></i> 详情
+                                </button>
+                            </td>
+                        </tr>
+                        
+                        <tr data-batch-id="VN202410006">
+                            <td>
+                                <input type="checkbox" class="form-check-input batch-checkbox" value="VN202410006">
+                            </td>
+                            <td>
+                                <button class="expand-btn" onclick="toggleBatchDetails(this, 'VN202410006')">
+                                    <i class="bi bi-chevron-right"></i>
+                                </button>
+                            </td>
+                            <td>VN202410006</td>
+                            <td>芹苴物流中心</td>
+                            <td>38</td>
+                            <td>22</td>
+                            <td>
+                                <div class="currency-amount">฿ 198,765.43</div>
+                                <div class="currency-amount">$ 5,234.78</div>
+                            </td>
+                            <td class="currency-amount">¥ 37,890.12</td>
+                            <td><span class="status-badge status-new">新建</span></td>
+                            <td>
+                                <button class="btn btn-sm btn-outline-primary me-1" onclick="editBatch('VN202410006')">
+                                    <i class="bi bi-pencil"></i> 编辑
+                                </button>
+                                <button class="btn btn-sm btn-outline-info me-1" onclick="viewBatchDetails('VN202410006')">
+                                    <i class="bi bi-eye"></i> 详情
+                                </button>
+                                <button class="btn btn-sm btn-outline-success me-1" onclick="confirmBatch('VN202410006')">
+                                    <i class="bi bi-check"></i> 确认
+                                </button>
+                                <button class="btn btn-sm btn-outline-danger" onclick="deleteBatch('VN202410006')">
+                                    <i class="bi bi-trash"></i> 删除
+                                </button>
+                            </td>
+                        </tr>
+                        
+                        <tr data-batch-id="VN202410007">
+                            <td>
+                                <input type="checkbox" class="form-check-input batch-checkbox" value="VN202410007">
+                            </td>
+                            <td>
+                                <button class="expand-btn" onclick="toggleBatchDetails(this, 'VN202410007')">
+                                    <i class="bi bi-chevron-right"></i>
+                                </button>
+                            </td>
+                            <td>VN202410007</td>
+                            <td>海防港务集团</td>
+                            <td>29</td>
+                            <td>17</td>
+                            <td>
+                                <div class="currency-amount">฿ 143,210.98</div>
+                            </td>
+                            <td class="currency-amount">¥ 26,543.21</td>
+                            <td><span class="status-badge status-confirmed">已确认</span></td>
+                            <td>
+                                <button class="btn btn-sm btn-outline-warning me-1" onclick="sendToDistribution('VN202410007')">
+                                    <i class="bi bi-send"></i> 下发企配
+                                </button>
+                                <button class="btn btn-sm btn-outline-secondary me-1" onclick="cancelConfirm('VN202410007')">
+                                    <i class="bi bi-x-circle"></i> 取消确认
+                                </button>
+                                <button class="btn btn-sm btn-outline-info" onclick="viewBatchDetails('VN202410007')">
+                                    <i class="bi bi-eye"></i> 详情
+                                </button>
+                            </td>
+                        </tr>
+                        
+                        <tr data-batch-id="VN202410008">
+                            <td>
+                                <input type="checkbox" class="form-check-input batch-checkbox" value="VN202410008">
+                            </td>
+                            <td>
+                                <button class="expand-btn" onclick="toggleBatchDetails(this, 'VN202410008')">
+                                    <i class="bi bi-chevron-right"></i>
+                                </button>
+                            </td>
+                            <td>VN202410008</td>
+                            <td>顺化商贸公司</td>
+                            <td>15</td>
+                            <td>9</td>
+                            <td>
+                                <div class="currency-amount">฿ 76,543.21</div>
+                                <div class="currency-amount">$ 2,134.56</div>
+                            </td>
+                            <td class="currency-amount">¥ 14,567.89</td>
+                            <td><span class="status-badge status-pending">待发运</span></td>
+                            <td>
+                                <button class="btn btn-sm btn-outline-primary me-1" onclick="downloadHandover('VN202410008')">
+                                    <i class="bi bi-download"></i> 下载交接单
+                                </button>
+                                <button class="btn btn-sm btn-outline-info" onclick="viewBatchDetails('VN202410008')">
+                                    <i class="bi bi-eye"></i> 详情
+                                </button>
+                            </td>
+                        </tr>
+                        
+                        <tr data-batch-id="VN202410009">
+                            <td>
+                                <input type="checkbox" class="form-check-input batch-checkbox" value="VN202410009">
+                            </td>
+                            <td>
+                                <button class="expand-btn" onclick="toggleBatchDetails(this, 'VN202410009')">
+                                    <i class="bi bi-chevron-right"></i>
+                                </button>
+                            </td>
+                            <td>VN202410009</td>
+                            <td>槟椥省物流</td>
+                            <td>41</td>
+                            <td>25</td>
+                            <td>
+                                <div class="currency-amount">฿ 212,345.67</div>
+                                <div class="currency-amount">$ 5,678.90</div>
+                            </td>
+                            <td class="currency-amount">¥ 40,234.56</td>
+                            <td><span class="status-badge status-shipped">已发运</span></td>
+                            <td>
+                                <button class="btn btn-sm btn-outline-primary me-1" onclick="downloadHandover('VN202410009')">
+                                    <i class="bi bi-download"></i> 下载交接单
+                                </button>
+                                <button class="btn btn-sm btn-outline-info" onclick="viewBatchDetails('VN202410009')">
+                                    <i class="bi bi-eye"></i> 详情
+                                </button>
+                            </td>
+                        </tr>
+                        
+                        <tr data-batch-id="VN202410010">
+                            <td>
+                                <input type="checkbox" class="form-check-input batch-checkbox" value="VN202410010">
+                            </td>
+                            <td>
+                                <button class="expand-btn" onclick="toggleBatchDetails(this, 'VN202410010')">
+                                    <i class="bi bi-chevron-right"></i>
+                                </button>
+                            </td>
+                            <td>VN202410010</td>
+                            <td>平阳工业区</td>
+                            <td>33</td>
+                            <td>19</td>
+                            <td>
+                                <div class="currency-amount">฿ 167,890.12</div>
+                            </td>
+                            <td class="currency-amount">¥ 31,056.78</td>
+                            <td><span class="status-badge status-delivered">已妥投</span></td>
+                            <td>
+                                <button class="btn btn-sm btn-outline-primary me-1" onclick="downloadHandover('VN202410010')">
+                                    <i class="bi bi-download"></i> 下载交接单
+                                </button>
+                                <button class="btn btn-sm btn-outline-success me-1" onclick="downloadPOD('VN202410010')">
+                                    <i class="bi bi-file-check"></i> 下载POD
+                                </button>
+                                <button class="btn btn-sm btn-outline-info" onclick="viewBatchDetails('VN202410010')">
+                                    <i class="bi bi-eye"></i> 详情
+                                </button>
+                            </td>
+                        </tr>
+                        
+                        <tr data-batch-id="VN202410011">
+                            <td>
+                                <input type="checkbox" class="form-check-input batch-checkbox" value="VN202410011">
+                            </td>
+                            <td>
+                                <button class="expand-btn" onclick="toggleBatchDetails(this, 'VN202410011')">
+                                    <i class="bi bi-chevron-right"></i>
+                                </button>
+                            </td>
+                            <td>VN202410011</td>
+                            <td>同奈省贸易</td>
+                            <td>27</td>
+                            <td>16</td>
+                            <td>
+                                <div class="currency-amount">฿ 134,567.89</div>
+                                <div class="currency-amount">$ 3,567.12</div>
+                            </td>
+                            <td class="currency-amount">¥ 25,432.10</td>
+                            <td><span class="status-badge status-new">新建</span></td>
+                            <td>
+                                <button class="btn btn-sm btn-outline-primary me-1" onclick="editBatch('VN202410011')">
+                                    <i class="bi bi-pencil"></i> 编辑
+                                </button>
+                                <button class="btn btn-sm btn-outline-info me-1" onclick="viewBatchDetails('VN202410011')">
+                                    <i class="bi bi-eye"></i> 详情
+                                </button>
+                                <button class="btn btn-sm btn-outline-success me-1" onclick="confirmBatch('VN202410011')">
+                                    <i class="bi bi-check"></i> 确认
+                                </button>
+                                <button class="btn btn-sm btn-outline-danger" onclick="deleteBatch('VN202410011')">
+                                    <i class="bi bi-trash"></i> 删除
+                                </button>
+                            </td>
+                        </tr>
+                        
+                        <tr data-batch-id="VN202410012">
+                            <td>
+                                <input type="checkbox" class="form-check-input batch-checkbox" value="VN202410012">
+                            </td>
+                            <td>
+                                <button class="expand-btn" onclick="toggleBatchDetails(this, 'VN202410012')">
+                                    <i class="bi bi-chevron-right"></i>
+                                </button>
+                            </td>
+                            <td>VN202410012</td>
+                            <td>巴地头顿物流</td>
+                            <td>36</td>
+                            <td>21</td>
+                            <td>
+                                <div class="currency-amount">฿ 189,012.34</div>
+                                <div class="currency-amount">$ 4,890.67</div>
+                            </td>
+                            <td class="currency-amount">¥ 35,678.90</td>
+                            <td><span class="status-badge status-confirmed">已确认</span></td>
+                            <td>
+                                <button class="btn btn-sm btn-outline-warning me-1" onclick="sendToDistribution('VN202410012')">
+                                    <i class="bi bi-send"></i> 下发企配
+                                </button>
+                                <button class="btn btn-sm btn-outline-secondary me-1" onclick="cancelConfirm('VN202410012')">
+                                    <i class="bi bi-x-circle"></i> 取消确认
+                                </button>
+                                <button class="btn btn-sm btn-outline-info" onclick="viewBatchDetails('VN202410012')">
+                                    <i class="bi bi-eye"></i> 详情
+                                </button>
+                            </td>
+                        </tr>
+                        
+                        <tr data-batch-id="VN202410013">
+                            <td>
+                                <input type="checkbox" class="form-check-input batch-checkbox" value="VN202410013">
+                            </td>
+                            <td>
+                                <button class="expand-btn" onclick="toggleBatchDetails(this, 'VN202410013')">
+                                    <i class="bi bi-chevron-right"></i>
+                                </button>
+                            </td>
+                            <td>VN202410013</td>
+                            <td>安江省商务</td>
+                            <td>19</td>
+                            <td>11</td>
+                            <td>
+                                <div class="currency-amount">฿ 95,432.10</div>
+                            </td>
+                            <td class="currency-amount">¥ 17,654.32</td>
+                            <td><span class="status-badge status-pending">待发运</span></td>
+                            <td>
+                                <button class="btn btn-sm btn-outline-primary me-1" onclick="downloadHandover('VN202410013')">
+                                    <i class="bi bi-download"></i> 下载交接单
+                                </button>
+                                <button class="btn btn-sm btn-outline-info" onclick="viewBatchDetails('VN202410013')">
+                                    <i class="bi bi-eye"></i> 详情
+                                </button>
+                            </td>
+                        </tr>
+                        
+                        <tr data-batch-id="VN202410014">
+                            <td>
+                                <input type="checkbox" class="form-check-input batch-checkbox" value="VN202410014">
+                            </td>
+                            <td>
+                                <button class="expand-btn" onclick="toggleBatchDetails(this, 'VN202410014')">
+                                    <i class="bi bi-chevron-right"></i>
+                                </button>
+                            </td>
+                            <td>VN202410014</td>
+                            <td>广宁省进出口</td>
+                            <td>44</td>
+                            <td>26</td>
+                            <td>
+                                <div class="currency-amount">฿ 223,456.78</div>
+                                <div class="currency-amount">$ 6,123.45</div>
+                            </td>
+                            <td class="currency-amount">¥ 42,345.67</td>
+                            <td><span class="status-badge status-shipped">已发运</span></td>
+                            <td>
+                                <button class="btn btn-sm btn-outline-primary me-1" onclick="downloadHandover('VN202410014')">
+                                    <i class="bi bi-download"></i> 下载交接单
+                                </button>
+                                <button class="btn btn-sm btn-outline-info" onclick="viewBatchDetails('VN202410014')">
+                                    <i class="bi bi-eye"></i> 详情
+                                </button>
+                            </td>
+                        </tr>
+                        
+                        <tr data-batch-id="VN202410015">
+                            <td>
+                                <input type="checkbox" class="form-check-input batch-checkbox" value="VN202410015">
+                            </td>
+                            <td>
+                                <button class="expand-btn" onclick="toggleBatchDetails(this, 'VN202410015')">
+                                    <i class="bi bi-chevron-right"></i>
+                                </button>
+                            </td>
+                            <td>VN202410015</td>
+                            <td>太原省物流</td>
+                            <td>31</td>
+                            <td>18</td>
+                            <td>
+                                <div class="currency-amount">฿ 156,789.01</div>
+                            </td>
+                            <td class="currency-amount">¥ 29,012.34</td>
+                            <td><span class="status-badge status-delivered">已妥投</span></td>
+                            <td>
+                                <button class="btn btn-sm btn-outline-primary me-1" onclick="downloadHandover('VN202410015')">
+                                    <i class="bi bi-download"></i> 下载交接单
+                                </button>
+                                <button class="btn btn-sm btn-outline-success me-1" onclick="downloadPOD('VN202410015')">
+                                    <i class="bi bi-file-check"></i> 下载POD
+                                </button>
+                                <button class="btn btn-sm btn-outline-info" onclick="viewBatchDetails('VN202410015')">
+                                    <i class="bi bi-eye"></i> 详情
+                                </button>
+                            </td>
+                        </tr>
+                        
+                        <tr data-batch-id="VN202410016">
+                            <td>
+                                <input type="checkbox" class="form-check-input batch-checkbox" value="VN202410016">
+                            </td>
+                            <td>
+                                <button class="expand-btn" onclick="toggleBatchDetails(this, 'VN202410016')">
+                                    <i class="bi bi-chevron-right"></i>
+                                </button>
+                            </td>
+                            <td>VN202410016</td>
+                            <td>老街边贸公司</td>
+                            <td>23</td>
+                            <td>13</td>
+                            <td>
+                                <div class="currency-amount">฿ 112,345.67</div>
+                                <div class="currency-amount">$ 2,987.65</div>
+                            </td>
+                            <td class="currency-amount">¥ 21,234.56</td>
+                            <td><span class="status-badge status-new">新建</span></td>
+                            <td>
+                                <button class="btn btn-sm btn-outline-primary me-1" onclick="editBatch('VN202410016')">
+                                    <i class="bi bi-pencil"></i> 编辑
+                                </button>
+                                <button class="btn btn-sm btn-outline-info me-1" onclick="viewBatchDetails('VN202410016')">
+                                    <i class="bi bi-eye"></i> 详情
+                                </button>
+                                <button class="btn btn-sm btn-outline-success me-1" onclick="confirmBatch('VN202410016')">
+                                    <i class="bi bi-check"></i> 确认
+                                </button>
+                                <button class="btn btn-sm btn-outline-danger" onclick="deleteBatch('VN202410016')">
+                                    <i class="bi bi-trash"></i> 删除
+                                </button>
+                            </td>
+                        </tr>
+                        
+                        <tr data-batch-id="VN202410017">
+                            <td>
+                                <input type="checkbox" class="form-check-input batch-checkbox" value="VN202410017">
+                            </td>
+                            <td>
+                                <button class="expand-btn" onclick="toggleBatchDetails(this, 'VN202410017')">
+                                    <i class="bi bi-chevron-right"></i>
+                                </button>
+                            </td>
+                            <td>VN202410017</td>
+                            <td>高平省贸易</td>
+                            <td>39</td>
+                            <td>23</td>
+                            <td>
+                                <div class="currency-amount">฿ 201,234.56</div>
+                                <div class="currency-amount">$ 5,432.10</div>
+                            </td>
+                            <td class="currency-amount">¥ 38,123.45</td>
+                            <td><span class="status-badge status-confirmed">已确认</span></td>
+                            <td>
+                                <button class="btn btn-sm btn-outline-warning me-1" onclick="sendToDistribution('VN202410017')">
+                                    <i class="bi bi-send"></i> 下发企配
+                                </button>
+                                <button class="btn btn-sm btn-outline-secondary me-1" onclick="cancelConfirm('VN202410017')">
+                                    <i class="bi bi-x-circle"></i> 取消确认
+                                </button>
+                                <button class="btn btn-sm btn-outline-info" onclick="viewBatchDetails('VN202410017')">
+                                    <i class="bi bi-eye"></i> 详情
+                                </button>
+                            </td>
+                        </tr>
+                        
+                        <tr data-batch-id="VN202410018">
+                            <td>
+                                <input type="checkbox" class="form-check-input batch-checkbox" value="VN202410018">
+                            </td>
+                            <td>
+                                <button class="expand-btn" onclick="toggleBatchDetails(this, 'VN202410018')">
+                                    <i class="bi bi-chevron-right"></i>
+                                </button>
+                            </td>
+                            <td>VN202410018</td>
+                            <td>莱州省物流</td>
+                            <td>26</td>
+                            <td>15</td>
+                            <td>
+                                <div class="currency-amount">฿ 128,765.43</div>
+                            </td>
+                            <td class="currency-amount">¥ 23,876.54</td>
+                            <td><span class="status-badge status-pending">待发运</span></td>
+                            <td>
+                                <button class="btn btn-sm btn-outline-primary me-1" onclick="downloadHandover('VN202410018')">
+                                    <i class="bi bi-download"></i> 下载交接单
+                                </button>
+                                <button class="btn btn-sm btn-outline-info" onclick="viewBatchDetails('VN202410018')">
+                                    <i class="bi bi-eye"></i> 详情
+                                </button>
+                            </td>
+                        </tr>
+                        
+                        <tr data-batch-id="VN202410019">
+                            <td>
+                                <input type="checkbox" class="form-check-input batch-checkbox" value="VN202410019">
+                            </td>
+                            <td>
+                                <button class="expand-btn" onclick="toggleBatchDetails(this, 'VN202410019')">
+                                    <i class="bi bi-chevron-right"></i>
+                                </button>
+                            </td>
+                            <td>VN202410019</td>
+                            <td>奠边省商务</td>
+                            <td>17</td>
+                            <td>10</td>
+                            <td>
+                                <div class="currency-amount">฿ 84,321.09</div>
+                                <div class="currency-amount">$ 2,234.56</div>
+                            </td>
+                            <td class="currency-amount">¥ 15,987.65</td>
+                            <td><span class="status-badge status-shipped">已发运</span></td>
+                            <td>
+                                <button class="btn btn-sm btn-outline-primary me-1" onclick="downloadHandover('VN202410019')">
+                                    <i class="bi bi-download"></i> 下载交接单
+                                </button>
+                                <button class="btn btn-sm btn-outline-info" onclick="viewBatchDetails('VN202410019')">
+                                    <i class="bi bi-eye"></i> 详情
+                                </button>
+                            </td>
+                        </tr>
+                        
+                        <tr data-batch-id="VN202410020">
+                            <td>
+                                <input type="checkbox" class="form-check-input batch-checkbox" value="VN202410020">
+                            </td>
+                            <td>
+                                <button class="expand-btn" onclick="toggleBatchDetails(this, 'VN202410020')">
+                                    <i class="bi bi-chevron-right"></i>
+                                </button>
+                            </td>
+                            <td>VN202410020</td>
+                            <td>山罗省进出口</td>
+                            <td>35</td>
+                            <td>20</td>
+                            <td>
+                                <div class="currency-amount">฿ 178,901.23</div>
+                                <div class="currency-amount">$ 4,678.90</div>
+                            </td>
+                            <td class="currency-amount">¥ 33,456.78</td>
+                            <td><span class="status-badge status-delivered">已妥投</span></td>
+                            <td>
+                                <button class="btn btn-sm btn-outline-primary me-1" onclick="downloadHandover('VN202410020')">
+                                    <i class="bi bi-download"></i> 下载交接单
+                                </button>
+                                <button class="btn btn-sm btn-outline-success me-1" onclick="downloadPOD('VN202410020')">
+                                    <i class="bi bi-file-check"></i> 下载POD
+                                </button>
+                                <button class="btn btn-sm btn-outline-info" onclick="viewBatchDetails('VN202410020')">
+                                    <i class="bi bi-eye"></i> 详情
+                                </button>
+                            </td>
+                        </tr>
+                        
+                        <tr data-batch-id="VN202410021">
+                            <td>
+                                <input type="checkbox" class="form-check-input batch-checkbox" value="VN202410021">
+                            </td>
+                            <td>
+                                <button class="expand-btn" onclick="toggleBatchDetails(this, 'VN202410021')">
+                                    <i class="bi bi-chevron-right"></i>
+                                </button>
+                            </td>
+                            <td>VN202410021</td>
+                            <td>和平省物流</td>
+                            <td>28</td>
+                            <td>16</td>
+                            <td>
+                                <div class="currency-amount">฿ 145,678.90</div>
+                            </td>
+                            <td class="currency-amount">¥ 26,987.65</td>
+                            <td><span class="status-badge status-new">新建</span></td>
+                            <td>
+                                <button class="btn btn-sm btn-outline-primary me-1" onclick="editBatch('VN202410021')">
+                                    <i class="bi bi-pencil"></i> 编辑
+                                </button>
+                                <button class="btn btn-sm btn-outline-info me-1" onclick="viewBatchDetails('VN202410021')">
+                                    <i class="bi bi-eye"></i> 详情
+                                </button>
+                                <button class="btn btn-sm btn-outline-success me-1" onclick="confirmBatch('VN202410021')">
+                                    <i class="bi bi-check"></i> 确认
+                                </button>
+                                <button class="btn btn-sm btn-outline-danger" onclick="deleteBatch('VN202410021')">
+                                    <i class="bi bi-trash"></i> 删除
+                                </button>
+                            </td>
+                        </tr>
+                        
+                        <tr data-batch-id="VN202410022">
+                            <td>
+                                <input type="checkbox" class="form-check-input batch-checkbox" value="VN202410022">
+                            </td>
+                            <td>
+                                <button class="expand-btn" onclick="toggleBatchDetails(this, 'VN202410022')">
+                                    <i class="bi bi-chevron-right"></i>
+                                </button>
+                            </td>
+                            <td>VN202410022</td>
+                            <td>富寿省贸易</td>
+                            <td>42</td>
+                            <td>24</td>
+                            <td>
+                                <div class="currency-amount">฿ 215,432.10</div>
+                                <div class="currency-amount">$ 5,876.54</div>
+                            </td>
+                            <td class="currency-amount">¥ 40,876.54</td>
+                            <td><span class="status-badge status-confirmed">已确认</span></td>
+                            <td>
+                                <button class="btn btn-sm btn-outline-warning me-1" onclick="sendToDistribution('VN202410022')">
+                                    <i class="bi bi-send"></i> 下发企配
+                                </button>
+                                <button class="btn btn-sm btn-outline-secondary me-1" onclick="cancelConfirm('VN202410022')">
+                                    <i class="bi bi-x-circle"></i> 取消确认
+                                </button>
+                                <button class="btn btn-sm btn-outline-info" onclick="viewBatchDetails('VN202410022')">
+                                    <i class="bi bi-eye"></i> 详情
+                                </button>
+                            </td>
+                        </tr>
+                        
+                        <tr data-batch-id="VN202410023">
+                            <td>
+                                <input type="checkbox" class="form-check-input batch-checkbox" value="VN202410023">
+                            </td>
+                            <td>
+                                <button class="expand-btn" onclick="toggleBatchDetails(this, 'VN202410023')">
+                                    <i class="bi bi-chevron-right"></i>
+                                </button>
+                            </td>
+                            <td>VN202410023</td>
+                            <td>永福省商务</td>
+                            <td>21</td>
+                            <td>12</td>
+                            <td>
+                                <div class="currency-amount">฿ 103,456.78</div>
+                            </td>
+                            <td class="currency-amount">¥ 19,123.45</td>
+                            <td><span class="status-badge status-pending">待发运</span></td>
+                            <td>
+                                <button class="btn btn-sm btn-outline-primary me-1" onclick="downloadHandover('VN202410023')">
+                                    <i class="bi bi-download"></i> 下载交接单
+                                </button>
+                                <button class="btn btn-sm btn-outline-info" onclick="viewBatchDetails('VN202410023')">
+                                    <i class="bi bi-eye"></i> 详情
+                                </button>
+                            </td>
+                        </tr>
+                        
+                        <tr data-batch-id="VN202410024">
+                            <td>
+                                <input type="checkbox" class="form-check-input batch-checkbox" value="VN202410024">
+                            </td>
+                            <td>
+                                <button class="expand-btn" onclick="toggleBatchDetails(this, 'VN202410024')">
+                                    <i class="bi bi-chevron-right"></i>
+                                </button>
+                            </td>
+                            <td>VN202410024</td>
+                            <td>北江省物流</td>
+                            <td>37</td>
+                            <td>21</td>
+                            <td>
+                                <div class="currency-amount">฿ 192,345.67</div>
+                                <div class="currency-amount">$ 5,123.45</div>
+                            </td>
+                            <td class="currency-amount">¥ 36,432.10</td>
+                            <td><span class="status-badge status-shipped">已发运</span></td>
+                            <td>
+                                <button class="btn btn-sm btn-outline-primary me-1" onclick="downloadHandover('VN202410024')">
+                                    <i class="bi bi-download"></i> 下载交接单
+                                </button>
+                                <button class="btn btn-sm btn-outline-info" onclick="viewBatchDetails('VN202410024')">
+                                    <i class="bi bi-eye"></i> 详情
+                                </button>
+                            </td>
+                        </tr>
+                        
+                        <tr data-batch-id="VN202410025">
+                            <td>
+                                <input type="checkbox" class="form-check-input batch-checkbox" value="VN202410025">
+                            </td>
+                            <td>
+                                <button class="expand-btn" onclick="toggleBatchDetails(this, 'VN202410025')">
+                                    <i class="bi bi-chevron-right"></i>
+                                </button>
+                            </td>
+                            <td>VN202410025</td>
+                            <td>兴安省进出口</td>
+                            <td>30</td>
+                            <td>17</td>
+                            <td>
+                                <div class="currency-amount">฿ 154,321.09</div>
+                            </td>
+                            <td class="currency-amount">¥ 28,543.21</td>
+                            <td><span class="status-badge status-delivered">已妥投</span></td>
+                            <td>
+                                <button class="btn btn-sm btn-outline-primary me-1" onclick="downloadHandover('VN202410025')">
+                                    <i class="bi bi-download"></i> 下载交接单
+                                </button>
+                                <button class="btn btn-sm btn-outline-success me-1" onclick="downloadPOD('VN202410025')">
+                                    <i class="bi bi-file-check"></i> 下载POD
+                                </button>
+                                <button class="btn btn-sm btn-outline-info" onclick="viewBatchDetails('VN202410025')">
+                                    <i class="bi bi-eye"></i> 详情
+                                </button>
+                            </td>
+                        </tr>
+                        
+                        <tr data-batch-id="VN202410026">
+                            <td>
+                                <input type="checkbox" class="form-check-input batch-checkbox" value="VN202410026">
+                            </td>
+                            <td>
+                                <button class="expand-btn" onclick="toggleBatchDetails(this, 'VN202410026')">
+                                    <i class="bi bi-chevron-right"></i>
+                                </button>
+                            </td>
+                            <td>VN202410026</td>
+                            <td>海阳省贸易</td>
+                            <td>24</td>
+                            <td>14</td>
+                            <td>
+                                <div class="currency-amount">฿ 119,876.54</div>
+                                <div class="currency-amount">$ 3,234.56</div>
+                            </td>
+                            <td class="currency-amount">¥ 22,765.43</td>
+                            <td><span class="status-badge status-new">新建</span></td>
+                            <td>
+                                <button class="btn btn-sm btn-outline-primary me-1" onclick="editBatch('VN202410026')">
+                                    <i class="bi bi-pencil"></i> 编辑
+                                </button>
+                                <button class="btn btn-sm btn-outline-info me-1" onclick="viewBatchDetails('VN202410026')">
+                                    <i class="bi bi-eye"></i> 详情
+                                </button>
+                                <button class="btn btn-sm btn-outline-success me-1" onclick="confirmBatch('VN202410026')">
+                                    <i class="bi bi-check"></i> 确认
+                                </button>
+                                <button class="btn btn-sm btn-outline-danger" onclick="deleteBatch('VN202410026')">
+                                    <i class="bi bi-trash"></i> 删除
+                                </button>
+                            </td>
+                        </tr>
+                        
+                        <tr data-batch-id="VN202410027">
+                            <td>
+                                <input type="checkbox" class="form-check-input batch-checkbox" value="VN202410027">
+                            </td>
+                            <td>
+                                <button class="expand-btn" onclick="toggleBatchDetails(this, 'VN202410027')">
+                                    <i class="bi bi-chevron-right"></i>
+                                </button>
+                            </td>
+                            <td>VN202410027</td>
+                            <td>宁平省物流</td>
+                            <td>40</td>
+                            <td>23</td>
+                            <td>
+                                <div class="currency-amount">฿ 207,654.32</div>
+                                <div class="currency-amount">$ 5,654.32</div>
+                            </td>
+                            <td class="currency-amount">¥ 39,321.09</td>
+                            <td><span class="status-badge status-confirmed">已确认</span></td>
+                            <td>
+                                <button class="btn btn-sm btn-outline-warning me-1" onclick="sendToDistribution('VN202410027')">
+                                    <i class="bi bi-send"></i> 下发企配
+                                </button>
+                                <button class="btn btn-sm btn-outline-secondary me-1" onclick="cancelConfirm('VN202410027')">
+                                    <i class="bi bi-x-circle"></i> 取消确认
+                                </button>
+                                <button class="btn btn-sm btn-outline-info" onclick="viewBatchDetails('VN202410027')">
+                                    <i class="bi bi-eye"></i> 详情
+                                </button>
+                            </td>
+                        </tr>
+                        
+                        <tr data-batch-id="VN202410028">
+                            <td>
+                                <input type="checkbox" class="form-check-input batch-checkbox" value="VN202410028">
+                            </td>
+                            <td>
+                                <button class="expand-btn" onclick="toggleBatchDetails(this, 'VN202410028')">
+                                    <i class="bi bi-chevron-right"></i>
+                                </button>
+                            </td>
+                            <td>VN202410028</td>
+                            <td>南定省商务</td>
+                            <td>20</td>
+                            <td>11</td>
+                            <td>
+                                <div class="currency-amount">฿ 98,765.43</div>
+                            </td>
+                            <td class="currency-amount">¥ 18,234.56</td>
+                            <td><span class="status-badge status-pending">待发运</span></td>
+                            <td>
+                                <button class="btn btn-sm btn-outline-primary me-1" onclick="downloadHandover('VN202410028')">
+                                    <i class="bi bi-download"></i> 下载交接单
+                                </button>
+                                <button class="btn btn-sm btn-outline-info" onclick="viewBatchDetails('VN202410028')">
+                                    <i class="bi bi-eye"></i> 详情
+                                </button>
+                            </td>
+                        </tr>
+                        
+                        <tr data-batch-id="VN202410029">
+                            <td>
+                                <input type="checkbox" class="form-check-input batch-checkbox" value="VN202410029">
+                            </td>
+                            <td>
+                                <button class="expand-btn" onclick="toggleBatchDetails(this, 'VN202410029')">
+                                    <i class="bi bi-chevron-right"></i>
+                                </button>
+                            </td>
+                            <td>VN202410029</td>
+                            <td>清化省进出口</td>
+                            <td>34</td>
+                            <td>19</td>
+                            <td>
+                                <div class="currency-amount">฿ 172,109.87</div>
+                                <div class="currency-amount">$ 4,543.21</div>
+                            </td>
+                            <td class="currency-amount">¥ 32,109.87</td>
+                            <td><span class="status-badge status-shipped">已发运</span></td>
+                            <td>
+                                <button class="btn btn-sm btn-outline-primary me-1" onclick="downloadHandover('VN202410029')">
+                                    <i class="bi bi-download"></i> 下载交接单
+                                </button>
+                                <button class="btn btn-sm btn-outline-info" onclick="viewBatchDetails('VN202410029')">
+                                    <i class="bi bi-eye"></i> 详情
+                                </button>
+                            </td>
+                        </tr>
+                        
+                        <tr data-batch-id="VN202410030">
+                            <td>
+                                <input type="checkbox" class="form-check-input batch-checkbox" value="VN202410030">
+                            </td>
+                            <td>
+                                <button class="expand-btn" onclick="toggleBatchDetails(this, 'VN202410030')">
+                                    <i class="bi bi-chevron-right"></i>
+                                </button>
+                            </td>
+                            <td>VN202410030</td>
+                            <td>义安省物流</td>
+                            <td>46</td>
+                            <td>27</td>
+                            <td>
+                                <div class="currency-amount">฿ 245,678.90</div>
+                                <div class="currency-amount">$ 6,789.01</div>
+                            </td>
+                            <td class="currency-amount">¥ 46,543.21</td>
+                            <td><span class="status-badge status-delivered">已妥投</span></td>
+                            <td>
+                                <button class="btn btn-sm btn-outline-primary me-1" onclick="downloadHandover('VN202410030')">
+                                    <i class="bi bi-download"></i> 下载交接单
+                                </button>
+                                <button class="btn btn-sm btn-outline-success me-1" onclick="downloadPOD('VN202410030')">
+                                    <i class="bi bi-file-check"></i> 下载POD
+                                </button>
+                                <button class="btn btn-sm btn-outline-info" onclick="viewBatchDetails('VN202410030')">
+                                    <i class="bi bi-eye"></i> 详情
+                                </button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- 分页 -->
+            <nav aria-label="分页导航" class="mt-4">
+                <ul class="pagination justify-content-center">
+                    <li class="page-item disabled">
+                        <a class="page-link" href="#" tabindex="-1">上一页</a>
+                    </li>
+                    <li class="page-item active"><a class="page-link" href="#">1</a></li>
+                    <li class="page-item"><a class="page-link" href="#">2</a></li>
+                    <li class="page-item"><a class="page-link" href="#">3</a></li>
+                    <li class="page-item">
+                        <a class="page-link" href="#">下一页</a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // 全选/取消全选功能
+        function toggleSelectAll() {
+            const selectAll = document.getElementById('selectAll');
+            const checkboxes = document.querySelectorAll('.batch-checkbox');
+            checkboxes.forEach(checkbox => {
+                checkbox.checked = selectAll.checked;
+            });
+        }
+
+        // 展开/收起批次详情
+        function toggleBatchDetails(button, batchId) {
+            const icon = button.querySelector('i');
+            const row = button.closest('tr');
+            let detailsRow = row.nextElementSibling;
+            
+            // 检查是否已存在详情行
+            if (detailsRow && detailsRow.classList.contains('batch-details-row')) {
+                // 如果存在，则移除
+                detailsRow.remove();
+                icon.className = 'bi bi-chevron-right';
+                button.classList.remove('expanded');
+            } else {
+                // 如果不存在，则创建并插入
+                const detailsRowHtml = createBatchDetailsRow(batchId);
+                row.insertAdjacentHTML('afterend', detailsRowHtml);
+                icon.className = 'bi bi-chevron-down';
+                button.classList.add('expanded');
+            }
+        }
+
+        // 创建批次详情行
+        function createBatchDetailsRow(batchId) {
+            // 模拟批次对应的订单商品数据
+            const mockData = [
+                {
+                    customerName: '越南客户A',
+                    orderNumber: 'ORD20241001001',
+                    mku: 'MKU001',
+                    sku: 'SKU001',
+                    thirdPartyOrderNumber: 'TP001',
+                    customerMaterialCode: 'CM001',
+                    productNameCN: '智能手机',
+                    productNameVN: 'Điện thoại thông minh',
+                    quantity: 2,
+                    unitPrice: '฿ 15,500.00',
+                    totalAmount: '฿ 31,000.00',
+                    originCountry: '中国',
+                    originPlace: '深圳',
+                    salesUnit: '台/Cái',
+                    customerApprovalTime: '2024-10-01 09:30:00',
+                    orderConfirmTime: '2024-10-01 10:00:00',
+                    orderShipTime: '2024-10-01 14:00:00',
+                    consolidationReceiveTime: '2024-10-02 08:00:00',
+                    consolidationShipTime: '2024-10-02 16:00:00',
+                    promiseDeliveryTime: '2024-10-05 18:00:00',
+                    plannedDeliveryTime: '2024-10-05 15:00:00',
+                    distributionReceiveTime: '2024-10-03 10:00:00',
+                    customsDeclaration: '是',
+                    distributionCenter: '胡志明企配中心',
+                    warehouseName: '胡志明备货仓',
+                    localBatchNumber: batchId,
+                    consignee: 'Nguyen Van A',
+                    consigneePhone: '+84 901 234 567',
+                    address: '胡志明市/第一郡/Ben Nghe坊/详细地址：123 Nguyen Hue Street'
+                }
+            ];
+
+            let detailsHtml = `
+                <tr class="batch-details-row">
+                    <td colspan="10" class="batch-details p-0">
+                        <div class="p-3">
+                            <h6 class="text-primary mb-3">
+                                <i class="bi bi-box-seam me-2"></i>批次 ${batchId} 对应订单商品信息
+                            </h6>
+                            <div class="table-responsive">
+                                <table class="table table-sm">
+                                    <thead>
+                                        <tr>
+                                            <th>客户名称</th>
+                                            <th>订单编号</th>
+                                            <th>MKU</th>
+                                            <th>SKU</th>
+                                            <th>三方订单号</th>
+                                            <th>客户物料号</th>
+                                            <th>商品中文名称</th>
+                                            <th>商品越南语名称</th>
+                                            <th>商品件数</th>
+                                            <th>商品含税单价</th>
+                                            <th>订单行含税总金额</th>
+                                            <th>商品原产国</th>
+                                            <th>商品原产地</th>
+                                            <th>商品销售单位</th>
+                                            <th>客户审批时间</th>
+                                            <th>订单确认时间</th>
+                                            <th>订单发货时间</th>
+                                            <th>集运中心收货时间</th>
+                                            <th>集运中心发货时间</th>
+                                            <th>承诺送达时间</th>
+                                            <th>计划妥投时间</th>
+                                            <th>企配收货时间</th>
+                                            <th>是否报关</th>
+                                            <th>企配中心</th>
+                                            <th>备货仓名称</th>
+                                            <th>本地发运批次号</th>
+                                            <th>收货人</th>
+                                            <th>收货人电话</th>
+                                            <th>收货地址</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>`;
+
+            mockData.forEach(item => {
+                detailsHtml += `
+                    <tr>
+                        <td>${item.customerName}</td>
+                        <td>${item.orderNumber}</td>
+                        <td>${item.mku}</td>
+                        <td>${item.sku}</td>
+                        <td>${item.thirdPartyOrderNumber}</td>
+                        <td>${item.customerMaterialCode}</td>
+                        <td>${item.productNameCN}</td>
+                        <td>${item.productNameVN}</td>
+                        <td>${item.quantity}</td>
+                        <td class="currency-amount">${item.unitPrice}</td>
+                        <td class="currency-amount">${item.totalAmount}</td>
+                        <td>${item.originCountry}</td>
+                        <td>${item.originPlace}</td>
+                        <td>${item.salesUnit}</td>
+                        <td>${item.customerApprovalTime}</td>
+                        <td>${item.orderConfirmTime}</td>
+                        <td>${item.orderShipTime}</td>
+                        <td>${item.consolidationReceiveTime}</td>
+                        <td>${item.consolidationShipTime}</td>
+                        <td>${item.promiseDeliveryTime}</td>
+                        <td>${item.plannedDeliveryTime}</td>
+                        <td>${item.distributionReceiveTime}</td>
+                        <td>${item.customsDeclaration}</td>
+                        <td>${item.distributionCenter}</td>
+                        <td>${item.warehouseName}</td>
+                        <td>${item.localBatchNumber}</td>
+                        <td>${item.consignee}</td>
+                        <td>${item.consigneePhone}</td>
+                        <td>${item.address}</td>
+                    </tr>`;
+            });
+
+            detailsHtml += `
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </td>
+                </tr>`;
+
+            return detailsHtml;
+        }
+
+        // 批量确认功能
+        function batchConfirm() {
+            const selectedCheckboxes = document.querySelectorAll('.batch-checkbox:checked');
+            if (selectedCheckboxes.length === 0) {
+                alert('请选择要确认的批次');
+                return;
+            }
+            
+            const batchIds = Array.from(selectedCheckboxes).map(cb => cb.value);
+            if (confirm(`确认要批量确认选中的 ${batchIds.length} 个批次吗？`)) {
+                console.log('批量确认批次:', batchIds);
+                alert('批量确认成功');
+            }
+        }
+
+        // 更新计划发货时间
+        function updatePlannedShipTime() {
+            const selectedCheckboxes = document.querySelectorAll('.batch-checkbox:checked');
+            if (selectedCheckboxes.length === 0) {
+                alert('请选择要更新的批次');
+                return;
+            }
+            
+            const newTime = prompt('请输入新的计划发货时间（格式：YYYY-MM-DD）：');
+            if (newTime) {
+                console.log('更新计划发货时间:', newTime);
+                alert('计划发货时间更新成功');
+            }
+        }
+
+        // 更新计划送达时间
+        function updatePlannedDeliveryTime() {
+            const selectedCheckboxes = document.querySelectorAll('.batch-checkbox:checked');
+            if (selectedCheckboxes.length === 0) {
+                alert('请选择要更新的批次');
+                return;
+            }
+            
+            const newTime = prompt('请输入新的计划送达时间（格式：YYYY-MM-DD）：');
+            if (newTime) {
+                console.log('更新计划送达时间:', newTime);
+                alert('计划送达时间更新成功');
+            }
+        }
+
+        // 导出批次信息
+        function exportBatchInfo() {
+            console.log('导出批次信息');
+            alert('批次信息导出成功');
+        }
+
+        // 导出批次订单信息
+        function exportBatchOrderInfo() {
+            console.log('导出批次订单信息');
+            alert('批次订单信息导出成功');
+        }
+
+        // 编辑批次
+        function editBatch(batchId) {
+            console.log('编辑批次:', batchId);
+            window.location.href = `vietnam-batch-edit.html?id=${batchId}`;
+        }
+
+        // 查看批次详情
+        function viewBatchDetails(batchId) {
+            console.log('查看批次详情:', batchId);
+            window.location.href = `vietnam-batch-details.html?id=${batchId}`;
+        }
+
+        // 确认批次
+        function confirmBatch(batchId) {
+            if (confirm(`确认要确认批次 ${batchId} 吗？`)) {
+                console.log('确认批次:', batchId);
+                alert('批次确认成功');
+            }
+        }
+
+        // 删除批次
+        function deleteBatch(batchId) {
+            if (confirm(`确认要删除批次 ${batchId} 吗？此操作不可恢复！`)) {
+                console.log('删除批次:', batchId);
+                alert('批次删除成功');
+            }
+        }
+
+        // 下发企配
+        function sendToDistribution(batchId) {
+            if (confirm(`确认要下发批次 ${batchId} 至企配吗？`)) {
+                console.log('下发企配:', batchId);
+                alert('下发企配成功');
+            }
+        }
+
+        // 取消确认
+        function cancelConfirm(batchId) {
+            if (confirm(`确认要取消确认批次 ${batchId} 吗？`)) {
+                console.log('取消确认:', batchId);
+                alert('取消确认成功');
+            }
+        }
+
+        // 表单提交处理
+        document.getElementById('searchForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            console.log('执行查询操作');
+            alert('查询完成');
+        });
+
+        // 表单重置处理
+        document.getElementById('searchForm').addEventListener('reset', function() {
+            setTimeout(() => {
+                console.log('表单已重置');
+            }, 100);
+        });
+    </script>
+<script>
+        // 切换侧边栏
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const mainContent = document.getElementById('mainContent');
+            
+            sidebar.classList.toggle('collapsed');
+            mainContent.classList.toggle('expanded');
+        }
+        
+        // 响应式处理
+        function handleResize() {
+            const sidebar = document.getElementById('sidebar');
+            const mainContent = document.getElementById('mainContent');
+            
+            if (window.innerWidth <= 768) {
+                sidebar.classList.remove('show');
+            }
+        }
+        
+        // 移动端菜单切换
+        function toggleMobileSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            sidebar.classList.toggle('show');
+        }
+        
+        // 初始化
+        window.addEventListener('resize', handleResize);
+        
+        // 移动端点击外部关闭侧边栏
+        document.addEventListener('click', function(event) {
+            const sidebar = document.getElementById('sidebar');
+            const toggleBtn = document.querySelector('.toggle-btn');
+            
+            if (window.innerWidth <= 768 && 
+                !sidebar.contains(event.target) && 
+                !toggleBtn.contains(event.target)) {
+                sidebar.classList.remove('show');
+            }
+        });
+        
+        // 移动端响应式样式
+        const mediaQuery = window.matchMedia('(max-width: 768px)');
+        function handleMobileChange(e) {
+            const sidebar = document.getElementById('sidebar');
+            if (e.matches) {
+                // 移动端
+                sidebar.style.transform = 'translateX(-100%)';
+                document.querySelector('.toggle-btn').onclick = toggleMobileSidebar;
+            } else {
+                // 桌面端
+                sidebar.style.transform = 'translateX(0)';
+                document.querySelector('.toggle-btn').onclick = toggleSidebar;
+            }
+        }
+        
+        mediaQuery.addListener(handleMobileChange);
+        handleMobileChange(mediaQuery);
+    </script>
+</body>
+</html>
