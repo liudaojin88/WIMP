@@ -450,6 +450,23 @@
             }
         }
         
+        /* 优化表格操作按钮大小 */
+        .table td .btn-sm {
+            padding: 2px 6px;
+            font-size: 0.75rem;
+            line-height: 1.2;
+            min-width: auto;
+            white-space: nowrap;
+        }
+        
+        .table td .btn-sm i {
+            font-size: 0.7rem;
+        }
+        
+        .table td .btn-sm:not(:last-child) {
+            margin-right: 3px;
+        }
+        
         @media (max-width: 768px) {
             .search-btn-group {
                 flex-direction: column;
@@ -464,6 +481,16 @@
                 width: 100%;
                 margin-right: 0;
                 margin-bottom: 10px;
+            }
+            
+            .table td .btn-sm {
+                padding: 1px 4px;
+                font-size: 0.7rem;
+                margin-right: 2px;
+            }
+            
+            .table td .btn-sm i {
+                font-size: 0.65rem;
             }
         }
     </style>
