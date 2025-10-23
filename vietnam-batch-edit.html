@@ -10,6 +10,7 @@
         body {
             font-family: 'Microsoft YaHei', Arial, sans-serif;
             background-color: #f8f9fa;
+            font-size: 0.9rem;
         }
         
         .sidebar {
@@ -259,6 +260,15 @@
             font-weight: 500;
         }
         
+        /* 查询结果区域按钮字体大小 */
+        .results-section .btn {
+            font-size: 0.8rem;
+        }
+        
+        .results-section .btn-sm {
+            font-size: 0.75rem;
+        }
+        
         .nav-pills .nav-link {
             border-radius: 8px;
             margin-right: 5px;
@@ -323,39 +333,50 @@
         
         .progress-timeline {
             position: relative;
-            padding-left: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            padding: 20px 0;
+            margin: 20px 0;
         }
         
         .progress-timeline::before {
             content: '';
             position: absolute;
-            left: 15px;
-            top: 0;
-            bottom: 0;
-            width: 2px;
+            left: 0;
+            right: 0;
+            top: 35px;
+            height: 2px;
             background: #dee2e6;
+            z-index: 1;
         }
         
         .progress-item {
             position: relative;
-            margin-bottom: 20px;
-            padding: 15px;
+            flex: 1;
+            text-align: center;
+            padding: 0 10px;
+            z-index: 2;
             background: white;
             border-radius: 8px;
             border: 1px solid #e9ecef;
+            margin: 0 5px;
+            padding: 15px 10px;
         }
         
         .progress-item::before {
             content: '';
             position: absolute;
-            left: -22px;
-            top: 20px;
+            left: 50%;
+            top: -15px;
+            transform: translateX(-50%);
             width: 12px;
             height: 12px;
             border-radius: 50%;
             background: #28a745;
             border: 3px solid white;
             box-shadow: 0 0 0 2px #28a745;
+            z-index: 3;
         }
         
         .progress-item.pending::before {
@@ -366,6 +387,17 @@
         .progress-item.current::before {
             background: #007bff;
             box-shadow: 0 0 0 2px #007bff;
+        }
+        
+        .progress-item h6 {
+            margin-top: 10px;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+        }
+        
+        .progress-item p {
+            font-size: 0.75rem;
+            margin-bottom: 0.25rem;
         }
         
         .currency-amount {
@@ -535,16 +567,6 @@
                     <li class="breadcrumb-item active" aria-current="page">批次编辑</li>
                 </ol>
             </nav>
-        </div>
-    </div>
-
-    <!-- 页面标题 -->
-    <div class="page-header">
-        <div class="container">
-            <h1 class="mb-0">
-                <i class="bi bi-pencil-square me-3"></i>越南运输批次编辑
-            </h1>
-            <p class="mt-2 mb-0 opacity-75">编辑运输批次信息及相关详情</p>
         </div>
     </div>
 

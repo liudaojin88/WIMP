@@ -10,6 +10,7 @@
         body {
             font-family: 'Microsoft YaHei', Arial, sans-serif;
             background-color: #f8f9fa;
+            font-size: 0.9rem;
         }
         
         .sidebar {
@@ -198,6 +199,15 @@
         
         .btn-success {
             background: #28a745;
+        }
+        
+        /* 查询结果区域按钮字体大小 */
+        .results-section .btn {
+            font-size: 0.8rem;
+        }
+        
+        .results-section .btn-sm {
+            font-size: 0.75rem;
             border-color: #28a745;
             border-radius: 6px;
             padding: 8px 20px;
@@ -480,17 +490,37 @@
                         ></textarea>
                     </div>
                     
+                    <div class="col-md-6">
+                        <label for="secondStageStatus" class="form-label">生成末端批次</label>
+                        <select class="form-select" id="secondStageStatus">
+                            <option value="">全部</option>
+                            <option value="all">全部生成</option>
+                            <option value="none">未生成</option>
+                            <option value="partial">部分生成</option>
+                        </select>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <label for="deliveryStatus" class="form-label">妥投状态</label>
+                        <select class="form-select" id="deliveryStatus">
+                            <option value="">全部</option>
+                            <option value="delivered">已妥投</option>
+                            <option value="partial">部分妥投</option>
+                            <option value="pending">未妥投</option>
+                        </select>
+                    </div>
+                    
                     <div class="col-md-12 d-flex justify-content-between align-items-center">
                         <div class="d-flex gap-2">
                             <button type="submit" class="btn btn-primary">
                                 <i class="bi bi-search me-2"></i>查询
                             </button>
                             <button type="reset" class="btn btn-outline-secondary">
-                                <i class="bi bi-arrow-clockwise me-2"></i>展开
+                                <i class="bi bi-arrow-clockwise me-2"></i>重置
                             </button>
                         </div>
                         <div class="text-muted">
-                            重置
+                            支持多条件组合查询
                         </div>
                     </div>
                 </div>
@@ -530,18 +560,21 @@
                 <table class="table table-hover">
                     <thead>
                         <tr>
-                            <th width="5%">
+                            <th width="3%">
                                 <input type="checkbox" class="form-check-input" id="selectAll">
                             </th>
-                            <th width="15%">订单编号</th>
-                            <th width="10%">父单号</th>
-                            <th width="15%">订单来源</th>
-                            <th width="15%">第三方订单号</th>
-                            <th width="10%">订单类型</th>
-                            <th width="10%">订单状态</th>
-                            <th width="8%">是否报关</th>
-                            <th width="12%">合同号</th>
-                            <th width="10%">操作</th>
+                            <th width="12%">订单编号</th>
+                            <th width="8%">父单号</th>
+                            <th width="10%">订单来源</th>
+                            <th width="12%">第三方订单号</th>
+                            <th width="8%">订单类型</th>
+                            <th width="8%">订单状态</th>
+                            <th width="6%">是否报关</th>
+                            <th width="10%">合同号</th>
+                            <th width="8%">SKU妥投详情</th>
+                            <th width="8%">SKU末端派送详情</th>
+                            <th width="12%">末端运输批次号</th>
+                            <th width="8%">操作</th>
                         </tr>
                     </thead>
                     <tbody id="orderTableBody">
@@ -556,6 +589,22 @@
                             <td><span class="status-shipped">已发货</span></td>
                             <td><span class="customs-status customs-none">不报关</span></td>
                             <td>ISPG-202407</td>
+                            <td>
+                                <a href="#" class="text-primary text-decoration-none" onclick="showSkuDeliveryDetails('250909104000001')" style="cursor: pointer;">
+                                    <strong>8/12</strong>
+                                </a>
+                            </td>
+                            <td>
+                                <a href="#" class="text-primary text-decoration-none" onclick="showSkuBatchDetails('250909104000001')" style="cursor: pointer;">
+                                    <strong>10/12</strong>
+                                </a>
+                            </td>
+                            <td>
+                                <div class="d-flex flex-wrap gap-1">
+                                    <a href="#" class="badge bg-primary text-decoration-none" onclick="goToBatchDetail('VN20241023001')" style="cursor: pointer;">VN20241023001</a>
+                                    <a href="#" class="badge bg-primary text-decoration-none" onclick="goToBatchDetail('VN20241023002')" style="cursor: pointer;">VN20241023002</a>
+                                </div>
+                            </td>
                             <td>
                                 <button class="btn btn-sm btn-outline-primary me-1" onclick="viewOrderDetails('250909104000001')">
                                     查看详情
@@ -576,6 +625,21 @@
                             <td><span class="customs-status customs-none">不报关</span></td>
                             <td>ISPG-202407</td>
                             <td>
+                                <a href="#" class="text-primary text-decoration-none" onclick="showSkuDeliveryDetails('250909101700001')" style="cursor: pointer;">
+                                    <strong>5/8</strong>
+                                </a>
+                            </td>
+                            <td>
+                                <a href="#" class="text-primary text-decoration-none" onclick="showSkuBatchDetails('250909101700001')" style="cursor: pointer;">
+                                    <strong>6/8</strong>
+                                </a>
+                            </td>
+                            <td>
+                                <div class="d-flex flex-wrap gap-1">
+                                    <a href="#" class="badge bg-primary text-decoration-none" onclick="goToBatchDetail('VN20241023003')" style="cursor: pointer;">VN20241023003</a>
+                                </div>
+                            </td>
+                            <td>
                                 <button class="btn btn-sm btn-outline-primary me-1" onclick="viewOrderDetails('250909101700001')">
                                     查看详情
                                 </button>
@@ -595,6 +659,22 @@
                             <td><span class="customs-status customs-none">不报关</span></td>
                             <td>ISPG-202407</td>
                             <td>
+                                <a href="#" class="text-primary text-decoration-none" onclick="showSkuDeliveryDetails('250804222700004')" style="cursor: pointer;">
+                                    <strong>15/15</strong>
+                                </a>
+                            </td>
+                            <td>
+                                <a href="#" class="text-primary text-decoration-none" onclick="showSkuBatchDetails('250804222700004')" style="cursor: pointer;">
+                                    <strong>15/15</strong>
+                                </a>
+                            </td>
+                            <td>
+                                <div class="d-flex flex-wrap gap-1">
+                                    <a href="#" class="badge bg-primary text-decoration-none" onclick="goToBatchDetail('VN20241023004')" style="cursor: pointer;">VN20241023004</a>
+                                    <a href="#" class="badge bg-primary text-decoration-none" onclick="goToBatchDetail('VN20241023005')" style="cursor: pointer;">VN20241023005</a>
+                                </div>
+                            </td>
+                            <td>
                                 <button class="btn btn-sm btn-outline-primary me-1" onclick="viewOrderDetails('250804222700004')">
                                     查看详情
                                 </button>
@@ -613,6 +693,21 @@
                             <td><span class="status-shipped">已发货</span></td>
                             <td><span class="customs-status customs-required">报关</span></td>
                             <td>ISPG-202412</td>
+                            <td>
+                                <a href="#" class="text-primary text-decoration-none" onclick="showSkuDeliveryDetails('250924171800001')" style="cursor: pointer;">
+                                    <strong>0/6</strong>
+                                </a>
+                            </td>
+                            <td>
+                                <a href="#" class="text-primary text-decoration-none" onclick="showSkuBatchDetails('250924171800001')" style="cursor: pointer;">
+                                    <strong>3/6</strong>
+                                </a>
+                            </td>
+                            <td>
+                                <div class="d-flex flex-wrap gap-1">
+                                    <span class="text-muted">-</span>
+                                </div>
+                            </td>
                             <td>
                                 <button class="btn btn-sm btn-outline-primary me-1" onclick="viewOrderDetails('250924171800001')">
                                     查看详情
@@ -862,6 +957,94 @@
                 <div class="modal-footer">
                     <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">取消</button>
                     <button type="button" class="btn btn-primary" onclick="addToSelectedBatch()">添加到批次</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SKU妥投详情弹框 -->
+    <div class="modal fade" id="skuDeliveryModal" tabindex="-1" aria-labelledby="skuDeliveryModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="skuDeliveryModalLabel">
+                        <i class="bi bi-box-seam me-2"></i>SKU妥投详情
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="关闭"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <h6 class="fw-bold">订单号：<span id="deliveryOrderNumber" class="text-primary"></span></h6>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>MKU</th>
+                                    <th>SKU</th>
+                                    <th>商品名称</th>
+                                    <th>数量</th>
+                                    <th>末端运输批次号</th>
+                                    <th>末端运输批次状态</th>
+                                    <th>批次总共商品SKU数量</th>
+                                    <th>是否报关</th>
+                                    <th>企配中心名称</th>
+                                    <th>创建时间</th>
+                                    <th>创建人</th>
+                                </tr>
+                            </thead>
+                            <tbody id="skuDeliveryTableBody">
+                                <!-- 动态加载数据 -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">关闭</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SKU末端派送详情弹框 -->
+    <div class="modal fade" id="skuBatchModal" tabindex="-1" aria-labelledby="skuBatchModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="skuBatchModalLabel">
+                        <i class="bi bi-truck me-2"></i>SKU末端派送详情
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="关闭"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <h6 class="fw-bold">订单号：<span id="batchOrderNumber" class="text-primary"></span></h6>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>MKU</th>
+                                    <th>SKU</th>
+                                    <th>商品名称</th>
+                                    <th>数量</th>
+                                    <th>末端运输批次号</th>
+                                    <th>末端运输批次状态</th>
+                                    <th>批次总共商品SKU数量</th>
+                                    <th>是否报关</th>
+                                    <th>企配中心名称</th>
+                                    <th>创建时间</th>
+                                    <th>创建人</th>
+                                </tr>
+                            </thead>
+                            <tbody id="skuBatchTableBody">
+                                <!-- 动态加载数据 -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">关闭</button>
                 </div>
             </div>
         </div>
@@ -1162,6 +1345,169 @@
         function printOrder(orderNumber) {
             showMessage(`打印订单 ${orderNumber}`, 'info');
             // 这里应该调用打印功能
+        }
+
+        // 显示SKU妥投详情
+        function showSkuDeliveryDetails(orderNumber) {
+            // 设置订单号
+            document.getElementById('deliveryOrderNumber').textContent = orderNumber;
+            
+            // 模拟SKU妥投详情数据
+            const mockDeliveryData = [
+                {
+                    mku: 'MKU001',
+                    sku: 'SKU001',
+                    productName: '智能手机保护壳',
+                    quantity: 2,
+                    batchNumber: 'VN20241023001',
+                    batchStatus: '已妥投',
+                    batchTotalSku: 25,
+                    isCustoms: '不报关',
+                    warehouseCenter: '深圳企配中心',
+                    createTime: '2024-10-20 14:30:00',
+                    creator: '张三'
+                },
+                {
+                    mku: 'MKU002',
+                    sku: 'SKU002',
+                    productName: '无线耳机',
+                    quantity: 1,
+                    batchNumber: 'VN20241023002',
+                    batchStatus: '运输中',
+                    batchTotalSku: 18,
+                    isCustoms: '不报关',
+                    warehouseCenter: '深圳企配中心',
+                    createTime: '2024-10-21 09:15:00',
+                    creator: '李四'
+                }
+            ];
+            
+            // 填充表格数据
+            const tableBody = document.getElementById('skuDeliveryTableBody');
+            tableBody.innerHTML = mockDeliveryData.map(item => `
+                <tr>
+                    <td>${item.mku}</td>
+                    <td>${item.sku}</td>
+                    <td>${item.productName}</td>
+                    <td>${item.quantity}</td>
+                    <td>
+                        <a href="#" class="text-primary text-decoration-none" onclick="goToBatchDetail('${item.batchNumber}')" style="cursor: pointer;">
+                            ${item.batchNumber}
+                        </a>
+                    </td>
+                    <td>
+                        <span class="badge ${item.batchStatus === '已妥投' ? 'bg-success' : 'bg-primary'}">${item.batchStatus}</span>
+                    </td>
+                    <td>${item.batchTotalSku}</td>
+                    <td>${item.isCustoms}</td>
+                    <td>${item.warehouseCenter}</td>
+                    <td>${item.createTime}</td>
+                    <td>${item.creator}</td>
+                </tr>
+            `).join('');
+            
+            // 显示弹框
+            const modal = new bootstrap.Modal(document.getElementById('skuDeliveryModal'));
+            modal.show();
+        }
+
+        // 显示SKU末端派送详情
+        function showSkuBatchDetails(orderNumber) {
+            // 设置订单号
+            document.getElementById('batchOrderNumber').textContent = orderNumber;
+            
+            // 模拟SKU末端派送详情数据
+            const mockBatchData = [
+                {
+                    mku: 'MKU001',
+                    sku: 'SKU001',
+                    productName: '智能手机保护壳',
+                    quantity: 2,
+                    batchNumber: 'VN20241023001',
+                    batchStatus: '已添加',
+                    batchTotalSku: 25,
+                    isCustoms: '不报关',
+                    warehouseCenter: '深圳企配中心',
+                    createTime: '2024-10-20 14:30:00',
+                    creator: '张三'
+                },
+                {
+                    mku: 'MKU002',
+                    sku: 'SKU002',
+                    productName: '无线耳机',
+                    quantity: 1,
+                    batchNumber: 'VN20241023002',
+                    batchStatus: '已添加',
+                    batchTotalSku: 18,
+                    isCustoms: '不报关',
+                    warehouseCenter: '深圳企配中心',
+                    createTime: '2024-10-21 09:15:00',
+                    creator: '李四'
+                },
+                {
+                    mku: 'MKU003',
+                    sku: 'SKU003',
+                    productName: '数据线',
+                    quantity: 3,
+                    batchNumber: '-',
+                    batchStatus: '未添加',
+                    batchTotalSku: 0,
+                    isCustoms: '不报关',
+                    warehouseCenter: '深圳企配中心',
+                    createTime: '-',
+                    creator: '-'
+                }
+            ];
+            
+            // 填充表格数据
+            const tableBody = document.getElementById('skuBatchTableBody');
+            tableBody.innerHTML = mockBatchData.map(item => `
+                <tr>
+                    <td>${item.mku}</td>
+                    <td>${item.sku}</td>
+                    <td>${item.productName}</td>
+                    <td>${item.quantity}</td>
+                    <td>
+                        ${item.batchNumber !== '-' ?
+                            `<a href="#" class="text-primary text-decoration-none" onclick="goToBatchDetail('${item.batchNumber}')" style="cursor: pointer;">${item.batchNumber}</a>` :
+                            '<span class="text-muted">-</span>'
+                        }
+                    </td>
+                    <td>
+                        <span class="badge ${item.batchStatus === '已添加' ? 'bg-success' : 'bg-secondary'}">${item.batchStatus}</span>
+                    </td>
+                    <td>${item.batchTotalSku}</td>
+                    <td>${item.isCustoms}</td>
+                    <td>${item.warehouseCenter}</td>
+                    <td>${item.createTime}</td>
+                    <td>${item.creator}</td>
+                </tr>
+            `).join('');
+            
+            // 显示弹框
+            const modal = new bootstrap.Modal(document.getElementById('skuBatchModal'));
+            modal.show();
+        }
+
+        // 跳转到批次详情页面
+        function goToBatchDetail(batchNumber) {
+            showMessage(`跳转到批次详情：${batchNumber}`, 'info');
+            // 这里应该跳转到vietnam-batch-edit.html页面，并传递批次号参数
+            // window.location.href = `vietnam-batch-edit.html?batchNumber=${batchNumber}`;
+        }
+
+        // 跳转到派送列表页面
+        function goToDeliveryList() {
+            showMessage('跳转到派送列表页面', 'info');
+            // 这里应该跳转到vietnam-delivery-list.html页面
+            // window.location.href = 'vietnam-delivery-list.html';
+        }
+
+        // 显示成功弹框
+        function showSuccessModal(batchNumber) {
+            document.getElementById('batchNumberLink').textContent = batchNumber;
+            const modal = new bootstrap.Modal(document.getElementById('successModal'));
+            modal.show();
         }
 
         // 显示消息提示
