@@ -264,7 +264,7 @@
             white-space: nowrap;
         }
         
-    .table tbody td {
+     .table tbody td {
             padding: 15px;
             vertical-align: middle;
             border-color: #f1f3f4;
@@ -800,6 +800,12 @@
                 </button>
                 <button type="button" class="btn btn-outline-secondary" onclick="exportBatchOrderInfo()">
                     <i class="bi bi-file-earmark-spreadsheet me-2"></i>导出批次订单信息
+                </button>
+                <button type="button" class="btn btn-outline-info" onclick="configureBatchColumns()" data-bs-toggle="modal" data-bs-target="#batchColumnConfigModal">
+                    <i class="bi bi-gear me-2"></i>批次列配置
+                </button>
+                <button type="button" class="btn btn-outline-info" onclick="configureOrderColumns()" data-bs-toggle="modal" data-bs-target="#orderColumnConfigModal">
+                    <i class="bi bi-sliders me-2"></i>订单商品列配置
                 </button>
             </div>
             
@@ -2398,6 +2404,586 @@
             // 初始化筛选结果信息
             const rows = document.querySelectorAll('#batchTableBody tr[data-batch-id]');
             updateFilterResultInfo(rows.length, rows.length);
+        });
+    </script>
+
+    <!-- 批次列配置模态框 -->
+    <div class="modal fade" id="batchColumnConfigModal" tabindex="-1" aria-labelledby="batchColumnConfigModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="batchColumnConfigModalLabel">
+                        <i class="bi bi-gear me-2"></i>批次列展示配置
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-12">
+                            <p class="text-muted mb-3">请选择要在批次表格中显示的列：</p>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input batch-column-checkbox" type="checkbox" value="batch-number" id="col-batch-number" checked disabled>
+                                        <label class="form-check-label" for="col-batch-number">
+                                            本地发运批次号 <span class="text-muted">(必选)</span>
+                                        </label>
+                                    </div>
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input batch-column-checkbox" type="checkbox" value="customer-name" id="col-customer-name" checked>
+                                        <label class="form-check-label" for="col-customer-name">
+                                            客户名称
+                                        </label>
+                                    </div>
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input batch-column-checkbox" type="checkbox" value="order-count" id="col-order-count" checked>
+                                        <label class="form-check-label" for="col-order-count">
+                                            订单数量
+                                        </label>
+                                    </div>
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input batch-column-checkbox" type="checkbox" value="mku-count" id="col-mku-count" checked>
+                                        <label class="form-check-label" for="col-mku-count">
+                                            MKU数量
+                                        </label>
+                                    </div>
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input batch-column-checkbox" type="checkbox" value="total-amount" id="col-total-amount" checked>
+                                        <label class="form-check-label" for="col-total-amount">
+                                            订单行含税总金额
+                                        </label>
+                                    </div>
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input batch-column-checkbox" type="checkbox" value="rmb-amount" id="col-rmb-amount" checked>
+                                        <label class="form-check-label" for="col-rmb-amount">
+                                            人民币金额
+                                        </label>
+                                    </div>
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input batch-column-checkbox" type="checkbox" value="customs-declaration" id="col-customs-declaration" checked>
+                                        <label class="form-check-label" for="col-customs-declaration">
+                                            是否报关
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input batch-column-checkbox" type="checkbox" value="customs-status" id="col-customs-status" checked>
+                                        <label class="form-check-label" for="col-customs-status">
+                                            报关状态
+                                        </label>
+                                    </div>
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input batch-column-checkbox" type="checkbox" value="consignee" id="col-consignee" checked>
+                                        <label class="form-check-label" for="col-consignee">
+                                            收件人
+                                        </label>
+                                    </div>
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input batch-column-checkbox" type="checkbox" value="consignee-phone" id="col-consignee-phone" checked>
+                                        <label class="form-check-label" for="col-consignee-phone">
+                                            收件人电话
+                                        </label>
+                                    </div>
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input batch-column-checkbox" type="checkbox" value="consignee-address" id="col-consignee-address" checked>
+                                        <label class="form-check-label" for="col-consignee-address">
+                                            收件人地址
+                                        </label>
+                                    </div>
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input batch-column-checkbox" type="checkbox" value="creator" id="col-creator" checked>
+                                        <label class="form-check-label" for="col-creator">
+                                            创建人
+                                        </label>
+                                    </div>
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input batch-column-checkbox" type="checkbox" value="create-time" id="col-create-time" checked>
+                                        <label class="form-check-label" for="col-create-time">
+                                            创建时间
+                                        </label>
+                                    </div>
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input batch-column-checkbox" type="checkbox" value="status" id="col-status" checked>
+                                        <label class="form-check-label" for="col-status">
+                                            状态
+                                        </label>
+                                    </div>
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input batch-column-checkbox" type="checkbox" value="actions" id="col-actions" checked disabled>
+                                        <label class="form-check-label" for="col-actions">
+                                            操作 <span class="text-muted">(必选)</span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" onclick="resetBatchColumnConfig()">
+                        <i class="bi bi-arrow-clockwise me-2"></i>重置默认
+                    </button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="bi bi-x-circle me-2"></i>取消
+                    </button>
+                    <button type="button" class="btn btn-primary" onclick="applyBatchColumnConfig()">
+                        <i class="bi bi-check-circle me-2"></i>应用配置
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 订单商品信息列配置模态框 -->
+    <div class="modal fade" id="orderColumnConfigModal" tabindex="-1" aria-labelledby="orderColumnConfigModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="orderColumnConfigModalLabel">
+                        <i class="bi bi-sliders me-2"></i>订单商品信息列展示配置
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-12">
+                            <p class="text-muted mb-3">请选择要在订单商品信息表格中显示的列：</p>
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input order-column-checkbox" type="checkbox" value="customer-name" id="order-col-customer-name" checked>
+                                        <label class="form-check-label" for="order-col-customer-name">
+                                            客户名称
+                                        </label>
+                                    </div>
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input order-column-checkbox" type="checkbox" value="order-number" id="order-col-order-number" checked>
+                                        <label class="form-check-label" for="order-col-order-number">
+                                            订单编号
+                                        </label>
+                                    </div>
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input order-column-checkbox" type="checkbox" value="mku" id="order-col-mku" checked>
+                                        <label class="form-check-label" for="order-col-mku">
+                                            MKU
+                                        </label>
+                                    </div>
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input order-column-checkbox" type="checkbox" value="sku" id="order-col-sku" checked>
+                                        <label class="form-check-label" for="order-col-sku">
+                                            SKU
+                                        </label>
+                                    </div>
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input order-column-checkbox" type="checkbox" value="third-party-order" id="order-col-third-party-order" checked>
+                                        <label class="form-check-label" for="order-col-third-party-order">
+                                            三方订单号
+                                        </label>
+                                    </div>
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input order-column-checkbox" type="checkbox" value="customer-material-code" id="order-col-customer-material-code" checked>
+                                        <label class="form-check-label" for="order-col-customer-material-code">
+                                            客户物料号
+                                        </label>
+                                    </div>
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input order-column-checkbox" type="checkbox" value="product-name-cn" id="order-col-product-name-cn" checked>
+                                        <label class="form-check-label" for="order-col-product-name-cn">
+                                            商品中文名称
+                                        </label>
+                                    </div>
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input order-column-checkbox" type="checkbox" value="product-name-vn" id="order-col-product-name-vn" checked>
+                                        <label class="form-check-label" for="order-col-product-name-vn">
+                                            商品越南语名称
+                                        </label>
+                                    </div>
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input order-column-checkbox" type="checkbox" value="quantity" id="order-col-quantity" checked>
+                                        <label class="form-check-label" for="order-col-quantity">
+                                            商品件数
+                                        </label>
+                                    </div>
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input order-column-checkbox" type="checkbox" value="unit-price" id="order-col-unit-price" checked>
+                                        <label class="form-check-label" for="order-col-unit-price">
+                                            商品含税单价
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input order-column-checkbox" type="checkbox" value="total-amount" id="order-col-total-amount" checked>
+                                        <label class="form-check-label" for="order-col-total-amount">
+                                            订单行含税总金额
+                                        </label>
+                                    </div>
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input order-column-checkbox" type="checkbox" value="origin-country" id="order-col-origin-country" checked>
+                                        <label class="form-check-label" for="order-col-origin-country">
+                                            商品原产国
+                                        </label>
+                                    </div>
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input order-column-checkbox" type="checkbox" value="origin-place" id="order-col-origin-place" checked>
+                                        <label class="form-check-label" for="order-col-origin-place">
+                                            商品原产地
+                                        </label>
+                                    </div>
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input order-column-checkbox" type="checkbox" value="sales-unit" id="order-col-sales-unit" checked>
+                                        <label class="form-check-label" for="order-col-sales-unit">
+                                            商品销售单位
+                                        </label>
+                                    </div>
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input order-column-checkbox" type="checkbox" value="customer-approval-time" id="order-col-customer-approval-time" checked>
+                                        <label class="form-check-label" for="order-col-customer-approval-time">
+                                            客户审批时间
+                                        </label>
+                                    </div>
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input order-column-checkbox" type="checkbox" value="order-confirm-time" id="order-col-order-confirm-time" checked>
+                                        <label class="form-check-label" for="order-col-order-confirm-time">
+                                            订单确认时间
+                                        </label>
+                                    </div>
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input order-column-checkbox" type="checkbox" value="order-ship-time" id="order-col-order-ship-time" checked>
+                                        <label class="form-check-label" for="order-col-order-ship-time">
+                                            订单发货时间
+                                        </label>
+                                    </div>
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input order-column-checkbox" type="checkbox" value="consolidation-receive-time" id="order-col-consolidation-receive-time" checked>
+                                        <label class="form-check-label" for="order-col-consolidation-receive-time">
+                                            集运中心收货时间
+                                        </label>
+                                    </div>
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input order-column-checkbox" type="checkbox" value="consolidation-ship-time" id="order-col-consolidation-ship-time" checked>
+                                        <label class="form-check-label" for="order-col-consolidation-ship-time">
+                                            集运中心发货时间
+                                        </label>
+                                    </div>
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input order-column-checkbox" type="checkbox" value="promise-delivery-time" id="order-col-promise-delivery-time" checked>
+                                        <label class="form-check-label" for="order-col-promise-delivery-time">
+                                            承诺送达时间
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input order-column-checkbox" type="checkbox" value="planned-delivery-time" id="order-col-planned-delivery-time" checked>
+                                        <label class="form-check-label" for="order-col-planned-delivery-time">
+                                            计划妥投时间
+                                        </label>
+                                    </div>
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input order-column-checkbox" type="checkbox" value="distribution-receive-time" id="order-col-distribution-receive-time" checked>
+                                        <label class="form-check-label" for="order-col-distribution-receive-time">
+                                            企配收货时间
+                                        </label>
+                                    </div>
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input order-column-checkbox" type="checkbox" value="customs-declaration" id="order-col-customs-declaration" checked>
+                                        <label class="form-check-label" for="order-col-customs-declaration">
+                                            是否报关
+                                        </label>
+                                    </div>
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input order-column-checkbox" type="checkbox" value="distribution-center" id="order-col-distribution-center" checked>
+                                        <label class="form-check-label" for="order-col-distribution-center">
+                                            企配中心
+                                        </label>
+                                    </div>
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input order-column-checkbox" type="checkbox" value="warehouse-name" id="order-col-warehouse-name" checked>
+                                        <label class="form-check-label" for="order-col-warehouse-name">
+                                            备货仓名称
+                                        </label>
+                                    </div>
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input order-column-checkbox" type="checkbox" value="local-batch-number" id="order-col-local-batch-number" checked>
+                                        <label class="form-check-label" for="order-col-local-batch-number">
+                                            本地发运批次号
+                                        </label>
+                                    </div>
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input order-column-checkbox" type="checkbox" value="consignee" id="order-col-consignee" checked>
+                                        <label class="form-check-label" for="order-col-consignee">
+                                            收货人
+                                        </label>
+                                    </div>
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input order-column-checkbox" type="checkbox" value="consignee-phone" id="order-col-consignee-phone" checked>
+                                        <label class="form-check-label" for="order-col-consignee-phone">
+                                            收货人电话
+                                        </label>
+                                    </div>
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input order-column-checkbox" type="checkbox" value="address" id="order-col-address" checked>
+                                        <label class="form-check-label" for="order-col-address">
+                                            收货地址
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" onclick="resetOrderColumnConfig()">
+                        <i class="bi bi-arrow-clockwise me-2"></i>重置默认
+                    </button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="bi bi-x-circle me-2"></i>取消
+                    </button>
+                    <button type="button" class="btn btn-primary" onclick="applyOrderColumnConfig()">
+                        <i class="bi bi-check-circle me-2"></i>应用配置
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 列配置相关功能
+        
+        // 批次列配置功能
+        function configureBatchColumns() {
+            // 加载当前配置状态
+            loadBatchColumnConfig();
+        }
+        
+        // 加载批次列配置
+        function loadBatchColumnConfig() {
+            const savedConfig = localStorage.getItem('batchColumnConfig');
+            if (savedConfig) {
+                const config = JSON.parse(savedConfig);
+                document.querySelectorAll('.batch-column-checkbox').forEach(checkbox => {
+                    if (config.hasOwnProperty(checkbox.value)) {
+                        checkbox.checked = config[checkbox.value];
+                    }
+                });
+            }
+        }
+        
+        // 重置批次列配置
+        function resetBatchColumnConfig() {
+            document.querySelectorAll('.batch-column-checkbox').forEach(checkbox => {
+                if (!checkbox.disabled) {
+                    checkbox.checked = true;
+                }
+            });
+        }
+        
+        // 应用批次列配置
+        function applyBatchColumnConfig() {
+            const config = {};
+            const columnMapping = {
+                'batch-number': 2,
+                'customer-name': 3,
+                'order-count': 4,
+                'mku-count': 5,
+                'total-amount': 6,
+                'rmb-amount': 7,
+                'customs-declaration': 8,
+                'customs-status': 9,
+                'consignee': 10,
+                'consignee-phone': 11,
+                'consignee-address': 12,
+                'creator': 13,
+                'create-time': 14,
+                'status': 15,
+                'actions': 16
+            };
+            
+            document.querySelectorAll('.batch-column-checkbox').forEach(checkbox => {
+                config[checkbox.value] = checkbox.checked;
+            });
+            
+            // 保存配置到本地存储
+            localStorage.setItem('batchColumnConfig', JSON.stringify(config));
+            
+            // 应用配置到表格
+            const table = document.querySelector('.table');
+            const headerRow = table.querySelector('thead tr');
+            const bodyRows = table.querySelectorAll('tbody tr[data-batch-id]');
+            
+            // 更新表头
+            Object.keys(columnMapping).forEach(key => {
+                const columnIndex = columnMapping[key];
+                const headerCell = headerRow.children[columnIndex];
+                if (headerCell) {
+                    headerCell.style.display = config[key] ? '' : 'none';
+                }
+            });
+            
+            // 更新数据行
+            bodyRows.forEach(row => {
+                Object.keys(columnMapping).forEach(key => {
+                    const columnIndex = columnMapping[key];
+                    const cell = row.children[columnIndex];
+                    if (cell) {
+                        cell.style.display = config[key] ? '' : 'none';
+                    }
+                });
+            });
+            
+            // 关闭模态框
+            const modal = bootstrap.Modal.getInstance(document.getElementById('batchColumnConfigModal'));
+            modal.hide();
+            
+            // 显示成功提示
+            showToast('批次列配置已应用', 'success');
+        }
+        
+        // 订单商品信息列配置功能
+        function configureOrderColumns() {
+            // 加载当前配置状态
+            loadOrderColumnConfig();
+        }
+        
+        // 加载订单商品信息列配置
+        function loadOrderColumnConfig() {
+            const savedConfig = localStorage.getItem('orderColumnConfig');
+            if (savedConfig) {
+                const config = JSON.parse(savedConfig);
+                document.querySelectorAll('.order-column-checkbox').forEach(checkbox => {
+                    if (config.hasOwnProperty(checkbox.value)) {
+                        checkbox.checked = config[checkbox.value];
+                    }
+                });
+            }
+        }
+        
+        // 重置订单商品信息列配置
+        function resetOrderColumnConfig() {
+            document.querySelectorAll('.order-column-checkbox').forEach(checkbox => {
+                checkbox.checked = true;
+            });
+        }
+        
+        // 应用订单商品信息列配置
+        function applyOrderColumnConfig() {
+            const config = {};
+            
+            document.querySelectorAll('.order-column-checkbox').forEach(checkbox => {
+                config[checkbox.value] = checkbox.checked;
+            });
+            
+            // 保存配置到本地存储
+            localStorage.setItem('orderColumnConfig', JSON.stringify(config));
+            
+            // 关闭模态框
+            const modal = bootstrap.Modal.getInstance(document.getElementById('orderColumnConfigModal'));
+            modal.hide();
+            
+            // 显示成功提示
+            showToast('订单商品信息列配置已应用', 'success');
+            
+            // 注意：订单商品信息表格是动态生成的，配置会在下次展开批次详情时生效
+        }
+        
+        // 显示Toast提示
+        function showToast(message, type = 'info') {
+            // 创建toast容器（如果不存在）
+            let toastContainer = document.querySelector('.toast-container');
+            if (!toastContainer) {
+                toastContainer = document.createElement('div');
+                toastContainer.className = 'toast-container position-fixed top-0 end-0 p-3';
+                toastContainer.style.zIndex = '9999';
+                document.body.appendChild(toastContainer);
+            }
+            
+            // 创建toast元素
+            const toastId = 'toast-' + Date.now();
+            const toastHtml = `
+                <div id="${toastId}" class="toast align-items-center text-bg-${type === 'success' ? 'success' : 'info'} border-0" role="alert" aria-live="assertive" aria-atomic="true">
+                    <div class="d-flex">
+                        <div class="toast-body">
+                            <i class="bi bi-${type === 'success' ? 'check-circle' : 'info-circle'} me-2"></i>${message}
+                        </div>
+                        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                    </div>
+                </div>
+            `;
+            
+            toastContainer.insertAdjacentHTML('beforeend', toastHtml);
+            
+            // 显示toast
+            const toastElement = document.getElementById(toastId);
+            const toast = new bootstrap.Toast(toastElement, {
+                autohide: true,
+                delay: 3000
+            });
+            toast.show();
+            
+            // 自动移除toast元素
+            toastElement.addEventListener('hidden.bs.toast', function() {
+                toastElement.remove();
+            });
+        }
+        
+        // 页面加载时应用已保存的批次列配置
+        document.addEventListener('DOMContentLoaded', function() {
+            // 延迟应用配置，确保表格已渲染
+            setTimeout(() => {
+                const savedConfig = localStorage.getItem('batchColumnConfig');
+                if (savedConfig) {
+                    const config = JSON.parse(savedConfig);
+                    const columnMapping = {
+                        'batch-number': 2,
+                        'customer-name': 3,
+                        'order-count': 4,
+                        'mku-count': 5,
+                        'total-amount': 6,
+                        'rmb-amount': 7,
+                        'customs-declaration': 8,
+                        'customs-status': 9,
+                        'consignee': 10,
+                        'consignee-phone': 11,
+                        'consignee-address': 12,
+                        'creator': 13,
+                        'create-time': 14,
+                        'status': 15,
+                        'actions': 16
+                    };
+                    
+                    const table = document.querySelector('.table');
+                    if (table) {
+                        const headerRow = table.querySelector('thead tr');
+                        const bodyRows = table.querySelectorAll('tbody tr[data-batch-id]');
+                        
+                        // 应用到表头
+                        Object.keys(columnMapping).forEach(key => {
+                            if (config.hasOwnProperty(key) && !config[key]) {
+                                const columnIndex = columnMapping[key];
+                                const headerCell = headerRow.children[columnIndex];
+                                if (headerCell) {
+                                    headerCell.style.display = 'none';
+                                }
+                            }
+                        });
+                        
+                        // 应用到数据行
+                        bodyRows.forEach(row => {
+                            Object.keys(columnMapping).forEach(key => {
+                                if (config.hasOwnProperty(key) && !config[key]) {
+                                    const columnIndex = columnMapping[key];
+                                    const cell = row.children[columnIndex];
+                                    if (cell) {
+                                        cell.style.display = 'none';
+                                    }
+                                }
+                            });
+                        });
+                    }
+                }
+            }, 500);
         });
     </script>
 </body>
