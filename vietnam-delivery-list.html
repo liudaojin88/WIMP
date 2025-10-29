@@ -18,7 +18,8 @@
             top: 0;
             left: 0;
             height: 100vh;
-            width: 280px;
+            width: 15%;
+            min-width: 200px;
             background: linear-gradient(180deg, #667eea 0%, #764ba2 100%);
             color: white;
             z-index: 1000;
@@ -27,7 +28,8 @@
         }
         
         .sidebar.collapsed {
-            width: 80px;
+            width: 60px;
+            min-width: 60px;
         }
         
         .sidebar-header {
@@ -110,13 +112,13 @@
         }
         
         .main-content {
-            margin-left: 280px;
+            margin-left: 15%;
             min-height: 100vh;
             transition: all 0.3s ease;
         }
         
         .main-content.expanded {
-            margin-left: 80px;
+            margin-left: 60px;
         }
         
         .top-navbar {
@@ -453,7 +455,32 @@
             font-weight: 600;
         }
         
+        /* 响应式设计 - 支持15%宽度侧边栏 */
+        @media (max-width: 1200px) {
+            .sidebar {
+                width: 250px;
+                min-width: 250px;
+            }
+            .main-content {
+                margin-left: 250px;
+            }
+        }
+        
         @media (max-width: 768px) {
+            .sidebar {
+                width: 100%;
+                height: auto;
+                position: relative;
+            }
+            
+            .main-content {
+                margin-left: 0;
+            }
+            
+            .content-area {
+                padding: 15px;
+            }
+            
             .status-filter-cards {
                 justify-content: flex-start;
                 gap: 4px;
@@ -3016,6 +3043,11 @@
                 }
             }, 500);
         });
+    // 查看批次详情
+    function viewBatchDetails(batchId) {
+        // 跳转到框架页面，并传递要加载的页面和批次ID参数
+        window.location.href = `layout.html?page=vietnam-batch-detail-content.html&batchId=${batchId}`;
+    }
     </script>
 </body>
 </html>

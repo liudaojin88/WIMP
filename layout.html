@@ -244,22 +244,61 @@
         
         // 加载页面到iframe
         function loadPage(url) {
-            document.getElementById('contentFrame').src = url;
+            // 获取所有URL参数
+            const urlParams = new URLSearchParams(window.location.search);
+            let params = '';
+            
+            // 排除page参数，将其他参数传递给加载的页面
+            for (const [key, value] of urlParams.entries()) {
+                if (key !== 'page') {
+                    params += params ? '&' : '?';
+                    params += `${key}=${value}`;
+                }
+            }
+            
+            // 设置iframe的src，包含参数
+            document.getElementById('contentFrame').src = url + params;
             
             // 更新导航菜单的活动状态
             const navLinks = document.querySelectorAll('.nav-link');
             navLinks.forEach(link => {
                 link.classList.remove('active');
-                if (link.getAttribute('onclick').includes(url)) {
+                if (link.getAttribute('onclick') && link.getAttribute('onclick').includes(url)) {
                     link.classList.add('active');
                 }
             });
         }
         
+        // 从URL获取参数
+        function getUrlParameter(name) {
+            name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
+            const regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
+            const results = regex.exec(location.search);
+            return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
+        }
+        
         // 初始化页面
         document.addEventListener('DOMContentLoaded', function() {
-            // 默认加载控制台页面
-            loadPage('dashboard.html');
+            // 获取要加载的页面参数
+            const page = getUrlParameter('page');
+            
+            if (page) {
+                // 如果有指定页面参数，则加载指定页面
+                loadPage(page);
+                
+                // 更新导航菜单的活动状态
+                const navLinks = document.querySelectorAll('.nav-link');
+                navLinks.forEach(link => {
+                    if (link.getAttribute('onclick') && link.getAttribute('onclick').includes(page)) {
+                        link.classList.add('active');
+                    } else {
+                        link.classList.remove('active');
+                    }
+                });
+            } else {
+                // 默认加载控制台页面
+                loadPage('dashboard.html');
+            }
         });
     </script>
 </body>
