@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>运输批次详情 - 越南末端派送管理系统</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Microsoft YaHei', Arial, sans-serif;
+            background-color: #f8f9fa;
+            margin: 0;
+            padding: 0;
+            font-size: 0.9rem;
+        }
+        
+        .top-navbar {
+            background: white;
+            padding: 15px 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .content-area {
+            padding: 25px;
+        }
+        
+        .page-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px 30px;
+            margin: -25px -25px 25px -25px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .page-title {
+            font-size: 1.8rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        
+        .page-subtitle {
+            font-size: 1rem;
+            opacity: 0.9;
+            margin-bottom: 0;
+        }
+        
+        .back-btn {
+            background: rgba(255,255,255,0.2);
+            border: 1px solid rgba(255,255,255,0.3);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+        
+        .back-btn:hover {
+            background: rgba(255,255,255,0.3);
+            color: white;
+        }
+        
+        /* 三个主要区域样式 */
+        .detail-section {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.08);
+        }
+        
+        .section-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e9ecef;
+            display: flex;
+            align-items: center;
+        }
+        
+        .section-title i {
+            margin-right: 10px;
+            color: #667eea;
+        }
+        
+        /* 基本信息区域 */
+        .basic-info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        
+        .info-item {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .info-label {
+            font-size: 0.85rem;
+            color: #666;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+        
+        .info-value {
+            font-size: 0.95rem;
+            color: #333;
+            font-weight: 500;
+            padding: 8px 12px;
+            background: #f8f9fa;
+            border-radius: 6px;
+            border-left: 3px solid #667eea;
+        }
+        
+        /* 商品信息表格 */
+        .product-table-container {
+            overflow-x: auto;
+        }
+        
+        .product-table {
+            width: 100%;
+            font-size: 0.85rem;
+            min-width: 1600px;
+        }
+        
+        .product-table th {
+            background: #f8f9fa;
+            font-weight: 600;
+            color: #495057;
+            border: 1px solid #dee2e6;
+            padding: 12px 8px;
+            text-align: center;
+            white-space: nowrap;
+            vertical-align: middle;
+        }
+        
+        .product-table td {
+            padding: 10px 8px;
+            border: 1px solid #dee2e6;
+            vertical-align: middle;
+        }
+        
+        .product-table tbody tr:hover {
+            background-color: #f8f9fa;
+        }
+        
+        .currency-amount {
+            font-weight: 500;
+            color: #28a745;
+            text-align: right;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .product-name-cn {
+            font-weight: 500;
+            color: #333;
+            margin-bottom: 3px;
+        }
+        
+        .product-name-vn {
+            font-style: italic;
+            color: #666;
+            font-size: 0.8rem;
+        }
+        
+        .product-unit {
+            font-size: 0.85rem;
+            color: #333;
+        }
+        
+        .text-center {
+            text-align: center;
+        }
+        
+        .text-right {
+            text-align: right;
+        }
+        
+        /* 运输进度区域 - 横向简单展示 */
+        .progress-horizontal {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+        
+        .progress-card {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 15px;
+            border-left: 4px solid #667eea;
+            transition: all 0.3s ease;
+        }
+        
+        .progress-card:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        
+        .progress-card.completed {
+            border-left-color: #28a745;
+            background: #f8fff9;
+        }
+        
+        .progress-card.current {
+            border-left-color: #ffc107;
+            background: #fffcf0;
+        }
+        
+        .progress-card.pending {
+            border-left-color: #6c757d;
+            background: #f8f9fa;
+        }
+        
+        .progress-status {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+            font-size: 1rem;
+        }
+        
+        .progress-operator {
+            font-size: 0.9rem;
+            color: #666;
+            margin-bottom: 5px;
+        }
+        
+        .progress-time {
+            font-size: 0.85rem;
+            color: #495057;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+        
+        .progress-remark {
+            font-size: 0.85rem;
+            color: #666;
+            font-style: italic;
+        }
+        
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .content-area {
+                padding: 15px;
+            }
+            
+            .page-header {
+                margin: -15px -15px 15px -15px;
+                padding: 20px;
+            }
+            
+            .basic-info-grid {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+            
+            .progress-horizontal {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+            
+            .product-table {
+                font-size: 0.8rem;
+            }
+            
+            .product-table th,
+            .product-table td {
+                padding: 8px 6px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="top-navbar">
+        <div class="navbar-title">
+            <h4 class="mb-0">运输批次详情</h4>
+        </div>
+        <div class="navbar-actions">
+            <a href="javascript:parent.loadPage('vietnam-delivery-list.html')" class="back-btn">
+                <i class="bi bi-arrow-left me-1"></i>返回列表
+            </a>
+        </div>
+    </div>
+    
+    <div class="content-area">
+        <div class="page-header">
+            <div class="page-title">运输批次详情</div>
+            <div class="page-subtitle">批次号：VN2024102801 | 状态：运输中</div>
+        </div>
+        
+        <!-- 基本信息区域 -->
+        <div class="detail-section">
+            <div class="section-title">
+                <i class="bi bi-info-circle-fill"></i>
+                基本信息
+            </div>
+
+            <div class="basic-info-grid">
+                <div class="info-item">
+                    <div class="info-label">批次号</div>
+                    <div class="info-value">VN2024102801</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">客户信息</div>
+                    <div class="info-value">深圳市科技有限公司</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">企配中心</div>
+                    <div class="info-value">深圳前海仓</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">运输方式</div>
+                    <div class="info-value">陆运</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">是否报关</div>
+                    <div class="info-value">是</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">客户运单号</div>
+                    <div class="info-value">CUS2024102801</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">承运商</div>
+                    <div class="info-value">越南快运物流</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">承运商单号</div>
+                    <div class="info-value">VNE2024102801</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">创建时间</div>
+                    <div class="info-value">2024-10-28 14:30:25</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 商品信息区域 -->
+        <div class="detail-section">
+            <div class="section-title">
+                <i class="bi bi-box-fill"></i>
+                商品信息
+            </div>
+            <div class="product-table-container">
+                <table class="table product-table">
+                    <thead>
+                        <tr>
+                            <th>客户名称</th>
+                            <th>订单编号</th>
+                            <th>MKU</th>
+                            <th>SKU</th>
+                            <th>三方订单号</th>
+                            <th>客户物料号</th>
+                            <th>商品中文名称</th>
+                            <th>商品越南语名称</th>
+                            <th>商品件数</th>
+                            <th>商品含税单价</th>
+                            <th>商品含税总金额</th>
+                            <th>商品原产国</th>
+                            <th>商品原产地</th>
+                            <th>商品销售单位</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>深圳市科技有限公司</td>
+                            <td class="text-center">ORD2024102801</td>
+                            <td class="text-center">MKU001</td>
+                            <td class="text-center">SKU-PHONE-001</td>
+                            <td class="text-center">3P2024102801</td>
+                            <td class="text-center">MAT-001-2024</td>
+                            <td>
+                                <div class="product-name-cn">智能手机 iPhone 15</div>
+                                <div class="product-name-vn">Điện thoại thông minh iPhone 15</div>
+                            </td>
+                            <td>Điện thoại thông minh iPhone 15</td>
+                            <td class="text-center">100</td>
+                            <td class="text-right currency-amount">฿3,611.2</td>
+                            <td class="text-right currency-amount">฿361,120.0</td>
+                            <td class="text-center">中国</td>
+                            <td class="text-center">深圳</td>
+                            <td class="text-center">件/Chiếc</td>
+                        </tr>
+                        <tr>
+                            <td>深圳市科技有限公司</td>
+                            <td class="text-center">ORD2024102802</td>
+                            <td class="text-center">MKU002</td>
+                            <td class="text-center">SKU-WATCH-002</td>
+                            <td class="text-center">3P2024102802</td>
+                            <td class="text-center">MAT-002-2024</td>
+                            <td>
+                                <div class="product-name-cn">智能手表 Apple Watch</div>
+                                <div class="product-name-vn">Đồng hồ thông minh Apple Watch</div>
+                            </td>
+                            <td>Đồng hồ thông minh Apple Watch</td>
+                            <td class="text-center">50</td>
+                            <td class="text-right currency-amount">฿2,450.0</td>
+                            <td class="text-right currency-amount">฿122,500.0</td>
+                            <td class="text-center">中国</td>
+                            <td class="text-center">东莞</td>
+                            <td class="text-center">个/Cái</td>
+                        </tr>
+                        <tr>
+                            <td>深圳市科技有限公司</td>
+                            <td class="text-center">ORD2024102803</td>
+                            <td class="text-center">MKU003</td>
+                            <td class="text-center">SKU-EARPOD-003</td>
+                            <td class="text-center">3P2024102803</td>
+                            <td class="text-center">MAT-003-2024</td>
+                            <td>
+                                <div class="product-name-cn">无线耳机 AirPods Pro</div>
+                                <div class="product-name-vn">Tai nghe không dây AirPods Pro</div>
+                            </td>
+                            <td>Tai nghe không dây AirPods Pro</td>
+                            <td class="text-center">200</td>
+                            <td class="text-right currency-amount">฿1,890.5</td>
+                            <td class="text-right currency-amount">฿378,100.0</td>
+                            <td class="text-center">中国</td>
+                            <td class="text-center">广州</td>
+                            <td class="text-center">副/Bộ</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <!-- 运输进度区域 - 横向简单展示 -->
+        <div class="detail-section">
+            <div class="section-title">
+                <i class="bi bi-truck"></i>
+                运输进度
+            </div>
+            <div class="progress-horizontal">
+                <div class="progress-card completed">
+                    <div class="progress-status">
+                        <i class="bi bi-check-circle-fill me-2"></i>已装车
+                    </div>
+                    <div class="progress-operator">操作人: 张三</div>
+                    <div class="progress-time">2024-10-28 09:30:15</div>
+                    <div class="progress-remark">已完成装车，货物已清点完毕，准备发往海关</div>
+                </div>
+                
+                <div class="progress-card completed">
+                    <div class="progress-status">
+                        <i class="bi bi-check-circle-fill me-2"></i>海关清关
+                    </div>
+                    <div class="progress-operator">操作人: 海关系统</div>
+                    <div class="progress-time">2024-10-28 14:15:42</div>
+                    <div class="progress-remark">已完成清关手续，货物已放行</div>
+                </div>
+                
+                <div class="progress-card current">
+                    <div class="progress-status">
+                        <i class="bi bi-arrow-right-circle-fill me-2"></i>运输中
+                    </div>
+                    <div class="progress-operator">操作人: 李四</div>
+                    <div class="progress-time">2024-10-29 08:00:33</div>
+                    <div class="progress-remark">货物已进入越南境内，预计今日18:00到达河内分拨中心</div>
+                </div>
+                
+                <div class="progress-card pending">
+                    <div class="progress-status">
+                        <i class="bi bi-clock-fill me-2"></i>待派送
+                    </div>
+                    <div class="progress-operator">操作人: 王五</div>
+                    <div class="progress-time">预计: 2024-10-30 09:00:00</div>
+                    <div class="progress-remark">等待分拨到各末端网点</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // 从URL获取参数
+        function getUrlParameter(name) {
+            name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
+            const regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
+            const results = regex.exec(location.search);
+            return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
+        }
+        
+        // 初始化页面
+        document.addEventListener('DOMContentLoaded', function() {
+            // 获取批次ID参数
+            const batchId = getUrlParameter('batchId');
+            
+            // 如果有批次ID参数，则更新页面标题和内容
+            if (batchId) {
+                // 更新页面标题
+                document.querySelector('.page-subtitle').textContent = `批次号：${batchId} | 状态：运输中`;
+                
+                // 更新基本信息区域的批次号
+                const batchNumberElement = document.querySelector('.basic-info-grid .info-item:first-child .info-value');
+                if (batchNumberElement) {
+                    batchNumberElement.textContent = batchId;
+                }
+                
+                // 这里可以添加更多逻辑，例如根据批次ID从服务器获取详细数据
+                // 在实际应用中，这里应该有一个AJAX请求来获取批次详情数据
+                console.log(`加载批次 ${batchId} 的详细信息`);
+            }
+        });
+    </script>
+</body>
+</html>
