@@ -702,38 +702,38 @@
             
             <form id="searchForm">
                 <div class="row g-3">
-                    <!-- 第一行 -->
+                    <!-- 第一行：订单相关查询 -->
                     <div class="col-md-4">
                         <label for="orderNumbers" class="form-label">订单编号</label>
-                        <textarea 
-                            class="form-control" 
-                            id="orderNumbers" 
-                            rows="3" 
+                        <textarea
+                            class="form-control"
+                            id="orderNumbers"
+                            rows="3"
                             placeholder="输入国际订单号，支持多个查询，回车隔开，不支持模糊查询"
                         ></textarea>
                     </div>
                     
                     <div class="col-md-4">
                         <label for="parentOrderNumbers" class="form-label">父单号</label>
-                        <textarea 
-                            class="form-control" 
-                            id="parentOrderNumbers" 
-                            rows="3" 
+                        <textarea
+                            class="form-control"
+                            id="parentOrderNumbers"
+                            rows="3"
                             placeholder="输入国际订单父单号，支持多个查询，回车隔开，不支持模糊查询"
                         ></textarea>
                     </div>
                     
                     <div class="col-md-4">
                         <label for="thirdPartyOrderNumbers" class="form-label">第三方订单号</label>
-                        <textarea 
-                            class="form-control" 
-                            id="thirdPartyOrderNumbers" 
-                            rows="3" 
+                        <textarea
+                            class="form-control"
+                            id="thirdPartyOrderNumbers"
+                            rows="3"
                             placeholder="输入第三方订单号，支持多个查询，回车隔开，不支持模糊查询"
                         ></textarea>
                     </div>
                     
-                    <!-- 第二行 -->
+                    <!-- 第二行：批次和运输信息 -->
                     <div class="col-md-3">
                         <label for="localBatchNumber" class="form-label">本地发运批次</label>
                         <input type="text" class="form-control" id="localBatchNumber" placeholder="输入单个批次号，支持右模糊查询">
@@ -758,12 +758,7 @@
                         <input type="text" class="form-control" id="distributionCenter" placeholder="输入企配中心名称，支持模糊查询">
                     </div>
                     
-                    <!-- 第三行 -->
-                    <div class="col-md-3">
-                        <label for="warehouseName" class="form-label">备货仓名称</label>
-                        <input type="text" class="form-control" id="warehouseName" placeholder="输入备货仓名称，支持模糊查询">
-                    </div>
-                    
+                    <!-- 第三行：产品和报关信息 -->
                     <div class="col-md-3">
                         <label for="customsDeclaration" class="form-label">是否报关</label>
                         <select class="form-select" id="customsDeclaration">
@@ -783,37 +778,35 @@
                         <input type="text" class="form-control" id="internationalSku" placeholder="输入国际SKU，支持多个查询，回车隔开">
                     </div>
                     
-                    <!-- 第四行 -->
-                    <div class="col-md-4">
+                    <div class="col-md-3">
                         <label for="customerMaterialCode" class="form-label">客户物料号</label>
                         <input type="text" class="form-control" id="customerMaterialCode" placeholder="输入客户物料号，支持多个查询，回车隔开">
                     </div>
                     
-                    <div class="col-md-4">
+                    <!-- 第四行：时间范围查询 -->
+                    <div class="col-md-6">
                         <label class="form-label">订单确认时间</label>
                         <div class="row g-2">
                             <div class="col-6">
-                                <input type="datetime-local" class="form-control" id="orderConfirmStartTime">
+                                <input type="datetime-local" class="form-control" id="orderConfirmStartTime" placeholder="开始时间">
                             </div>
                             <div class="col-6">
-                                <input type="datetime-local" class="form-control" id="orderConfirmEndTime">
+                                <input type="datetime-local" class="form-control" id="orderConfirmEndTime" placeholder="结束时间">
                             </div>
                         </div>
                     </div>
                     
-                    <div class="col-md-4">
+                    <div class="col-md-6">
                         <label class="form-label">企配收货时间</label>
                         <div class="row g-2">
                             <div class="col-6">
-                                <input type="datetime-local" class="form-control" id="distributionReceiveStartTime">
+                                <input type="datetime-local" class="form-control" id="distributionReceiveStartTime" placeholder="开始时间">
                             </div>
                             <div class="col-6">
-                                <input type="datetime-local" class="form-control" id="distributionReceiveEndTime">
+                                <input type="datetime-local" class="form-control" id="distributionReceiveEndTime" placeholder="结束时间">
                             </div>
                         </div>
                     </div>
-                    
-                    
                     
                     <!-- 查询按钮 -->
                     <div class="col-12 d-flex justify-content-end">
@@ -905,7 +898,6 @@
                             <th>订单数量</th>
                             <th>MKU数量</th>
                             <th>订单金额（币种）</th>
-                            <th>订单金额（人民币）</th>
                             <th>是否报关</th>
                             <th>报关状态</th>
                             <th>收件人</th>
@@ -936,7 +928,6 @@
                                 <div class="currency-amount">฿ 125,680.50</div>
                                 <div class="currency-amount">$ 3,245.20</div>
                             </td>
-                            <td class="currency-amount">¥ 23,456.78</td>
                             <td><span class="badge bg-success">是</span></td>
                             <td><span class="badge bg-warning">待报关</span></td>
                             <td>阮文明</td>
@@ -977,7 +968,6 @@
                             <td>
                                 <div class="currency-amount">฿ 98,750.30</div>
                             </td>
-                            <td class="currency-amount">¥ 18,234.56</td>
                             <td><span class="badge bg-danger">否</span></td>
                             <td><span class="badge bg-secondary">无需报关</span></td>
                             <td>陈氏兰</td>
@@ -1016,7 +1006,6 @@
                                 <div class="currency-amount">฿ 156,890.75</div>
                                 <div class="currency-amount">$ 4,125.60</div>
                             </td>
-                            <td class="currency-amount">¥ 29,876.45</td>
                             <td><span class="badge bg-success">是</span></td>
                             <td><span class="badge bg-success">已报关</span></td>
                             <td>黎文强</td>
@@ -1052,7 +1041,6 @@
                                 <div class="currency-amount">฿ 234,567.80</div>
                                 <div class="currency-amount">$ 6,789.12</div>
                             </td>
-                            <td class="currency-amount">¥ 45,123.67</td>
                             <td><span class="badge bg-success">是</span></td>
                             <td><span class="badge bg-info">报关中</span></td>
                             <td>黎文强</td>
@@ -1087,7 +1075,6 @@
                             <td>
                                 <div class="currency-amount">฿ 87,654.32</div>
                             </td>
-                            <td class="currency-amount">¥ 16,234.89</td>
                             <td><span class="badge bg-danger">否</span></td>
                             <td><span class="badge bg-secondary">无需报关</span></td>
                             <td>范氏花</td>
@@ -1126,7 +1113,6 @@
                                 <div class="currency-amount">฿ 198,765.43</div>
                                 <div class="currency-amount">$ 5,234.78</div>
                             </td>
-                            <td class="currency-amount">¥ 37,890.12</td>
                             <td><span class="status-badge status-new">新建</span></td>
                             <td>
                                 <button class="btn btn-sm btn-outline-primary me-1" onclick="editBatch('JDi-DNAG-241017-02')">
@@ -1160,7 +1146,6 @@
                             <td>
                                 <div class="currency-amount">฿ 143,210.98</div>
                             </td>
-                            <td class="currency-amount">¥ 26,543.21</td>
                             <td><span class="status-badge status-confirmed">已确认</span></td>
                             <td>
                                 <button class="btn btn-sm btn-outline-warning me-1" onclick="sendToDistribution('JDi-DNAG-241017-02')">
@@ -1192,7 +1177,6 @@
                                 <div class="currency-amount">฿ 76,543.21</div>
                                 <div class="currency-amount">$ 2,134.56</div>
                             </td>
-                            <td class="currency-amount">¥ 14,567.89</td>
                             <td><span class="badge bg-success">是</span></td>
                             <td><span class="badge bg-success">已报关</span></td>
                             <td>邓文海</td>
@@ -1228,7 +1212,6 @@
                                 <div class="currency-amount">฿ 212,345.67</div>
                                 <div class="currency-amount">$ 5,678.90</div>
                             </td>
-                            <td class="currency-amount">¥ 40,234.56</td>
                             <td><span class="badge bg-success">是</span></td>
                             <td><span class="badge bg-info">报关中</span></td>
                             <td>潘氏兰</td>
