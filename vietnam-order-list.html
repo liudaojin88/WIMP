@@ -18,7 +18,8 @@
             top: 0;
             left: 0;
             height: 100vh;
-            width: 280px;
+            width: 15%;
+            min-width: 200px;
             background: linear-gradient(180deg, #667eea 0%, #764ba2 100%);
             color: white;
             z-index: 1000;
@@ -27,7 +28,8 @@
         }
         
         .sidebar.collapsed {
-            width: 80px;
+            width: 60px;
+            min-width: 60px;
         }
         
         .sidebar-header {
@@ -110,13 +112,13 @@
         }
         
         .main-content {
-            margin-left: 280px;
+            margin-left: 15%;
             min-height: 100vh;
             transition: all 0.3s ease;
         }
         
         .main-content.expanded {
-            margin-left: 80px;
+            margin-left: 60px;
         }
         
         .top-navbar {
@@ -1125,16 +1127,19 @@
             }
         }
 
-        // 打开二段发运弹框
+        // 二段发运验证函数
         function openShippingModal() {
-            const checkedBoxes = document.querySelectorAll('.order-checkbox:checked');
-            if (checkedBoxes.length === 0) {
-                showMessage('请先选择要发运的订单', 'warning');
+            const selectedCheckboxes = document.querySelectorAll('.order-checkbox:checked');
+            
+            if (selectedCheckboxes.length === 0) {
+                showToast('请先选择要发运的订单', 'warning');
                 return;
             }
+
+            const selectedOrderIds = Array.from(selectedCheckboxes).map(checkbox => checkbox.value);
             
-            const modal = new bootstrap.Modal(document.getElementById('shippingModal'));
-            modal.show();
+            // 直接显示订单商品选择模态框，跳过校验
+            showOrderProductSelectionModal(selectedOrderIds);
         }
 
         // 选择批次操作方式
@@ -1618,6 +1623,1351 @@
         
         mediaQuery.addListener(handleMobileChange);
         handleMobileChange(mediaQuery);
+
+        // ========== 二段发运功能相关函数 ==========
+
+        // 显示Toast提示
+        function showToast(message, type = 'info') {
+            // 创建Toast容器（如果不存在）
+            let toastContainer = document.getElementById('toast-container');
+            if (!toastContainer) {
+                toastContainer = document.createElement('div');
+                toastContainer.id = 'toast-container';
+                toastContainer.className = 'toast-container position-fixed top-0 end-0 p-3';
+                toastContainer.style.zIndex = '9999';
+                document.body.appendChild(toastContainer);
+            }
+
+            // 创建Toast元素
+            const toastId = 'toast-' + Date.now();
+            const toastHtml = `
+                <div id="${toastId}" class="toast align-items-center text-bg-${type === 'warning' ? 'warning' : type === 'success' ? 'success' : 'primary'} border-0" role="alert" aria-live="assertive" aria-atomic="true">
+                    <div class="d-flex">
+                        <div class="toast-body">
+                            ${message}
+                        </div>
+                        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                    </div>
+                </div>
+            `;
+            
+            toastContainer.insertAdjacentHTML('beforeend', toastHtml);
+            
+            // 显示Toast
+            const toastElement = document.getElementById(toastId);
+            const toast = new bootstrap.Toast(toastElement, { delay: 3000 });
+            toast.show();
+            
+            // Toast隐藏后移除元素
+            toastElement.addEventListener('hidden.bs.toast', function() {
+                this.remove();
+            });
+        }
+
+        // 显示订单商品选择模态框
+        function showOrderProductSelectionModal(orderIds) {
+            // 生成模拟的订单商品数据
+            const mockOrderProducts = generateMockOrderProductsFromOrders(orderIds);
+            
+            const modalHtml = `
+                <div class="modal fade" id="orderProductSelectionModal" tabindex="-1" aria-labelledby="orderProductSelectionModalLabel" aria-hidden="true">
+                    <div class="modal-dialog modal-xl">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="orderProductSelectionModalLabel">
+                                    <i class="bi bi-list-check me-2"></i>选择订单商品信息
+                                </h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <!-- 筛选条件区域 -->
+                                <div class="filter-section mb-4">
+                                    <h6><i class="bi bi-funnel me-2"></i>筛选条件</h6>
+                                    <div class="row">
+                                        <div class="col-md-4">
+                                            <label class="form-label">国际订单号</label>
+                                            <input type="text" class="form-control" id="orderNumberFilter" placeholder="支持多个，用逗号分隔">
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label class="form-label">MKU</label>
+                                            <input type="text" class="form-control" id="mkuFilter" placeholder="支持多个，用逗号分隔">
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label class="form-label">国际SKU</label>
+                                            <input type="text" class="form-control" id="skuFilter" placeholder="支持多个，用逗号分隔">
+                                        </div>
+                                    </div>
+                                    <div class="row mt-3">
+                                        <div class="col-12">
+                                            <button type="button" class="btn btn-primary btn-sm" onclick="applyOrderProductFilter()">
+                                                <i class="bi bi-search me-1"></i>筛选
+                                            </button>
+                                            <button type="button" class="btn btn-outline-secondary btn-sm ms-2" onclick="clearOrderProductFilter()">
+                                                <i class="bi bi-x-circle me-1"></i>清除
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- 订单商品信息列表 -->
+                                <div class="order-products-section">
+                                    <div class="d-flex justify-content-between align-items-center mb-3">
+                                        <h6><i class="bi bi-table me-2"></i>订单商品信息列表</h6>
+                                        <div>
+                                            <input type="checkbox" class="form-check-input me-2" id="selectAllProducts" onchange="toggleSelectAllProducts()" checked>
+                                            <label for="selectAllProducts" class="form-check-label">全选</label>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- 超过限制提示 -->
+                                    <div id="limitWarning" class="alert alert-warning" style="display: none;">
+                                        <i class="bi bi-exclamation-triangle me-2"></i>
+                                        <span id="limitWarningText"></span>
+                                    </div>
+
+                                    <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
+                                        <table class="table table-hover table-sm">
+                                            <thead class="table-light sticky-top">
+                                                <tr>
+                                                    <th width="50">选择</th>
+                                                    <th>国际订单号</th>
+                                                    <th>客户名称</th>
+                                                    <th>订单类型</th>
+                                                    <th>MKU</th>
+                                                    <th>国际SKU</th>
+                                                    <th>单价</th>
+                                                    <th>数量</th>
+                                                    <th>商品行金额</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="orderProductsTableBody">
+                                                <!-- 动态生成内容 -->
+                                            </tbody>
+                                        </table>
+                                    </div>
+
+                                    <!-- 合计信息 -->
+                                    <div class="summary-section mt-3 p-3 bg-light rounded">
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <strong>MKU数量合计：</strong>
+                                                <span id="totalMkuQuantity" class="text-primary">0</span>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <strong>商品行金额合计：</strong>
+                                                <span id="totalAmount" class="text-success">¥ 0.00</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                    <i class="bi bi-arrow-left me-2"></i>返回
+                                </button>
+                                <button type="button" class="btn btn-primary" onclick="proceedToNextStep()">
+                                    <i class="bi bi-arrow-right me-2"></i>下一步
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // 移除已存在的模态框
+            const existingModal = document.getElementById('orderProductSelectionModal');
+            if (existingModal) {
+                existingModal.remove();
+            }
+            
+            // 添加新模态框到body
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
+            
+            // 初始化订单商品数据
+            window.currentOrderProducts = mockOrderProducts;
+            window.filteredOrderProducts = [...mockOrderProducts];
+            window.maxSelectableItems = 50; // 可配置的最大选择数量
+            
+            // 渲染订单商品列表
+            renderOrderProductsList();
+            
+            // 显示模态框
+            const modal = new bootstrap.Modal(document.getElementById('orderProductSelectionModal'));
+            modal.show();
+            
+            // 模态框关闭后移除
+            document.getElementById('orderProductSelectionModal').addEventListener('hidden.bs.modal', function() {
+                this.remove();
+            });
+        }
+
+        // 生成模拟订单商品数据（基于订单ID）
+        function generateMockOrderProductsFromOrders(orderIds) {
+            const products = [];
+            const orderTypes = ['跨境订单', '本地订单', '仓发订单'];
+            const customers = ['越南客户A', '越南客户B', '胡志明电子商务', '岘港进出口有限公司'];
+            const currencies = ['¥', '$', '฿'];
+            
+            orderIds.forEach((orderId, orderIndex) => {
+                // 每个订单生成10-20个商品
+                const productCount = Math.floor(Math.random() * 11) + 10;
+                
+                for (let i = 0; i < productCount; i++) {
+                    const quantity = Math.floor(Math.random() * 100) + 1;
+                    const unitPrice = (Math.random() * 500 + 50).toFixed(2);
+                    const currency = currencies[Math.floor(Math.random() * currencies.length)];
+                    const totalAmount = (parseFloat(unitPrice) * quantity).toFixed(2);
+                    
+                    products.push({
+                        id: `${orderId}-${i + 1}`,
+                        orderId: orderId,
+                        orderNumber: `ORD${orderIndex + 1}${String(i + 1).padStart(3, '0')}`,
+                        customerName: customers[Math.floor(Math.random() * customers.length)],
+                        orderType: orderTypes[Math.floor(Math.random() * orderTypes.length)],
+                        mku: `MKU${orderIndex + 1}${String(i + 1).padStart(3, '0')}`,
+                        sku: `SKU${orderIndex + 1}${String(i + 1).padStart(4, '0')}`,
+                        unitPrice: `${currency} ${unitPrice}`,
+                        quantity: quantity,
+                        totalAmount: `${currency} ${totalAmount}`,
+                        currency: currency,
+                        unitPriceValue: parseFloat(unitPrice),
+                        totalAmountValue: parseFloat(totalAmount),
+                        selected: true // 默认全选
+                    });
+                }
+            });
+            
+            return products;
+        }
+
+        // 渲染订单商品列表
+        function renderOrderProductsList() {
+            const tbody = document.getElementById('orderProductsTableBody');
+            if (!tbody || !window.filteredOrderProducts) return;
+            
+            tbody.innerHTML = '';
+            
+            window.filteredOrderProducts.forEach(product => {
+                const quantityClass = product.quantity > 50 ? 'text-danger fw-bold' : '';
+                const row = `
+                    <tr data-product-id="${product.id}">
+                        <td>
+                            <input type="checkbox" class="form-check-input product-checkbox"
+                                   value="${product.id}" ${product.selected ? 'checked' : ''}
+                                   onchange="toggleProductSelection('${product.id}')">
+                        </td>
+                        <td>${product.orderNumber}</td>
+                        <td>${product.customerName}</td>
+                        <td>${product.orderType}</td>
+                        <td>${product.mku}</td>
+                        <td>${product.sku}</td>
+                        <td>${product.unitPrice}</td>
+                        <td class="${quantityClass}">${product.quantity}</td>
+                        <td>${product.totalAmount}</td>
+                    </tr>
+                `;
+                tbody.insertAdjacentHTML('beforeend', row);
+            });
+            
+            // 更新合计信息
+            updateSummaryInfo();
+            
+            // 更新全选状态
+            updateSelectAllProductsState();
+            
+            // 检查选择数量限制
+            checkSelectionLimit();
+        }
+
+        // 切换产品选择状态
+        function toggleProductSelection(productId) {
+            const product = window.currentOrderProducts.find(p => p.id === productId);
+            if (product) {
+                product.selected = !product.selected;
+                
+                // 同步更新筛选后的数据
+                const filteredProduct = window.filteredOrderProducts.find(p => p.id === productId);
+                if (filteredProduct) {
+                    filteredProduct.selected = product.selected;
+                }
+                
+                updateSummaryInfo();
+                updateSelectAllProductsState();
+                checkSelectionLimit();
+            }
+        }
+
+        // 全选/取消全选产品
+        function toggleSelectAllProducts() {
+            const selectAllCheckbox = document.getElementById('selectAllProducts');
+            const isChecked = selectAllCheckbox.checked;
+            
+            // 更新当前筛选结果中的所有产品
+            window.filteredOrderProducts.forEach(product => {
+                product.selected = isChecked;
+                
+                // 同步更新原始数据
+                const originalProduct = window.currentOrderProducts.find(p => p.id === product.id);
+                if (originalProduct) {
+                    originalProduct.selected = isChecked;
+                }
+            });
+            
+            // 更新页面显示
+            const checkboxes = document.querySelectorAll('.product-checkbox');
+            checkboxes.forEach(checkbox => {
+                checkbox.checked = isChecked;
+            });
+            
+            updateSummaryInfo();
+            checkSelectionLimit();
+        }
+
+        // 更新全选状态
+        function updateSelectAllProductsState() {
+            const selectAllCheckbox = document.getElementById('selectAllProducts');
+            const visibleCheckboxes = document.querySelectorAll('.product-checkbox');
+            
+            if (visibleCheckboxes.length === 0) {
+                selectAllCheckbox.checked = false;
+                selectAllCheckbox.indeterminate = false;
+                return;
+            }
+            
+            const checkedCount = Array.from(visibleCheckboxes).filter(cb => cb.checked).length;
+            
+            if (checkedCount === 0) {
+                selectAllCheckbox.checked = false;
+                selectAllCheckbox.indeterminate = false;
+            } else if (checkedCount === visibleCheckboxes.length) {
+                selectAllCheckbox.checked = true;
+                selectAllCheckbox.indeterminate = false;
+            } else {
+                selectAllCheckbox.checked = false;
+                selectAllCheckbox.indeterminate = true;
+            }
+        }
+
+        // 更新合计信息
+        function updateSummaryInfo() {
+            const selectedProducts = window.currentOrderProducts.filter(p => p.selected);
+            
+            // 计算MKU数量合计
+            const totalMkuQuantity = selectedProducts.reduce((sum, product) => sum + product.quantity, 0);
+            
+            // 计算金额合计（按币种分组）
+            const amountByCurrency = {};
+            selectedProducts.forEach(product => {
+                if (!amountByCurrency[product.currency]) {
+                    amountByCurrency[product.currency] = 0;
+                }
+                amountByCurrency[product.currency] += product.totalAmountValue;
+            });
+            
+            // 更新显示
+            document.getElementById('totalMkuQuantity').textContent = totalMkuQuantity;
+            
+            const totalAmountText = Object.keys(amountByCurrency)
+                .map(currency => `${currency} ${amountByCurrency[currency].toFixed(2)}`)
+                .join(' / ');
+            document.getElementById('totalAmount').textContent = totalAmountText || '¥ 0.00';
+        }
+
+        // 检查选择数量限制
+        function checkSelectionLimit() {
+            const selectedCount = window.currentOrderProducts.filter(p => p.selected).length;
+            const limitWarning = document.getElementById('limitWarning');
+            const limitWarningText = document.getElementById('limitWarningText');
+            
+            if (selectedCount > window.maxSelectableItems) {
+                limitWarning.style.display = 'block';
+                limitWarningText.textContent = `已选择 ${selectedCount} 项，超过建议的 ${window.maxSelectableItems} 项限制。建议减少选择数量以获得更好的处理性能。`;
+            } else {
+                limitWarning.style.display = 'none';
+            }
+        }
+
+        // 应用筛选
+        function applyOrderProductFilter() {
+            const orderNumberFilter = document.getElementById('orderNumberFilter').value.trim();
+            const mkuFilter = document.getElementById('mkuFilter').value.trim();
+            const skuFilter = document.getElementById('skuFilter').value.trim();
+            
+            // 解析多个值（逗号分隔）
+            const orderNumbers = orderNumberFilter ? orderNumberFilter.split(',').map(s => s.trim().toLowerCase()) : [];
+            const mkus = mkuFilter ? mkuFilter.split(',').map(s => s.trim().toLowerCase()) : [];
+            const skus = skuFilter ? skuFilter.split(',').map(s => s.trim().toLowerCase()) : [];
+            
+            // 筛选数据
+            window.filteredOrderProducts = window.currentOrderProducts.filter(product => {
+                let match = true;
+                
+                // 订单号筛选
+                if (orderNumbers.length > 0) {
+                    match = match && orderNumbers.some(num => product.orderNumber.toLowerCase().includes(num));
+                }
+                
+                // MKU筛选
+                if (mkus.length > 0) {
+                    match = match && mkus.some(mku => product.mku.toLowerCase().includes(mku));
+                }
+                
+                // SKU筛选
+                if (skus.length > 0) {
+                    match = match && skus.some(sku => product.sku.toLowerCase().includes(sku));
+                }
+                
+                return match;
+            });
+            
+            // 重新渲染列表
+            renderOrderProductsList();
+        }
+
+        // 清除筛选
+        function clearOrderProductFilter() {
+            document.getElementById('orderNumberFilter').value = '';
+            document.getElementById('mkuFilter').value = '';
+            document.getElementById('skuFilter').value = '';
+            
+            // 恢复所有数据
+            window.filteredOrderProducts = [...window.currentOrderProducts];
+            
+            // 重新渲染列表
+            renderOrderProductsList();
+        }
+
+        // 进入下一步
+        function proceedToNextStep() {
+            const selectedProducts = window.currentOrderProducts.filter(p => p.selected);
+            
+            if (selectedProducts.length === 0) {
+                showToast('请至少选择一个订单商品', 'warning');
+                return;
+            }
+            
+            // 关闭当前模态框
+            const modal = bootstrap.Modal.getInstance(document.getElementById('orderProductSelectionModal'));
+            modal.hide();
+            
+            // 显示批次类型选择模态框
+            showBatchTypeSelectionModal(selectedProducts);
+        }
+
+        // 显示批次类型选择模态框
+        function showBatchTypeSelectionModal(selectedProducts) {
+            const modalHtml = `
+                <div class="modal fade" id="batchTypeSelectionModal" tabindex="-1" aria-labelledby="batchTypeSelectionModalLabel" aria-hidden="true">
+                    <div class="modal-dialog modal-lg">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="batchTypeSelectionModalLabel">
+                                    <i class="bi bi-plus-square me-2"></i>选择批次操作
+                                </h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <div class="alert alert-info">
+                                    <i class="bi bi-info-circle me-2"></i>
+                                    已选择 <strong>${selectedProducts.length}</strong> 个订单商品，请选择批次操作类型：
+                                </div>
+                                
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="card h-100 batch-type-card" onclick="selectBatchType('new')" style="cursor: pointer;">
+                                            <div class="card-body text-center">
+                                                <div class="mb-3">
+                                                    <i class="bi bi-plus-circle-fill text-success" style="font-size: 3rem;"></i>
+                                                </div>
+                                                <h5 class="card-title">新建批次</h5>
+                                                <p class="card-text text-muted">
+                                                    创建一个新的运输批次，将选中的订单商品添加到新批次中
+                                                </p>
+                                                <div class="form-check d-flex justify-content-center">
+                                                    <input class="form-check-input" type="radio" name="batchTypeRadio" id="newBatchRadio" value="new">
+                                                    <label class="form-check-label ms-2" for="newBatchRadio">选择新建批次</label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="col-md-6">
+                                        <div class="card h-100 batch-type-card" onclick="selectBatchType('existing')" style="cursor: pointer;">
+                                            <div class="card-body text-center">
+                                                <div class="mb-3">
+                                                    <i class="bi bi-folder-plus text-primary" style="font-size: 3rem;"></i>
+                                                </div>
+                                                <h5 class="card-title">添加到现有批次</h5>
+                                                <p class="card-text text-muted">
+                                                    将选中的订单商品添加到已存在的运输批次中
+                                                </p>
+                                                <div class="form-check d-flex justify-content-center">
+                                                    <input class="form-check-input" type="radio" name="batchTypeRadio" id="existingBatchRadio" value="existing">
+                                                    <label class="form-check-label ms-2" for="existingBatchRadio">选择现有批次</label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" onclick="backToProductSelectionFromType()">
+                                    <i class="bi bi-arrow-left me-2"></i>返回
+                                </button>
+                                <button type="button" class="btn btn-primary" onclick="proceedWithBatchType()">
+                                    <i class="bi bi-arrow-right me-2"></i>继续
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // 移除已存在的模态框
+            const existingModal = document.getElementById('batchTypeSelectionModal');
+            if (existingModal) {
+                existingModal.remove();
+            }
+            
+            // 添加新模态框到body
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
+            
+            // 保存选中的产品信息
+            window.selectedProductsForBatch = selectedProducts;
+            window.selectedBatchType = null;
+            
+            // 添加卡片点击样式
+            const style = document.createElement('style');
+            style.textContent = `
+                .batch-type-card {
+                    transition: all 0.3s ease;
+                    border: 2px solid #dee2e6;
+                }
+                .batch-type-card:hover {
+                    border-color: #007bff;
+                    box-shadow: 0 4px 8px rgba(0,123,255,0.2);
+                    transform: translateY(-2px);
+                }
+                .batch-type-card.selected {
+                    border-color: #007bff;
+                    background-color: #f8f9ff;
+                    box-shadow: 0 4px 12px rgba(0,123,255,0.3);
+                }
+            `;
+            document.head.appendChild(style);
+            
+            // 显示模态框
+            const typeModal = new bootstrap.Modal(document.getElementById('batchTypeSelectionModal'));
+            typeModal.show();
+            
+            // 模态框关闭后移除
+            document.getElementById('batchTypeSelectionModal').addEventListener('hidden.bs.modal', function() {
+                this.remove();
+                // 移除添加的样式
+                if (style && style.parentNode) {
+                    style.parentNode.removeChild(style);
+                }
+            });
+        }
+
+        // 选择批次类型
+        function selectBatchType(type) {
+            window.selectedBatchType = type;
+            
+            // 更新单选按钮状态
+            document.querySelectorAll('input[name="batchTypeRadio"]').forEach(radio => {
+                radio.checked = radio.value === type;
+            });
+            
+            // 更新卡片样式
+            document.querySelectorAll('.batch-type-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+            
+            if (type === 'new') {
+                document.querySelector('.batch-type-card:first-child').classList.add('selected');
+            } else {
+                document.querySelector('.batch-type-card:last-child').classList.add('selected');
+            }
+        }
+
+        // 从批次类型选择返回产品选择
+        function backToProductSelectionFromType() {
+            // 关闭批次类型选择模态框
+            const typeModal = bootstrap.Modal.getInstance(document.getElementById('batchTypeSelectionModal'));
+            typeModal.hide();
+            
+            // 重新显示产品选择模态框
+            setTimeout(() => {
+                showOrderProductSelectionModal([]);
+                
+                // 恢复之前的产品数据和选择状态
+                if (window.selectedProductsForBatch) {
+                    window.currentOrderProducts = window.selectedProductsForBatch.map(p => ({...p}));
+                    window.filteredOrderProducts = [...window.currentOrderProducts];
+                    renderOrderProductsList();
+                }
+            }, 300);
+        }
+
+        // 根据选择的批次类型继续
+        function proceedWithBatchType() {
+            if (!window.selectedBatchType) {
+                showToast('请选择批次操作类型', 'warning');
+                return;
+            }
+            
+            const selectedProducts = window.selectedProductsForBatch;
+            
+            // 关闭批次类型选择模态框
+            const typeModal = bootstrap.Modal.getInstance(document.getElementById('batchTypeSelectionModal'));
+            typeModal.hide();
+            
+            if (window.selectedBatchType === 'new') {
+                // 显示新建批次表单
+                setTimeout(() => {
+                    showCreateNewBatchModal(selectedProducts);
+                }, 300);
+                
+            } else if (window.selectedBatchType === 'existing') {
+                // 添加到现有批次
+                setTimeout(() => {
+                    showBatchSelectionModal(selectedProducts);
+                }, 300);
+            }
+        }
+
+        // 显示批次选择模态框
+        function showBatchSelectionModal(selectedProducts) {
+            // 获取订单信息用于筛选批次
+            const customerName = selectedProducts[0].customerName;
+            const enterpriseCenter = customerName; // 假设客户名称对应企配中心
+            
+            const modalHtml = `
+                <div class="modal fade" id="batchSelectionModal" tabindex="-1" aria-labelledby="batchSelectionModalLabel" aria-hidden="true">
+                    <div class="modal-dialog modal-xl">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="batchSelectionModalLabel">
+                                    <i class="bi bi-plus-square me-2"></i>添加到现有批次
+                                </h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <!-- 查询条件区域 -->
+                                <div class="search-section mb-4">
+                                    <h6><i class="bi bi-search me-2"></i>查询条件</h6>
+                                    <div class="row">
+                                        <div class="col-md-3">
+                                            <label class="form-label">本地运输批次</label>
+                                            <input type="text" class="form-control" id="batchNumberSearch" placeholder="支持右模糊查询">
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label class="form-label">客户</label>
+                                            <select class="form-select" id="customerSearch">
+                                                <option value="">全部客户</option>
+                                                <option value="越南客户A">越南客户A</option>
+                                                <option value="越南客户B">越南客户B</option>
+                                                <option value="胡志明电子商务">胡志明电子商务</option>
+                                                <option value="岘港进出口有限公司">岘港进出口有限公司</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label class="form-label">创建时间起</label>
+                                            <input type="date" class="form-control" id="createDateStart">
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label class="form-label">创建时间止</label>
+                                            <input type="date" class="form-control" id="createDateEnd">
+                                        </div>
+                                    </div>
+                                    <div class="row mt-3">
+                                        <div class="col-md-3">
+                                            <label class="form-label">是否报关</label>
+                                            <select class="form-select" id="customsSearch">
+                                                <option value="">全部</option>
+                                                <option value="是">是</option>
+                                                <option value="否">否</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label class="form-label">订单号</label>
+                                            <input type="text" class="form-control" id="orderNumberSearch" placeholder="输入单个订单号">
+                                        </div>
+                                        <div class="col-md-6 d-flex align-items-end">
+                                            <button type="button" class="btn btn-primary me-2" onclick="searchExistingBatches()">
+                                                <i class="bi bi-search me-1"></i>查询
+                                            </button>
+                                            <button type="button" class="btn btn-outline-secondary" onclick="clearBatchSearch()">
+                                                <i class="bi bi-x-circle me-1"></i>清除
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- 批次列表区域 -->
+                                <div class="batch-list-section">
+                                    <h6><i class="bi bi-list-ul me-2"></i>可选择的运输批次</h6>
+                                    <div class="alert alert-info">
+                                        <i class="bi bi-info-circle me-2"></i>
+                                        已根据订单客户（${customerName}）和企配中心（${enterpriseCenter}）进行预筛选
+                                    </div>
+                                    
+                                    <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
+                                        <table class="table table-hover table-sm">
+                                            <thead class="table-light sticky-top">
+                                                <tr>
+                                                    <th width="50">选择</th>
+                                                    <th>批次号</th>
+                                                    <th>客户</th>
+                                                    <th>企配中心</th>
+                                                    <th>是否报关</th>
+                                                    <th>运输方式</th>
+                                                    <th>商品MKU数量</th>
+                                                    <th>状态</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="existingBatchesTableBody">
+                                                <!-- 动态生成内容 -->
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" onclick="backToProductSelection()">
+                                    <i class="bi bi-arrow-left me-2"></i>返回
+                                </button>
+                                <button type="button" class="btn btn-success" onclick="addToSelectedBatch()">
+                                    <i class="bi bi-plus-circle me-2"></i>添加到选中批次
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // 移除已存在的模态框
+            const existingModal = document.getElementById('batchSelectionModal');
+            if (existingModal) {
+                existingModal.remove();
+            }
+            
+            // 添加新模态框到body
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
+            
+            // 保存选中的产品信息
+            window.selectedProductsForBatch = selectedProducts;
+            window.currentCustomerName = customerName;
+            window.currentEnterpriseCenter = enterpriseCenter;
+            
+            // 生成并显示现有批次数据
+            generateAndDisplayExistingBatches();
+            
+            // 显示模态框
+            const batchModal = new bootstrap.Modal(document.getElementById('batchSelectionModal'));
+            batchModal.show();
+            
+            // 模态框关闭后移除
+            document.getElementById('batchSelectionModal').addEventListener('hidden.bs.modal', function() {
+                this.remove();
+            });
+        }
+
+        // 生成并显示现有批次数据
+        function generateAndDisplayExistingBatches() {
+            // 生成模拟的现有批次数据
+            const existingBatches = generateMockExistingBatches();
+            window.currentExistingBatches = existingBatches;
+            window.filteredExistingBatches = [...existingBatches];
+            
+            renderExistingBatchesList();
+        }
+
+        // 生成模拟现有批次数据
+        function generateMockExistingBatches() {
+            const batches = [];
+            const transportMethods = ['陆运', '空运', '海运', '快递'];
+            const statuses = ['新建', '已确认', '待发运', '已发运'];
+            const customers = [window.currentCustomerName]; // 只显示相同客户的批次
+            
+            for (let i = 1; i <= 15; i++) {
+                const customsDeclaration = Math.random() > 0.5 ? '是' : '否';
+                const mkuQuantity = Math.floor(Math.random() * 200) + 50;
+                
+                batches.push({
+                    id: `BATCH-${String(i).padStart(3, '0')}`,
+                    batchNumber: `JDi-BATCH-2024${String(i).padStart(3, '0')}`,
+                    customerName: customers[0],
+                    enterpriseCenter: window.currentEnterpriseCenter,
+                    customsDeclaration: customsDeclaration,
+                    transportMethod: transportMethods[Math.floor(Math.random() * transportMethods.length)],
+                    mkuQuantity: mkuQuantity,
+                    status: statuses[Math.floor(Math.random() * statuses.length)],
+                    createDate: new Date(2024, Math.floor(Math.random() * 12), Math.floor(Math.random() * 28) + 1).toISOString().split('T')[0],
+                    orderNumbers: [`ORD${i}001`, `ORD${i}002`, `ORD${i}003`] // 模拟关联的订单号
+                });
+            }
+            
+            return batches;
+        }
+
+        // 渲染现有批次列表
+        function renderExistingBatchesList() {
+            const tbody = document.getElementById('existingBatchesTableBody');
+            if (!tbody || !window.filteredExistingBatches) return;
+            
+            tbody.innerHTML = '';
+            
+            window.filteredExistingBatches.forEach(batch => {
+                const row = `
+                    <tr data-batch-id="${batch.id}">
+                        <td>
+                            <input type="radio" class="form-check-input batch-radio"
+                                   name="selectedBatch" value="${batch.id}"
+                                   onchange="selectBatch('${batch.id}')">
+                        </td>
+                        <td>${batch.batchNumber}</td>
+                        <td>${batch.customerName}</td>
+                        <td>${batch.enterpriseCenter}</td>
+                        <td>
+                            <span class="badge ${batch.customsDeclaration === '是' ? 'bg-success' : 'bg-secondary'}">
+                                ${batch.customsDeclaration}
+                            </span>
+                        </td>
+                        <td>${batch.transportMethod}</td>
+                        <td>${batch.mkuQuantity}</td>
+                        <td>
+                            <span class="badge ${getBatchStatusClass(batch.status)}">
+                                ${batch.status}
+                            </span>
+                        </td>
+                    </tr>
+                `;
+                tbody.insertAdjacentHTML('beforeend', row);
+            });
+        }
+
+        // 获取批次状态样式类
+        function getBatchStatusClass(status) {
+            switch (status) {
+                case '新建': return 'bg-warning';
+                case '已确认': return 'bg-info';
+                case '待发运': return 'bg-primary';
+                case '已发运': return 'bg-success';
+                default: return 'bg-secondary';
+            }
+        }
+
+        // 选择批次
+        function selectBatch(batchId) {
+            window.selectedBatchId = batchId;
+            const selectedBatch = window.currentExistingBatches.find(b => b.id === batchId);
+            window.selectedBatch = selectedBatch;
+        }
+
+        // 搜索现有批次
+        function searchExistingBatches() {
+            const batchNumberSearch = document.getElementById('batchNumberSearch').value.trim().toLowerCase();
+            const customerSearch = document.getElementById('customerSearch').value;
+            const createDateStart = document.getElementById('createDateStart').value;
+            const createDateEnd = document.getElementById('createDateEnd').value;
+            const customsSearch = document.getElementById('customsSearch').value;
+            const orderNumberSearch = document.getElementById('orderNumberSearch').value.trim().toLowerCase();
+            
+            // 筛选数据
+            window.filteredExistingBatches = window.currentExistingBatches.filter(batch => {
+                let match = true;
+                
+                // 批次号筛选（右模糊查询）
+                if (batchNumberSearch) {
+                    match = match && batch.batchNumber.toLowerCase().startsWith(batchNumberSearch);
+                }
+                
+                // 客户筛选
+                if (customerSearch) {
+                    match = match && batch.customerName === customerSearch;
+                }
+                
+                // 创建时间筛选
+                if (createDateStart) {
+                    match = match && batch.createDate >= createDateStart;
+                }
+                if (createDateEnd) {
+                    match = match && batch.createDate <= createDateEnd;
+                }
+                
+                // 报关状态筛选
+                if (customsSearch) {
+                    match = match && batch.customsDeclaration === customsSearch;
+                }
+                
+                // 订单号筛选
+                if (orderNumberSearch) {
+                    match = match && batch.orderNumbers.some(orderNum =>
+                        orderNum.toLowerCase().includes(orderNumberSearch)
+                    );
+                }
+                
+                return match;
+            });
+            
+            // 重新渲染列表
+            renderExistingBatchesList();
+        }
+
+        // 清除批次搜索
+        function clearBatchSearch() {
+            document.getElementById('batchNumberSearch').value = '';
+            document.getElementById('customerSearch').value = '';
+            document.getElementById('createDateStart').value = '';
+            document.getElementById('createDateEnd').value = '';
+            document.getElementById('customsSearch').value = '';
+            document.getElementById('orderNumberSearch').value = '';
+            
+            // 恢复所有数据
+            window.filteredExistingBatches = [...window.currentExistingBatches];
+            
+            // 重新渲染列表
+            renderExistingBatchesList();
+        }
+
+        // 返回产品选择界面
+        function backToProductSelection() {
+            // 关闭批次选择模态框
+            const batchModal = bootstrap.Modal.getInstance(document.getElementById('batchSelectionModal'));
+            batchModal.hide();
+            
+            // 重新显示产品选择模态框
+            setTimeout(() => {
+                showOrderProductSelectionModal([]);
+                
+                // 恢复之前的产品数据和选择状态
+                if (window.selectedProductsForBatch) {
+                    window.currentOrderProducts = window.selectedProductsForBatch.map(p => ({...p}));
+                    window.filteredOrderProducts = [...window.currentOrderProducts];
+                    renderOrderProductsList();
+                }
+            }, 300);
+        }
+
+        // 添加到选中批次
+        function addToSelectedBatch() {
+            if (!window.selectedBatchId) {
+                showToast('请选择一个批次', 'warning');
+                return;
+            }
+            
+            const selectedBatch = window.selectedBatch;
+            const selectedProducts = window.selectedProductsForBatch;
+            
+            // 检查报关状态是否一致
+            const productCustomsStatus = selectedProducts[0].orderType === '跨境订单' ? '是' : '否';
+            const batchCustomsStatus = selectedBatch.customsDeclaration;
+            
+            if (productCustomsStatus !== batchCustomsStatus) {
+                // 报关状态不一致，显示确认对话框
+                showCustomsInconsistencyConfirmation(selectedBatch, selectedProducts);
+            } else {
+                // 报关状态一致，直接添加
+                confirmAddToBatch(selectedBatch, selectedProducts);
+            }
+        }
+
+        // 显示报关状态不一致确认对话框
+        function showCustomsInconsistencyConfirmation(selectedBatch, selectedProducts) {
+            const productCustomsStatus = selectedProducts[0].orderType === '跨境订单' ? '是' : '否';
+            
+            const confirmModalHtml = `
+                <div class="modal fade" id="customsInconsistencyModal" tabindex="-1" aria-labelledby="customsInconsistencyModalLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header bg-warning text-dark">
+                                <h5 class="modal-title" id="customsInconsistencyModalLabel">
+                                    <i class="bi bi-exclamation-triangle-fill me-2"></i>报关状态不一致确认
+                                </h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <div class="alert alert-warning">
+                                    <i class="bi bi-info-circle me-2"></i>
+                                    <strong>检测到报关状态不一致：</strong>
+                                </div>
+                                <div class="row">
+                                    <div class="col-6">
+                                        <strong>选择的订单商品：</strong><br>
+                                        <span class="badge ${productCustomsStatus === '是' ? 'bg-success' : 'bg-secondary'}">
+                                            报关状态：${productCustomsStatus}
+                                        </span>
+                                    </div>
+                                    <div class="col-6">
+                                        <strong>目标批次：</strong><br>
+                                        <span class="badge ${selectedBatch.customsDeclaration === '是' ? 'bg-success' : 'bg-secondary'}">
+                                            报关状态：${selectedBatch.customsDeclaration}
+                                        </span>
+                                    </div>
+                                </div>
+                                <hr>
+                                <p class="mb-0">
+                                    <strong>是否继续添加到批次 "${selectedBatch.batchNumber}"？</strong>
+                                </p>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                    <i class="bi bi-x-circle me-2"></i>取消
+                                </button>
+                                <button type="button" class="btn btn-warning" onclick="confirmAddToBatch(window.selectedBatch, window.selectedProductsForBatch)">
+                                    <i class="bi bi-check-circle me-2"></i>继续添加
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // 移除已存在的确认模态框
+            const existingConfirmModal = document.getElementById('customsInconsistencyModal');
+            if (existingConfirmModal) {
+                existingConfirmModal.remove();
+            }
+            
+            // 添加新确认模态框到body
+            document.body.insertAdjacentHTML('beforeend', confirmModalHtml);
+            
+            // 显示确认模态框
+            const confirmModal = new bootstrap.Modal(document.getElementById('customsInconsistencyModal'));
+            confirmModal.show();
+            
+            // 模态框关闭后移除
+            document.getElementById('customsInconsistencyModal').addEventListener('hidden.bs.modal', function() {
+                this.remove();
+            });
+        }
+
+        // 确认添加到批次
+        function confirmAddToBatch(selectedBatch, selectedProducts) {
+            // 关闭所有模态框
+            const customsModal = document.getElementById('customsInconsistencyModal');
+            if (customsModal) {
+                const customsModalInstance = bootstrap.Modal.getInstance(customsModal);
+                if (customsModalInstance) {
+                    customsModalInstance.hide();
+                }
+            }
+            
+            const batchModal = bootstrap.Modal.getInstance(document.getElementById('batchSelectionModal'));
+            batchModal.hide();
+            
+            // 显示成功提示
+            showToast(`成功将 ${selectedProducts.length} 个订单商品添加到批次 "${selectedBatch.batchNumber}"`, 'success');
+            
+            // 这里可以调用API将商品添加到批次
+            console.log('添加到批次:', {
+                batchId: selectedBatch.id,
+                batchNumber: selectedBatch.batchNumber,
+                products: selectedProducts
+            });
+            
+            // 清除原始订单选择状态
+            setTimeout(() => {
+                const selectedCheckboxes = document.querySelectorAll('.order-checkbox:checked');
+                selectedCheckboxes.forEach(checkbox => {
+                    checkbox.checked = false;
+                });
+                document.getElementById('selectAll').checked = false;
+            }, 1000);
+        }
+
+        // ========== 新建批次表单相关函数 ==========
+
+        // 显示新建批次模态框
+        function showCreateNewBatchModal(selectedProducts) {
+            // 从选中的产品中提取订单信息
+            const customerName = selectedProducts[0].customerName;
+            const orderType = selectedProducts[0].orderType;
+            const customsStatus = orderType === '跨境订单' ? '是' : '否';
+            const enterpriseCenter = customerName; // 假设客户名称对应企配中心
+            
+            // 计算商品汇总信息
+            const totalQuantity = selectedProducts.reduce((sum, product) => sum + product.quantity, 0);
+            const totalAmount = selectedProducts.reduce((sum, product) => sum + product.totalAmountValue, 0);
+            
+            const modalHtml = `
+                <div class="modal fade" id="createNewBatchModal" tabindex="-1" aria-labelledby="createNewBatchModalLabel" aria-hidden="true">
+                    <div class="modal-dialog modal-xl">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="createNewBatchModalLabel">
+                                    <i class="bi bi-plus-circle me-2"></i>新建发货批次
+                                </h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <form id="createNewBatchForm">
+                                    <!-- 批次基本信息 -->
+                                    <div class="row mb-4">
+                                        <div class="col-12">
+                                            <h6 class="fw-bold text-primary mb-3">
+                                                <i class="bi bi-info-circle me-2"></i>批次基本信息
+                                            </h6>
+                                        </div>
+                                        
+                                        <div class="col-md-4">
+                                            <label class="form-label">运输方式 <span class="text-danger">*</span></label>
+                                            <select class="form-select" id="transportMethod" required>
+                                                <option value="车辆运输" selected>车辆运输</option>
+                                                <option value="快递运输">快递运输</option>
+                                            </select>
+                                        </div>
+                                        
+                                        <div class="col-md-4">
+                                            <label class="form-label">承运商</label>
+                                            <input type="text" class="form-control" id="carrierName" placeholder="请输入承运商名称">
+                                        </div>
+                                        
+                                        <div class="col-md-4">
+                                            <label class="form-label">承运商单号</label>
+                                            <input type="text" class="form-control" id="carrierNumber" placeholder="请输入承运商单号">
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="row mb-4">
+                                        <div class="col-md-4">
+                                            <label class="form-label">客户运单号</label>
+                                            <input type="text" class="form-control" id="customerTrackingNumber" placeholder="请输入客户运单号">
+                                        </div>
+                                    </div>
+
+                                    <!-- 订单汇总信息 -->
+                                    <div class="row mb-4">
+                                        <div class="col-12">
+                                            <h6 class="fw-bold text-success mb-3">
+                                                <i class="bi bi-list-check me-2"></i>订单汇总信息
+                                            </h6>
+                                        </div>
+                                        
+                                        <div class="col-md-3">
+                                            <div class="card border-primary">
+                                                <div class="card-body text-center">
+                                                    <h5 class="card-title text-primary">${selectedProducts.length}</h5>
+                                                    <p class="card-text small mb-0">订单商品数</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="col-md-3">
+                                            <div class="card border-success">
+                                                <div class="card-body text-center">
+                                                    <h5 class="card-title text-success">${totalQuantity}</h5>
+                                                    <p class="card-text small mb-0">MKU总数量</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="col-md-3">
+                                            <div class="card border-info">
+                                                <div class="card-body text-center">
+                                                    <h5 class="card-title text-info">¥ ${totalAmount.toFixed(2)}</h5>
+                                                    <p class="card-text small mb-0">商品总金额</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="col-md-3">
+                                            <div class="card border-warning">
+                                                <div class="card-body text-center">
+                                                    <h5 class="card-title text-warning">${customerName}</h5>
+                                                    <p class="card-text small mb-0">客户名称</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- 自动保存信息提示 -->
+                                    <div class="alert alert-info">
+                                        <i class="bi bi-info-circle me-2"></i>
+                                        <strong>自动保存信息：</strong>
+                                        客户（${customerName}）、报关类型（${customsStatus}）、企配中心（${enterpriseCenter}）将根据订单自动保存，批次号将自动生成。
+                                    </div>
+
+                                    <!-- 选中的订单商品列表 -->
+                                    <div class="row">
+                                        <div class="col-12">
+                                            <h6 class="fw-bold text-secondary mb-3">
+                                                <i class="bi bi-table me-2"></i>选中的订单商品列表
+                                            </h6>
+                                            <div class="table-responsive" style="max-height: 300px; overflow-y: auto;">
+                                                <table class="table table-sm table-hover">
+                                                    <thead class="table-light sticky-top">
+                                                        <tr>
+                                                            <th>订单号</th>
+                                                            <th>客户</th>
+                                                            <th>MKU</th>
+                                                            <th>SKU</th>
+                                                            <th>数量</th>
+                                                            <th>金额</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        ${selectedProducts.map(product => `
+                                                            <tr>
+                                                                <td>${product.orderNumber}</td>
+                                                                <td>${product.customerName}</td>
+                                                                <td>${product.mku}</td>
+                                                                <td>${product.sku}</td>
+                                                                <td>${product.quantity}</td>
+                                                                <td>${product.totalAmount}</td>
+                                                            </tr>
+                                                        `).join('')}
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" onclick="backToBatchTypeSelection()">
+                                    <i class="bi bi-arrow-left me-2"></i>返回
+                                </button>
+                                <button type="button" class="btn btn-success" onclick="createNewBatch()">
+                                    <i class="bi bi-check-circle me-2"></i>创建批次
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // 移除已存在的模态框
+            const existingModal = document.getElementById('createNewBatchModal');
+            if (existingModal) {
+                existingModal.remove();
+            }
+            
+            // 添加新模态框到body
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
+            
+            // 保存选中的产品信息和客户信息
+            window.selectedProductsForNewBatch = selectedProducts;
+            window.newBatchCustomerInfo = {
+                customerName: customerName,
+                customsStatus: customsStatus,
+                enterpriseCenter: enterpriseCenter,
+                orderType: orderType
+            };
+            
+            // 显示模态框
+            const newBatchModal = new bootstrap.Modal(document.getElementById('createNewBatchModal'));
+            newBatchModal.show();
+            
+            // 模态框关闭后移除
+            document.getElementById('createNewBatchModal').addEventListener('hidden.bs.modal', function() {
+                this.remove();
+            });
+        }
+
+        // 从新建批次返回批次类型选择
+        function backToBatchTypeSelection() {
+            // 关闭新建批次模态框
+            const newBatchModal = bootstrap.Modal.getInstance(document.getElementById('createNewBatchModal'));
+            newBatchModal.hide();
+            
+            // 重新显示批次类型选择模态框
+            setTimeout(() => {
+                if (window.selectedProductsForNewBatch) {
+                    showBatchTypeSelectionModal(window.selectedProductsForNewBatch);
+                }
+            }, 300);
+        }
+
+        // 生成批次号
+        function generateBatchNumber(customerName) {
+            // 客户简称映射（实际项目中应该从数据库获取）
+            const customerShortNames = {
+                '越南客户A': 'VNA',
+                '越南客户B': 'VNB',
+                '胡志明电子商务': 'HCMC',
+                '岘港进出口有限公司': 'DNPT'
+            };
+            
+            const shortName = customerShortNames[customerName] || 'UNKN';
+            
+            // 获取当前日期 YYMMDD
+            const now = new Date();
+            const year = String(now.getFullYear()).slice(-2);
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+            const dateStr = year + month + day;
+            
+            // 生成当日序号（模拟，实际项目中应该从数据库获取当日该客户的批次数量）
+            const dailySequence = Math.floor(Math.random() * 99) + 1;
+            const sequenceStr = String(dailySequence).padStart(2, '0');
+            
+            return `JDi-${shortName}${dateStr}-${sequenceStr}`;
+        }
+
+        // 创建新批次
+        function createNewBatch() {
+            const form = document.getElementById('createNewBatchForm');
+            if (!form.checkValidity()) {
+                form.reportValidity();
+                return;
+            }
+            
+            const transportMethod = document.getElementById('transportMethod').value;
+            const carrierName = document.getElementById('carrierName').value.trim();
+            const carrierNumber = document.getElementById('carrierNumber').value.trim();
+            const customerTrackingNumber = document.getElementById('customerTrackingNumber').value.trim();
+            
+            const selectedProducts = window.selectedProductsForNewBatch;
+            const customerInfo = window.newBatchCustomerInfo;
+            
+            // 生成批次号
+            const batchNumber = generateBatchNumber(customerInfo.customerName);
+            
+            // 构建批次数据
+            const batchData = {
+                batchNumber: batchNumber,
+                customerName: customerInfo.customerName,
+                customsStatus: customerInfo.customsStatus,
+                enterpriseCenter: customerInfo.enterpriseCenter,
+                transportMethod: transportMethod,
+                carrierName: carrierName,
+                carrierNumber: carrierNumber,
+                customerTrackingNumber: customerTrackingNumber,
+                products: selectedProducts,
+                totalQuantity: selectedProducts.reduce((sum, product) => sum + product.quantity, 0),
+                totalAmount: selectedProducts.reduce((sum, product) => sum + product.totalAmountValue, 0),
+                createTime: new Date().toISOString()
+            };
+            
+            // 显示创建进度
+            showToast('正在创建发货批次...', 'info');
+            
+            // 模拟创建过程（实际项目中应该调用后端API）
+            setTimeout(() => {
+                // 关闭新建批次模态框
+                const newBatchModal = bootstrap.Modal.getInstance(document.getElementById('createNewBatchModal'));
+                newBatchModal.hide();
+                
+                // 显示成功提示
+                showToast(`批次 "${batchNumber}" 创建成功！已同步至报关系统`, 'success');
+                
+                // 打印批次数据到控制台（用于调试）
+                console.log('新建批次数据:', batchData);
+                
+                // 清除原始订单选择状态
+                setTimeout(() => {
+                    const selectedCheckboxes = document.querySelectorAll('.order-checkbox:checked');
+                    selectedCheckboxes.forEach(checkbox => {
+                        checkbox.checked = false;
+                    });
+                    document.getElementById('selectAll').checked = false;
+                }, 1000);
+                
+            }, 2000);
+        }
     </script>
 </body>
 </html>
