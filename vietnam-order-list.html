@@ -573,8 +573,8 @@
                             <th width="8%">订单状态</th>
                             <th width="6%">是否报关</th>
                             <th width="10%">合同号</th>
-                            <th width="8%">SKU妥投详情</th>
-                            <th width="8%">SKU末端派送详情</th>
+                            <th width="8%">MKU妥投详情</th>
+                            <th width="8%">MKU末端派送详情</th>
                             <th width="12%">末端运输批次号</th>
                             <th width="8%">操作</th>
                         </tr>
@@ -964,13 +964,13 @@
         </div>
     </div>
 
-    <!-- SKU妥投详情弹框 -->
+    <!-- MKU妥投详情弹框 -->
     <div class="modal fade" id="skuDeliveryModal" tabindex="-1" aria-labelledby="skuDeliveryModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-xl">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="skuDeliveryModalLabel">
-                        <i class="bi bi-box-seam me-2"></i>SKU妥投详情
+                        <i class="bi bi-box-seam me-2"></i>MKU妥投详情
                     </h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="关闭"></button>
                 </div>
@@ -988,7 +988,6 @@
                                     <th>数量</th>
                                     <th>末端运输批次号</th>
                                     <th>末端运输批次状态</th>
-                                    <th>批次总共商品SKU数量</th>
                                     <th>是否报关</th>
                                     <th>企配中心名称</th>
                                     <th>创建时间</th>
@@ -1014,7 +1013,7 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="skuBatchModalLabel">
-                        <i class="bi bi-truck me-2"></i>SKU末端派送详情
+                        <i class="bi bi-truck me-2"></i>MKU末端派送详情
                     </h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="关闭"></button>
                 </div>
@@ -1032,7 +1031,6 @@
                                     <th>数量</th>
                                     <th>末端运输批次号</th>
                                     <th>末端运输批次状态</th>
-                                    <th>批次总共商品SKU数量</th>
                                     <th>是否报关</th>
                                     <th>企配中心名称</th>
                                     <th>创建时间</th>
@@ -1352,12 +1350,12 @@
             // 这里应该调用打印功能
         }
 
-        // 显示SKU妥投详情
+        // 显示MKU妥投详情
         function showSkuDeliveryDetails(orderNumber) {
             // 设置订单号
             document.getElementById('deliveryOrderNumber').textContent = orderNumber;
             
-            // 模拟SKU妥投详情数据
+            // 模拟MKU妥投详情数据
             const mockDeliveryData = [
                 {
                     mku: 'MKU001',
@@ -1403,7 +1401,6 @@
                     <td>
                         <span class="badge ${item.batchStatus === '已妥投' ? 'bg-success' : 'bg-primary'}">${item.batchStatus}</span>
                     </td>
-                    <td>${item.batchTotalSku}</td>
                     <td>${item.isCustoms}</td>
                     <td>${item.warehouseCenter}</td>
                     <td>${item.createTime}</td>
@@ -1481,7 +1478,7 @@
                     <td>
                         <span class="badge ${item.batchStatus === '已添加' ? 'bg-success' : 'bg-secondary'}">${item.batchStatus}</span>
                     </td>
-                    <td>${item.batchTotalSku}</td>
+                    
                     <td>${item.isCustoms}</td>
                     <td>${item.warehouseCenter}</td>
                     <td>${item.createTime}</td>
@@ -1750,7 +1747,7 @@
                                     <div class="summary-section mt-3 p-3 bg-light rounded">
                                         <div class="row">
                                             <div class="col-md-6">
-                                                <strong>MKU数量合计：</strong>
+                                                <strong>MKU种数合计：</strong>
                                                 <span id="totalMkuQuantity" class="text-primary">0</span>
                                             </div>
                                             <div class="col-md-6">
@@ -2323,7 +2320,7 @@
                                                     <th>企配中心</th>
                                                     <th>是否报关</th>
                                                     <th>运输方式</th>
-                                                    <th>商品MKU数量</th>
+                                                    <th>商品MKU种数</th>
                                                     <th>状态</th>
                                                 </tr>
                                             </thead>
@@ -2759,7 +2756,7 @@
                                             <div class="card border-success">
                                                 <div class="card-body text-center">
                                                     <h5 class="card-title text-success">${totalQuantity}</h5>
-                                                    <p class="card-text small mb-0">MKU总数量</p>
+                                                    <p class="card-text small mb-0">MKU种数合计</p>
                                                 </div>
                                             </div>
                                         </div>
