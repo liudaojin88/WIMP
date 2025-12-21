@@ -1,0 +1,1173 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>跨境批次发运管理 - 履约管理</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Microsoft YaHei', Arial, sans-serif;
+            background-color: #f8f9fa;
+            font-size: 0.9rem;
+        }
+        
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100vh;
+            width: 15%;
+            min-width: 200px;
+            background: linear-gradient(180deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            z-index: 1000;
+            overflow-y: auto;
+            transition: all 0.3s ease;
+        }
+        
+        .sidebar.collapsed {
+            width: 60px;
+            min-width: 60px;
+        }
+        
+        .sidebar-header {
+            padding: 20px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            text-align: center;
+        }
+        
+        .sidebar-header .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .sidebar-header .subtitle {
+            font-size: 0.85rem;
+            opacity: 0.8;
+        }
+        
+        .sidebar.collapsed .sidebar-header .subtitle,
+        .sidebar.collapsed .nav-text {
+            display: none;
+        }
+        
+        .nav-menu {
+            padding: 20px 0;
+        }
+        
+        .nav-item {
+            margin-bottom: 5px;
+        }
+        
+        .nav-link {
+            color: rgba(255,255,255,0.9);
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            border-radius: 0;
+        }
+        
+        .nav-link:hover {
+            background: rgba(255,255,255,0.1);
+            color: white;
+        }
+        
+        .nav-link.active {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border-right: 4px solid white;
+        }
+        
+        .nav-link i {
+            width: 20px;
+            margin-right: 12px;
+            text-align: center;
+        }
+        
+        .sidebar.collapsed .nav-link {
+            padding: 12px 30px;
+            justify-content: center;
+        }
+        
+        .sidebar.collapsed .nav-link i {
+            margin-right: 0;
+        }
+        
+        .nav-group {
+            margin-bottom: 30px;
+        }
+        
+        .nav-group-title {
+            padding: 8px 20px;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            opacity: 0.7;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+        
+        .main-content {
+            margin-left: 15%;
+            min-height: 100vh;
+            transition: all 0.3s ease;
+        }
+        
+        .main-content.expanded {
+            margin-left: 60px;
+        }
+        
+        .top-navbar {
+            background: white;
+            padding: 15px 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .toggle-btn {
+            background: none;
+            border: none;
+            font-size: 1.2rem;
+            color: #495057;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+        }
+        
+        .toggle-btn:hover {
+            background: #f8f9fa;
+        }
+        
+        .content-area {
+            padding: 30px;
+        }
+        
+        .breadcrumb-nav {
+            background: white;
+            padding: 15px 30px;
+            border-bottom: 1px solid #e9ecef;
+        }
+        
+        .breadcrumb {
+            margin: 0;
+            background: none;
+            padding: 0;
+        }
+        
+        .search-section {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+            margin-bottom: 25px;
+        }
+        
+        .search-section h5 {
+            color: #495057;
+            font-weight: 600;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #f8f9fa;
+        }
+        
+        .results-section {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+        }
+        
+        .results-section h5 {
+            color: #495057;
+            font-weight: 600;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #f8f9fa;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+            border: none;
+            border-radius: 6px;
+            padding: 8px 20px;
+            font-weight: 500;
+        }
+        
+        .btn-success {
+            background: #28a745;
+            border-radius: 6px;
+            padding: 8px 20px;
+        }
+        
+        .btn-outline-primary {
+            border-radius: 6px;
+            padding: 6px 15px;
+        }
+        
+        .table {
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        .table thead th {
+            background: #f8f9fa;
+            border: none;
+            font-weight: 600;
+            color: #495057;
+            padding: 12px;
+            white-space: nowrap;
+        }
+        
+        .table tbody td {
+            padding: 12px;
+            vertical-align: middle;
+            border-color: #f1f3f4;
+            white-space: nowrap;
+        }
+        
+        .table tbody tr:hover {
+            background-color: #f8f9fa;
+        }
+        
+        .status-badge {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+        
+        .status-new {
+            background: #e7f3ff;
+            color: #0056b3;
+        }
+        
+        .status-confirmed {
+            background: #fff3cd;
+            color: #856404;
+        }
+        
+        .status-warehouse-out {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
+        .status-shipped {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .batch-number-badge {
+            background: #e7f3ff;
+            color: #0056b3;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-weight: 500;
+        }
+        
+        .transport-mode-badge {
+            background: #f8f9fa;
+            color: #495057;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.85rem;
+        }
+        
+        .alert-custom {
+            border-left: 4px solid #007bff;
+            background: #f8f9ff;
+            border-color: #b8daff;
+        }
+    </style>
+</head>
+<body>
+    <!-- 侧边栏 -->
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="logo">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 2L2 7v10c0 5.55 3.84 9.74 9 11 5.16-1.26 9-5.45 9-11V7l-10-5z"/>
+                    <path d="M9 12l2 2 4-4" stroke="white" stroke-width="2" fill="none"/>
+                </svg>
+                <span class="nav-text">WIMP</span>
+            </div>
+            <div class="subtitle">
+                <span class="nav-text">工采国际</span>
+            </div>
+        </div>
+        
+        <nav class="nav-menu">
+            <div class="nav-group">
+                <div class="nav-group-title">
+                    <span class="nav-text">主要功能</span>
+                </div>
+                <div class="nav-item">
+                    <a href="dashboard.html" class="nav-link">
+                        <i class="bi bi-house-door"></i>
+                        <span class="nav-text">系统首页</span>
+                    </a>
+                </div>
+                <div class="nav-item">
+                    <a href="vietnam-order-list.html" class="nav-link">
+                        <i class="bi bi-list-ul"></i>
+                        <span class="nav-text">越南订单列表</span>
+                    </a>
+                </div>
+            </div>
+            
+            <div class="nav-group">
+                <div class="nav-group-title">
+                    <span class="nav-text">履约管理</span>
+                </div>
+                <div class="nav-item">
+                    <a href="vietnam-delivery-list.html" class="nav-link">
+                        <i class="bi bi-truck"></i>
+                        <span class="nav-text">越南末端派送列表</span>
+                    </a>
+                </div>
+                <div class="nav-item">
+                    <a href="cross-border-batch-management.html" class="nav-link active">
+                        <i class="bi bi-globe"></i>
+                        <span class="nav-text">跨境批次发运管理</span>
+                    </a>
+                </div>
+            </div>
+            
+            <div class="nav-group">
+                <div class="nav-group-title">
+                    <span class="nav-text">基础信息维护</span>
+                </div>
+                <div class="nav-item">
+                    <a href="port-management.html" class="nav-link">
+                        <i class="bi bi-geo-alt"></i>
+                        <span class="nav-text">港口信息管理</span>
+                    </a>
+                </div>
+            </div>
+        </nav>
+    </div>
+
+    <!-- 主内容区域 -->
+    <div class="main-content" id="mainContent">
+        <!-- 顶部导航栏 -->
+        <div class="top-navbar">
+            <div class="d-flex align-items-center">
+                <button class="toggle-btn" id="toggleSidebar">
+                    <i class="bi bi-list"></i>
+                </button>
+                <h4 class="mb-0 ms-3">跨境批次发运管理</h4>
+            </div>
+            <div class="d-flex align-items-center">
+                <span class="text-muted me-3">管理员</span>
+                <div class="dropdown">
+                    <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                        <i class="bi bi-person-circle me-1"></i>
+                    </button>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="#"><i class="bi bi-gear me-2"></i>设置</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="#"><i class="bi bi-box-arrow-right me-2"></i>退出</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- 面包屑导航 -->
+        <div class="breadcrumb-nav">
+            <div class="container-fluid">
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item">履约管理</li>
+                        <li class="breadcrumb-item active" aria-current="page">跨境批次发运管理</li>
+                    </ol>
+                </nav>
+            </div>
+        </div>
+
+        <div class="content-area">
+            <!-- 提示信息 -->
+            <div class="alert alert-info alert-custom" role="alert">
+                <i class="bi bi-info-circle-fill me-2"></i>
+                管理和维护跨境发运批次信息，支持批次创建、确认、状态流转等操作。
+            </div>
+
+            <!-- 查询条件区域 -->
+            <div class="search-section">
+                <h5><i class="bi bi-search me-2"></i>查询条件</h5>
+                <form id="searchForm">
+                    <div class="row g-3">
+                        <div class="col-md-3">
+                            <label for="batchNumber" class="form-label">发货批次号</label>
+                            <input type="text" class="form-control" id="batchNumber" placeholder="支持右模糊查询">
+                        </div>
+                        
+                        <div class="col-md-3">
+                            <label for="batchStatus" class="form-label">状态</label>
+                            <select class="form-select" id="batchStatus">
+                                <option value="">全部</option>
+                                <option value="new">新建</option>
+                                <option value="confirmed">已确认</option>
+                                <option value="warehouse_out">集运中心出库</option>
+                                <option value="shipped">已发运</option>
+                            </select>
+                        </div>
+                        
+                        <div class="col-md-3">
+                            <label for="transportNumber" class="form-label">运输单号</label>
+                            <input type="text" class="form-control" id="transportNumber" placeholder="不支持模糊查询">
+                        </div>
+                        
+                        <div class="col-md-3">
+                            <label for="destinationCountry" class="form-label">所属国家</label>
+                            <select class="form-select" id="destinationCountry">
+                                <option value="">全部</option>
+                                <option value="VN">越南-VN</option>
+                                <option value="TH">泰国-TH</option>
+                                <option value="MY">马来西亚-MY</option>
+                                <option value="SG">新加坡-SG</option>
+                                <option value="PH">菲律宾-PH</option>
+                            </select>
+                        </div>
+                        
+                        <div class="col-md-3">
+                            <label for="transportTool" class="form-label">运输工具号</label>
+                            <input type="text" class="form-control" id="transportTool" placeholder="输入查询">
+                        </div>
+                        
+                        <div class="col-md-3">
+                            <label for="transportMode" class="form-label">运输方式</label>
+                            <select class="form-select" id="transportMode">
+                                <option value="">全部</option>
+                                <option value="air">航空运输</option>
+                                <option value="sea">海路运输</option>
+                                <option value="land">陆路运输</option>
+                                <option value="rail">铁路运输</option>
+                                <option value="express">国际快递</option>
+                            </select>
+                        </div>
+                        
+                        <div class="col-md-3">
+                            <label for="containerNumber" class="form-label">装箱箱号</label>
+                            <input type="text" class="form-control" id="containerNumber" placeholder="可输入多个，用逗号分隔">
+                            <small class="form-text text-muted">多个箱号请用英文逗号分隔</small>
+                        </div>
+                        
+                        <div class="col-md-12 d-flex justify-content-between align-items-center">
+                            <div class="d-flex gap-2">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="bi bi-search me-2"></i>查询
+                                </button>
+                                <button type="reset" class="btn btn-outline-secondary">
+                                    <i class="bi bi-arrow-clockwise me-2"></i>重置
+                                </button>
+                            </div>
+                            <div class="text-muted">
+                                支持多条件组合查询
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <!-- 查询结果区域 -->
+            <div class="results-section">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h5><i class="bi bi-list-check me-2"></i>查询结果</h5>
+                    <div class="d-flex gap-2">
+                        <button type="button" class="btn btn-success" onclick="openNewBatchModal()">
+                            <i class="bi bi-plus-circle me-2"></i>新建
+                        </button>
+                        <button type="button" class="btn btn-outline-primary" onclick="exportAllData()">
+                            <i class="bi bi-download me-2"></i>导出全部
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- 批次列表 -->
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th width="12%">跨境批次号</th>
+                                <th width="8%">状态</th>
+                                <th width="8%">订单和采购单总数</th>
+                                <th width="8%">运输方式</th>
+                                <th width="8%">整拼标识</th>
+                                <th width="8%">所属国家</th>
+                                <th width="10%">目的港</th>
+                                <th width="8%">贸易条款</th>
+                                <th width="10%">运输工具号</th>
+                                <th width="6%">ETD</th>
+                                <th width="6%">ETA</th>
+                                <th width="6%">ATD</th>
+                                <th width="6%">ATA</th>
+                                <th width="10%">提单号</th>
+                                <th width="8%">唛头</th>
+                                <th width="8%">发货人</th>
+                                <th width="8%">收货人</th>
+                                <th width="6%">运费</th>
+                                <th width="6%">保费</th>
+                                <th width="6%">杂费</th>
+                                <th width="10%">出口申报状态</th>
+                                <th width="15%">操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="batchTableBody">
+                            <!-- 示例数据 -->
+                            <tr>
+                                <td><span class="batch-number-badge">CB202412210001</span></td>
+                                <td><span class="status-badge status-new">新建</span></td>
+                                <td>15</td>
+                                <td><span class="transport-mode-badge">海路运输</span></td>
+                                <td>FCL</td>
+                                <td>越南-VN</td>
+                                <td>胡志明港-SGN</td>
+                                <td>FOB</td>
+                                <td>COSCO001</td>
+                                <td>2024-12-25</td>
+                                <td>2024-12-30</td>
+                                <td>-</td>
+                                <td>-</td>
+                                <td>-</td>
+                                <td>N/M</td>
+                                <td>工采国际</td>
+                                <td>越南收货人A</td>
+                                <td>-</td>
+                                <td>-</td>
+                                <td>-</td>
+                                <td>-</td>
+                                <td>
+                                    <div class="btn-group" role="group">
+                                        <button class="btn btn-sm btn-success" onclick="confirmBatch('CB202412210001')" title="确认">
+                                            <i class="bi bi-check"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-danger" onclick="deleteBatch('CB202412210001')" title="删除">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-primary" onclick="exportBatch('CB202412210001')" title="导出">
+                                            <i class="bi bi-download"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-primary" onclick="editBatch('CB202412210001')" title="编辑">
+                                            <i class="bi bi-pencil"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-secondary" onclick="uploadFiles('CB202412210001')" title="上传文件">
+                                            <i class="bi bi-upload"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-info" onclick="viewBatchDetails('CB202412210001')" title="详情">
+                                            <i class="bi bi-eye"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><span class="batch-number-badge">CB202412210002</span></td>
+                                <td><span class="status-badge status-confirmed">已确认</span></td>
+                                <td>8</td>
+                                <td><span class="transport-mode-badge">航空运输</span></td>
+                                <td>散货</td>
+                                <td>越南-VN</td>
+                                <td>河内机场-HAN</td>
+                                <td>CIF</td>
+                                <td>CZ3456</td>
+                                <td>2024-12-23</td>
+                                <td>2024-12-24</td>
+                                <td>-</td>
+                                <td>-</td>
+                                <td>-</td>
+                                <td>N/M</td>
+                                <td>工采国际</td>
+                                <td>越南收货人B</td>
+                                <td>5000.00</td>
+                                <td>200.00</td>
+                                <td>300.00</td>
+                                <td>-</td>
+                                <td>
+                                    <div class="btn-group" role="group">
+                                        <button class="btn btn-sm btn-warning" onclick="cancelConfirm('CB202412210002')" title="取消确认">
+                                            <i class="bi bi-x-circle"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-primary" onclick="exportBatch('CB202412210002')" title="导出">
+                                            <i class="bi bi-download"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-primary" onclick="editBatch('CB202412210002')" title="编辑">
+                                            <i class="bi bi-pencil"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-secondary" onclick="uploadFiles('CB202412210002')" title="上传文件">
+                                            <i class="bi bi-upload"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-info" onclick="viewBatchDetails('CB202412210002')" title="详情">
+                                            <i class="bi bi-eye"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><span class="batch-number-badge">CB202412210003</span></td>
+                                <td><span class="status-badge status-shipped">已发运</span></td>
+                                <td>22</td>
+                                <td><span class="transport-mode-badge">海路运输</span></td>
+                                <td>FCL</td>
+                                <td>泰国-TH</td>
+                                <td>曼谷港-BKK</td>
+                                <td>FOB</td>
+                                <td>EVERGREEN002</td>
+                                <td>2024-12-20</td>
+                                <td>2024-12-28</td>
+                                <td>2024-12-20</td>
+                                <td>-</td>
+                                <td>EG123456789</td>
+                                <td>WIMP-TH</td>
+                                <td>工采国际</td>
+                                <td>泰国收货人C</td>
+                                <td>-</td>
+                                <td>-</td>
+                                <td>-</td>
+                                <td>已申报</td>
+                                <td>
+                                    <div class="btn-group" role="group">
+                                        <button class="btn btn-sm btn-outline-primary" onclick="exportBatch('CB202412210003')" title="导出">
+                                            <i class="bi bi-download"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-primary" onclick="editBatch('CB202412210003')" title="编辑">
+                                            <i class="bi bi-pencil"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-secondary" onclick="uploadFiles('CB202412210003')" title="上传文件">
+                                            <i class="bi bi-upload"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-info" onclick="viewBatchDetails('CB202412210003')" title="详情">
+                                            <i class="bi bi-eye"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- 分页 -->
+                <div class="d-flex justify-content-between align-items-center mt-4">
+                    <div class="text-muted">
+                        共 3 条记录，第 1 页，共 1 页
+                    </div>
+                    <nav>
+                        <ul class="pagination pagination-sm mb-0">
+                            <li class="page-item disabled">
+                                <a class="page-link" href="#" tabindex="-1">上一页</a>
+                            </li>
+                            <li class="page-item active">
+                                <a class="page-link" href="#">1</a>
+                            </li>
+                            <li class="page-item disabled">
+                                <a class="page-link" href="#">下一页</a>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeEventListeners();
+            loadBatchData();
+        });
+        
+        // 初始化事件监听器
+        function initializeEventListeners() {
+            // 侧边栏切换
+            document.getElementById('toggleSidebar').addEventListener('click', function() {
+                const sidebar = document.getElementById('sidebar');
+                const mainContent = document.getElementById('mainContent');
+                
+                sidebar.classList.toggle('collapsed');
+                mainContent.classList.toggle('expanded');
+            });
+            
+            // 搜索表单提交
+            document.getElementById('searchForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                searchBatches();
+            });
+        }
+        
+        // 模拟批次数据
+        const mockBatchData = [
+            {
+                id: 'CB202412210001',
+                status: 'new',
+                orderCount: 15,
+                transportMode: '海路运输',
+                containerType: 'FCL',
+                country: '越南-VN',
+                destinationPort: '胡志明港-SGN',
+                tradeTerms: 'FOB',
+                transportTool: 'COSCO001',
+                etd: '2024-12-25',
+                eta: '2024-12-30',
+                atd: '-',
+                ata: '-',
+                billNumber: '-',
+                marks: 'N/M',
+                shipper: '工采国际',
+                consignee: '越南收货人A',
+                freight: '-',
+                insurance: '-',
+                miscFee: '-',
+                exportStatus: '-'
+            }
+        ];
+        
+        // 加载批次数据
+        function loadBatchData() {
+            // 模拟数据加载
+            console.log('批次数据已加载');
+        }
+        
+        // 搜索批次
+        function searchBatches() {
+            const batchNumber = document.getElementById('batchNumber').value.trim();
+            const status = document.getElementById('batchStatus').value;
+            const transportNumber = document.getElementById('transportNumber').value.trim();
+            const destinationCountry = document.getElementById('destinationCountry').value;
+            const transportTool = document.getElementById('transportTool').value.trim();
+            const transportMode = document.getElementById('transportMode').value;
+            const containerNumber = document.getElementById('containerNumber').value.trim();
+            
+            // 处理多装箱箱号
+            let containerNumbers = [];
+            if (containerNumber) {
+                containerNumbers = containerNumber.split(',').map(num => num.trim()).filter(num => num);
+            }
+            
+            // 构建搜索条件
+            const searchCriteria = {
+                batchNumber: batchNumber,
+                status: status,
+                transportNumber: transportNumber,
+                destinationCountry: destinationCountry,
+                transportTool: transportTool,
+                transportMode: transportMode,
+                containerNumbers: containerNumbers
+            };
+            
+            console.log('搜索条件:', searchCriteria);
+            
+            // 模拟搜索功能
+            showToast(`搜索功能已执行，共${containerNumbers.length > 0 ? containerNumbers.length : ''}个条件`, 'success');
+        }
+        
+        // 新建批次 - 打开新页面
+        function openNewBatchModal() {
+            // 打开新页面创建批次
+            window.open('cross-border-batch-edit.html?mode=create', '_blank');
+        }
+        
+        // 根据批次状态生成操作按钮
+        function generateActionButtons(batchId, status, customsStatus = '') {
+            const buttons = [];
+            
+            switch(status) {
+                case 'new': // 新建状态
+                    buttons.push({
+                        type: 'success',
+                        icon: 'check',
+                        action: `confirmBatch('${batchId}')`,
+                        title: '确认',
+                        text: '确认'
+                    });
+                    buttons.push({
+                        type: 'outline-danger',
+                        icon: 'trash',
+                        action: `deleteBatch('${batchId}')`,
+                        title: '删除',
+                        text: '删除'
+                    });
+                    break;
+                    
+                case 'confirmed': // 已确认状态
+                    // 仅在报关状态为空、草稿、新建时显示取消确认
+                    if (!customsStatus || ['', 'draft', 'new'].includes(customsStatus)) {
+                        buttons.push({
+                            type: 'warning',
+                            icon: 'x-circle',
+                            action: `cancelConfirm('${batchId}')`,
+                            title: '取消确认',
+                            text: '取消确认'
+                        });
+                    }
+                    break;
+                    
+                case 'warehouse_out': // 集运中心出库
+                case 'shipped': // 已发运
+                    // 这两个状态只有基础操作按钮
+                    break;
+            }
+            
+            // 所有状态都有的通用按钮
+            buttons.push({
+                type: 'outline-primary',
+                icon: 'download',
+                action: `exportBatch('${batchId}')`,
+                title: '导出',
+                text: '导出'
+            });
+            
+            buttons.push({
+                type: 'outline-primary',
+                icon: 'pencil',
+                action: `editBatch('${batchId}')`,
+                title: '编辑',
+                text: '编辑'
+            });
+            
+            buttons.push({
+                type: 'outline-secondary',
+                icon: 'upload',
+                action: `uploadFiles('${batchId}')`,
+                title: '上传文件',
+                text: '上传文件'
+            });
+            
+            buttons.push({
+                type: 'outline-info',
+                icon: 'eye',
+                action: `viewBatchDetails('${batchId}')`,
+                title: '详情',
+                text: '详情'
+            });
+            
+            // 生成HTML
+            const buttonHtml = buttons.map(btn =>
+                `<button class="btn btn-sm btn-${btn.type}" onclick="${btn.action}" title="${btn.title}">
+                    <i class="bi bi-${btn.icon}"></i>
+                </button>`
+            ).join('');
+            
+            return `<div class="btn-group" role="group">${buttonHtml}</div>`;
+        }
+        
+        // 确认批次 - 发送至集运中心
+        function confirmBatch(batchId) {
+            if (confirm('确定要确认此批次吗？确认后将发送至集运中心，排除已取消的订单。')) {
+                // 模拟API调用
+                showToast(`正在确认批次 ${batchId}...`, 'info');
+                
+                setTimeout(() => {
+                    // 模拟成功响应
+                    showToast(`批次 ${batchId} 已确认并发送至集运中心`, 'success');
+                    // 刷新页面数据
+                    loadBatchData();
+                }, 1500);
+            }
+        }
+        
+        // 取消确认 - 需要先取消集运中心出库批次
+        function cancelConfirm(batchId) {
+            if (confirm('确定要取消确认此批次吗？系统将先取消集运中心出库批次，再将发运批次状态变更为新建。')) {
+                // 模拟API调用
+                showToast(`正在取消确认批次 ${batchId}...`, 'info');
+                
+                setTimeout(() => {
+                    // 模拟可能的失败情况
+                    const isSuccess = Math.random() > 0.3; // 70%成功率
+                    
+                    if (isSuccess) {
+                        showToast(`批次 ${batchId} 确认已取消，状态已变更为新建`, 'success');
+                        loadBatchData();
+                    } else {
+                        showToast(`确认取消失败，原因：集运中心批次正在处理中，无法取消`, 'warning');
+                    }
+                }, 1500);
+            }
+        }
+        
+        // 编辑批次 - 根据状态限制编辑权限
+        function editBatch(batchId) {
+            // 获取批次状态（这里应该从数据中获取）
+            const batchStatus = getBatchStatus(batchId);
+            
+            if (['warehouse_out', 'shipped'].includes(batchStatus)) {
+                showToast('集运中心出库（含）状态后，不允许添加、删除关联的订单信息、装箱信息、装车信息', 'warning');
+                // 仍然可以编辑，但有限制
+            }
+            
+            // 跳转到编辑页面
+            window.open(`cross-border-batch-edit.html?mode=edit&id=${batchId}`, '_blank');
+        }
+        
+        // 查看批次详情 - 只读模式
+        function viewBatchDetails(batchId) {
+            // 跳转到详情页面（只读模式）
+            window.open(`cross-border-batch-edit.html?mode=view&id=${batchId}`, '_blank');
+        }
+        
+        // 删除批次 - 同步删除至报关系统
+        function deleteBatch(batchId) {
+            if (confirm('确定要删除此批次吗？删除后将同步删除消息至报关系统。')) {
+                showToast(`正在删除批次 ${batchId}...`, 'info');
+                
+                setTimeout(() => {
+                    showToast(`批次 ${batchId} 已删除，同步消息已发送至报关系统`, 'success');
+                    loadBatchData();
+                }, 1500);
+            }
+        }
+        
+        // 单个批次导出 - 模板选择
+        function exportBatch(batchId) {
+            // 创建模态框HTML
+            const modalHtml = `
+                <div class="modal fade" id="exportModal" tabindex="-1">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">选择导出模板</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body">
+                                <div class="mb-3">
+                                    <label for="exportTemplate" class="form-label">导出模板</label>
+                                    <select class="form-select" id="exportTemplate">
+                                        <option value="">请选择导出模板</option>
+                                        <option value="shipping_details">发货明细</option>
+                                        <option value="indonesia_malaysia">印尼&马来西亚发货明细</option>
+                                    </select>
+                                </div>
+                                <div class="alert alert-info">
+                                    <i class="bi bi-info-circle me-2"></i>
+                                    请选择适合的导出模板，不同模板包含不同的字段信息。
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                                <button type="button" class="btn btn-primary" onclick="executeExport('${batchId}')">确认导出</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // 添加模态框到页面
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
+            
+            // 显示模态框
+            const modal = new bootstrap.Modal(document.getElementById('exportModal'));
+            modal.show();
+            
+            // 模态框关闭后清理
+            document.getElementById('exportModal').addEventListener('hidden.bs.modal', function() {
+                this.remove();
+            });
+        }
+        
+        // 执行导出
+        function executeExport(batchId) {
+            const template = document.getElementById('exportTemplate').value;
+            
+            if (!template) {
+                showToast('请选择导出模板', 'warning');
+                return;
+            }
+            
+            // 关闭模态框
+            const modal = bootstrap.Modal.getInstance(document.getElementById('exportModal'));
+            modal.hide();
+            
+            // 执行导出
+            showToast(`正在导出批次 ${batchId} 的${getTemplateName(template)}...`, 'info');
+            
+            setTimeout(() => {
+                showToast(`批次 ${batchId} 导出完成`, 'success');
+            }, 2000);
+        }
+        
+        // 获取模板名称
+        function getTemplateName(template) {
+            const templates = {
+                'shipping_details': '发货明细',
+                'indonesia_malaysia': '印尼&马来西亚发货明细'
+            };
+            return templates[template] || '未知模板';
+        }
+        
+        // 上传文件
+        function uploadFiles(batchId) {
+            // 创建文件上传模态框
+            const modalHtml = `
+                <div class="modal fade" id="uploadModal" tabindex="-1">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">上传批次文件</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body">
+                                <div class="mb-3">
+                                    <label for="batchFiles" class="form-label">选择文件</label>
+                                    <input type="file" class="form-control" id="batchFiles" multiple>
+                                    <small class="form-text text-muted">支持多文件上传，单个文件不超过10MB</small>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="fileDescription" class="form-label">文件描述</label>
+                                    <textarea class="form-control" id="fileDescription" rows="3" placeholder="请输入文件描述（可选）"></textarea>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                                <button type="button" class="btn btn-primary" onclick="executeUpload('${batchId}')">上传文件</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // 添加模态框到页面
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
+            
+            // 显示模态框
+            const modal = new bootstrap.Modal(document.getElementById('uploadModal'));
+            modal.show();
+            
+            // 模态框关闭后清理
+            document.getElementById('uploadModal').addEventListener('hidden.bs.modal', function() {
+                this.remove();
+            });
+        }
+        
+        // 执行文件上传
+        function executeUpload(batchId) {
+            const files = document.getElementById('batchFiles').files;
+            const description = document.getElementById('fileDescription').value;
+            
+            if (files.length === 0) {
+                showToast('请选择要上传的文件', 'warning');
+                return;
+            }
+            
+            // 关闭模态框
+            const modal = bootstrap.Modal.getInstance(document.getElementById('uploadModal'));
+            modal.hide();
+            
+            // 模拟上传过程
+            showToast(`正在上传 ${files.length} 个文件...`, 'info');
+            
+            setTimeout(() => {
+                showToast(`批次 ${batchId} 的文件上传完成`, 'success');
+            }, 2000);
+        }
+        
+        // 获取批次状态（辅助函数）
+        function getBatchStatus(batchId) {
+            // 这里应该从实际数据中获取状态
+            // 模拟返回状态
+            const statusMap = {
+                'CB202412210001': 'new',
+                'CB202412210002': 'confirmed',
+                'CB202412210003': 'shipped'
+            };
+            return statusMap[batchId] || 'new';
+        }
+        
+        // 导出全部数据
+        function exportAllData() {
+            // 获取当前查询结果的所有数据
+            const table = document.querySelector('#batchTableBody');
+            const rows = table.querySelectorAll('tr');
+            
+            if (rows.length === 0) {
+                showToast('没有可导出的数据', 'warning');
+                return;
+            }
+            
+            // 准备CSV数据
+            const headers = [
+                '跨境批次号', '状态', '订单和采购单总数', '运输方式', '整拼标识',
+                '所属国家', '目的港', '贸易条款', '运输工具号', 'ETD', 'ETA',
+                'ATD', 'ATA', '提单号', '唛头', '发货人', '收货人', '运费',
+                '保费', '杂费', '出口申报状态'
+            ];
+            
+            let csvContent = '\ufeff' + headers.join(',') + '\n'; // 添加BOM以支持中文
+            
+            // 遍历表格数据
+            rows.forEach(row => {
+                const cells = row.querySelectorAll('td');
+                const rowData = [];
+                
+                // 提取需要的列数据（前21列）
+                for (let i = 0; i < 21; i++) {
+                    let cellText = cells[i] ? cells[i].textContent.trim() : '';
+                    
+                    // 处理特殊格式的单元格
+                    if (i === 0) { // 批次号
+                        cellText = cellText.replace('批次号: ', '');
+                    } else if (i === 1) { // 状态
+                        cellText = cellText.replace('状态: ', '');
+                    } else if (i === 3) { // 运输方式
+                        cellText = cellText.replace('运输方式: ', '');
+                    }
+                    
+                    // 如果包含逗号，用引号包裹
+                    if (cellText.includes(',')) {
+                        cellText = `"${cellText}"`;
+                    }
+                    
+                    rowData.push(cellText);
+                }
+                
+                csvContent += rowData.join(',') + '\n';
+            });
+            
+            // 创建下载链接
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            
+            link.setAttribute('href', url);
+            link.setAttribute('download', `跨境批次发运数据_${new Date().toISOString().slice(0, 10)}.csv`);
+            link.style.visibility = 'hidden';
+            
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            showToast('数据导出成功', 'success');
+        }
+        
+        // 显示提示信息
+        function showToast(message, type = 'info') {
+            const alertHtml = `
+                <div class="alert alert-${type === 'success' ? 'success' : type === 'warning' ? 'warning' : 'info'} alert-dismissible fade show" role="alert">
+                    <i class="bi bi-${type === 'success' ? 'check-circle' : type === 'warning' ? 'exclamation-triangle' : 'info-circle'}-fill me-2"></i>
+                    ${message}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            `;
+            
+            const container = document.querySelector('.content-area');
+            container.insertAdjacentHTML('afterbegin', alertHtml);
+            
+            // 3秒后自动隐藏
+            setTimeout(() => {
+                const alert = container.querySelector('.alert');
+                if (alert) {
+                    const bsAlert = new bootstrap.Alert(alert);
+                    bsAlert.close();
+                }
+            }, 3000);
+        }
+    </script>
+</body>
+</html>

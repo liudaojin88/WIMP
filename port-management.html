@@ -1,0 +1,1124 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>港口信息管理 - 基础信息维护</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Microsoft YaHei', Arial, sans-serif;
+            background-color: #f8f9fa;
+            font-size: 0.9rem;
+        }
+        
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100vh;
+            width: 15%;
+            min-width: 200px;
+            background: linear-gradient(180deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            z-index: 1000;
+            overflow-y: auto;
+            transition: all 0.3s ease;
+        }
+        
+        .sidebar.collapsed {
+            width: 60px;
+            min-width: 60px;
+        }
+        
+        .sidebar-header {
+            padding: 20px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            text-align: center;
+        }
+        
+        .sidebar-header .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .sidebar-header .subtitle {
+            font-size: 0.85rem;
+            opacity: 0.8;
+        }
+        
+        .sidebar.collapsed .sidebar-header .subtitle,
+        .sidebar.collapsed .nav-text {
+            display: none;
+        }
+        
+        .nav-menu {
+            padding: 20px 0;
+        }
+        
+        .nav-item {
+            margin-bottom: 5px;
+        }
+        
+        .nav-link {
+            color: rgba(255,255,255,0.9);
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            border-radius: 0;
+        }
+        
+        .nav-link:hover {
+            background: rgba(255,255,255,0.1);
+            color: white;
+        }
+        
+        .nav-link.active {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border-right: 4px solid white;
+        }
+        
+        .nav-link i {
+            width: 20px;
+            margin-right: 12px;
+            text-align: center;
+        }
+        
+        .sidebar.collapsed .nav-link {
+            padding: 12px 30px;
+            justify-content: center;
+        }
+        
+        .sidebar.collapsed .nav-link i {
+            margin-right: 0;
+        }
+        
+        .nav-group {
+            margin-bottom: 30px;
+        }
+        
+        .nav-group-title {
+            padding: 8px 20px;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            opacity: 0.7;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+        
+        .main-content {
+            margin-left: 15%;
+            min-height: 100vh;
+            transition: all 0.3s ease;
+        }
+        
+        .main-content.expanded {
+            margin-left: 60px;
+        }
+        
+        .top-navbar {
+            background: white;
+            padding: 15px 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .toggle-btn {
+            background: none;
+            border: none;
+            font-size: 1.2rem;
+            color: #495057;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+        }
+        
+        .toggle-btn:hover {
+            background: #f8f9fa;
+        }
+        
+        .content-area {
+            padding: 30px;
+        }
+        
+        .breadcrumb-nav {
+            background: white;
+            padding: 15px 30px;
+            border-bottom: 1px solid #e9ecef;
+        }
+        
+        .breadcrumb {
+            margin: 0;
+            background: none;
+            padding: 0;
+        }
+        
+        .search-section {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+            margin-bottom: 25px;
+        }
+        
+        .search-section h5 {
+            color: #495057;
+            font-weight: 600;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #f8f9fa;
+        }
+        
+        .results-section {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+        }
+        
+        .results-section h5 {
+            color: #495057;
+            font-weight: 600;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #f8f9fa;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+            border: none;
+            border-radius: 6px;
+            padding: 8px 20px;
+            font-weight: 500;
+        }
+        
+        .btn-success {
+            background: #28a745;
+            border-radius: 6px;
+            padding: 8px 20px;
+        }
+        
+        .btn-outline-primary {
+            border-radius: 6px;
+            padding: 6px 15px;
+        }
+        
+        .table {
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        .table thead th {
+            background: #f8f9fa;
+            border: none;
+            font-weight: 600;
+            color: #495057;
+            padding: 12px;
+        }
+        
+        .table tbody td {
+            padding: 12px;
+            vertical-align: middle;
+            border-color: #f1f3f4;
+        }
+        
+        .table tbody tr:hover {
+            background-color: #f8f9fa;
+        }
+        
+        .modal-header {
+            background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+            color: white;
+            border-bottom: none;
+        }
+        
+        .modal-header .btn-close {
+            filter: invert(1);
+        }
+        
+        .form-label {
+            font-weight: 600;
+            color: #495057;
+            margin-bottom: 8px;
+        }
+        
+        .form-control:focus {
+            border-color: #007bff;
+            box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+        }
+        
+        .form-select:focus {
+            border-color: #007bff;
+            box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+        }
+        
+        .country-flag {
+            width: 20px;
+            height: 15px;
+            margin-right: 8px;
+            border-radius: 2px;
+        }
+        
+        .validation-error {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+        }
+        
+        .alert-custom {
+            border-left: 4px solid #007bff;
+            background: #f8f9ff;
+            border-color: #b8daff;
+        }
+        
+        .port-code-badge {
+            background: #e7f3ff;
+            color: #0056b3;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-weight: 500;
+        }
+        
+        .country-badge {
+            background: #f8f9fa;
+            color: #495057;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.85rem;
+        }
+    </style>
+</head>
+<body>
+    <!-- 侧边栏 -->
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="logo">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 2L2 7v10c0 5.55 3.84 9.74 9 11 5.16-1.26 9-5.45 9-11V7l-10-5z"/>
+                    <path d="M9 12l2 2 4-4" stroke="white" stroke-width="2" fill="none"/>
+                </svg>
+                <span class="nav-text">WIMP</span>
+            </div>
+            <div class="subtitle">
+                <span class="nav-text">工采国际</span>
+            </div>
+        </div>
+        
+        <nav class="nav-menu">
+            <div class="nav-group">
+                <div class="nav-group-title">
+                    <span class="nav-text">主要功能</span>
+                </div>
+                <div class="nav-item">
+                    <a href="dashboard.html" class="nav-link">
+                        <i class="bi bi-house-door"></i>
+                        <span class="nav-text">系统首页</span>
+                    </a>
+                </div>
+                <div class="nav-item">
+                    <a href="vietnam-order-list.html" class="nav-link">
+                        <i class="bi bi-list-ul"></i>
+                        <span class="nav-text">越南订单列表</span>
+                    </a>
+                </div>
+            </div>
+            
+            <div class="nav-group">
+                <div class="nav-group-title">
+                    <span class="nav-text">履约管理</span>
+                </div>
+                <div class="nav-item">
+                    <a href="vietnam-delivery-list.html" class="nav-link">
+                        <i class="bi bi-truck"></i>
+                        <span class="nav-text">越南末端派送列表</span>
+                    </a>
+                </div>
+                <div class="nav-item">
+                    <a href="cross-border-batch-management.html" class="nav-link">
+                        <i class="bi bi-globe"></i>
+                        <span class="nav-text">跨境批次发运管理</span>
+                    </a>
+                </div>
+            </div>
+            
+            <div class="nav-group">
+                <div class="nav-group-title">
+                    <span class="nav-text">基础信息维护</span>
+                </div>
+                <div class="nav-item">
+                    <a href="port-management.html" class="nav-link active">
+                        <i class="bi bi-geo-alt"></i>
+                        <span class="nav-text">港口信息管理</span>
+                    </a>
+                </div>
+            </div>
+        </nav>
+    </div>
+
+    <!-- 主内容区域 -->
+    <div class="main-content" id="mainContent">
+        <!-- 顶部导航栏 -->
+        <div class="top-navbar">
+            <div class="d-flex align-items-center">
+                <button class="toggle-btn" id="toggleSidebar">
+                    <i class="bi bi-list"></i>
+                </button>
+                <h4 class="mb-0 ms-3">港口信息管理</h4>
+            </div>
+            <div class="d-flex align-items-center">
+                <span class="text-muted me-3">管理员</span>
+                <div class="dropdown">
+                    <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                        <i class="bi bi-person-circle me-1"></i>
+                    </button>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="#"><i class="bi bi-gear me-2"></i>设置</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="#"><i class="bi bi-box-arrow-right me-2"></i>退出</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- 面包屑导航 -->
+        <div class="breadcrumb-nav">
+            <div class="container-fluid">
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item">基础信息维护</li>
+                        <li class="breadcrumb-item active" aria-current="page">港口信息管理</li>
+                    </ol>
+                </nav>
+            </div>
+        </div>
+
+        <div class="content-area">
+            <!-- 提示信息 -->
+            <div class="alert alert-info alert-custom" role="alert">
+                <i class="bi bi-info-circle-fill me-2"></i>
+                维护港口信息基础信息，用于管理和维护批次发运装货港和卸货港的港口信息。按修改时间降序排列。
+            </div>
+
+            <!-- 查询条件区域 -->
+            <div class="search-section">
+                <h5><i class="bi bi-search me-2"></i>查询条件</h5>
+                <form id="searchForm">
+                    <div class="row g-3">
+                        <div class="col-md-3">
+                            <label for="portChineseName" class="form-label">港口中文名称</label>
+                            <input type="text" class="form-control" id="portChineseName" placeholder="支持模糊查询">
+                        </div>
+                        
+                        <div class="col-md-3">
+                            <label for="portEnglishName" class="form-label">港口英文名称</label>
+                            <input type="text" class="form-control" id="portEnglishName" placeholder="支持模糊查询">
+                        </div>
+                        
+                        <div class="col-md-3">
+                            <label for="countrySelect" class="form-label">所属国家</label>
+                            <select class="form-select" id="countrySelect">
+                                <option value="">全部</option>
+                                <option value="CN">中国-CN</option>
+                                <option value="US">美国-US</option>
+                                <option value="JP">日本-JP</option>
+                                <option value="KR">韩国-KR</option>
+                                <option value="TH">泰国-TH</option>
+                                <option value="VN">越南-VN</option>
+                                <option value="SG">新加坡-SG</option>
+                                <option value="MY">马来西亚-MY</option>
+                                <option value="ID">印度尼西亚-ID</option>
+                                <option value="PH">菲律宾-PH</option>
+                                <option value="IN">印度-IN</option>
+                                <option value="AU">澳大利亚-AU</option>
+                                <option value="NZ">新西兰-NZ</option>
+                                <option value="GB">英国-GB</option>
+                                <option value="DE">德国-DE</option>
+                                <option value="FR">法国-FR</option>
+                                <option value="IT">意大利-IT</option>
+                                <option value="ES">西班牙-ES</option>
+                                <option value="NL">荷兰-NL</option>
+                                <option value="BE">比利时-BE</option>
+                            </select>
+                        </div>
+                        
+                        <div class="col-md-3">
+                            <label for="portCode" class="form-label">港口三字码</label>
+                            <input type="text" class="form-control" id="portCode" placeholder="支持模糊查询" maxlength="5">
+                        </div>
+                        
+                        <div class="col-md-12 d-flex justify-content-between align-items-center">
+                            <div class="d-flex gap-2">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="bi bi-search me-2"></i>查询
+                                </button>
+                                <button type="reset" class="btn btn-outline-secondary">
+                                    <i class="bi bi-arrow-clockwise me-2"></i>重置
+                                </button>
+                            </div>
+                            <div class="text-muted">
+                                支持多条件组合查询
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <!-- 查询结果区域 -->
+            <div class="results-section">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h5><i class="bi bi-list-check me-2"></i>查询结果</h5>
+                    <div class="d-flex gap-2">
+                        <button type="button" class="btn btn-success" onclick="openAddPortModal()">
+                            <i class="bi bi-plus-circle me-2"></i>新增港口
+                        </button>
+                        <button type="button" class="btn btn-outline-primary">
+                            <i class="bi bi-download me-2"></i>导出
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- 港口列表 -->
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th width="15%">港口中文名称</th>
+                                <th width="15%">港口英文名称</th>
+                                <th width="12%">所属国家</th>
+                                <th width="10%">港口三字码</th>
+                                <th width="12%">关区代码</th>
+                                <th width="10%">最后修改人</th>
+                                <th width="12%">最后修改时间</th>
+                                <th width="14%">操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="portTableBody">
+                            <!-- 示例数据 -->
+                            <tr>
+                                <td><strong>上海港</strong></td>
+                                <td>Shanghai Port</td>
+                                <td><span class="country-badge">中国-CN</span></td>
+                                <td><span class="port-code-badge">SHA</span></td>
+                                <td>3100</td>
+                                <td>张三</td>
+                                <td>2024-12-21 14:30:25</td>
+                                <td>
+                                    <button class="btn btn-sm btn-outline-primary me-1" onclick="editPort(1)">
+                                        <i class="bi bi-pencil me-1"></i>编辑
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-danger" onclick="deletePort(1, '上海港')">
+                                        <i class="bi bi-trash me-1"></i>删除
+                                    </button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>深圳港</strong></td>
+                                <td>Shenzhen Port</td>
+                                <td><span class="country-badge">中国-CN</span></td>
+                                <td><span class="port-code-badge">SZX</span></td>
+                                <td>5300</td>
+                                <td>李四</td>
+                                <td>2024-12-21 13:15:10</td>
+                                <td>
+                                    <button class="btn btn-sm btn-outline-primary me-1" onclick="editPort(2)">
+                                        <i class="bi bi-pencil me-1"></i>编辑
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-danger" onclick="deletePort(2, '深圳港')">
+                                        <i class="bi bi-trash me-1"></i>删除
+                                    </button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>曼谷港</strong></td>
+                                <td>Bangkok Port</td>
+                                <td><span class="country-badge">泰国-TH</span></td>
+                                <td><span class="port-code-badge">BKK</span></td>
+                                <td></td>
+                                <td>王五</td>
+                                <td>2024-12-21 12:45:33</td>
+                                <td>
+                                    <button class="btn btn-sm btn-outline-primary me-1" onclick="editPort(3)">
+                                        <i class="bi bi-pencil me-1"></i>编辑
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-danger" onclick="deletePort(3, '曼谷港')">
+                                        <i class="bi bi-trash me-1"></i>删除
+                                    </button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- 分页 -->
+                <div class="d-flex justify-content-between align-items-center mt-4">
+                    <div class="text-muted">
+                        共 3 条记录，第 1 页，共 1 页
+                    </div>
+                    <nav>
+                        <ul class="pagination pagination-sm mb-0">
+                            <li class="page-item disabled">
+                                <a class="page-link" href="#" tabindex="-1">上一页</a>
+                            </li>
+                            <li class="page-item active">
+                                <a class="page-link" href="#">1</a>
+                            </li>
+                            <li class="page-item disabled">
+                                <a class="page-link" href="#">下一页</a>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 新增/编辑港口信息模态框 -->
+    <div class="modal fade" id="portModal" tabindex="-1" aria-labelledby="portModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="portModalLabel">
+                        <i class="bi bi-plus-circle me-2"></i>新增港口信息
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <!-- 验证错误提示 -->
+                    <div id="validationErrors" class="validation-error" style="display: none;">
+                        <ul class="mb-0" id="errorList"></ul>
+                    </div>
+
+                    <form id="portForm">
+                        <input type="hidden" id="portId" name="portId">
+                        
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label for="modalPortChineseName" class="form-label">
+                                    港口中文名称 <span class="text-danger">*</span>
+                                </label>
+                                <input type="text" class="form-control" id="modalPortChineseName" name="portChineseName" 
+                                       maxlength="35" required placeholder="请输入港口中文名称">
+                                <div class="form-text">最多35个字符</div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <label for="modalPortEnglishName" class="form-label">
+                                    港口英文名称 <span class="text-danger">*</span>
+                                </label>
+                                <input type="text" class="form-control" id="modalPortEnglishName" name="portEnglishName" 
+                                       maxlength="50" required placeholder="请输入港口英文名称">
+                                <div class="form-text">最多50个字符</div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <label for="modalCountrySelect" class="form-label">
+                                    所属国家 <span class="text-danger">*</span>
+                                </label>
+                                <select class="form-select" id="modalCountrySelect" name="country" required>
+                                    <option value="">请选择国家</option>
+                                    <option value="CN">中国-CN</option>
+                                    <option value="US">美国-US</option>
+                                    <option value="JP">日本-JP</option>
+                                    <option value="KR">韩国-KR</option>
+                                    <option value="TH">泰国-TH</option>
+                                    <option value="VN">越南-VN</option>
+                                    <option value="SG">新加坡-SG</option>
+                                    <option value="MY">马来西亚-MY</option>
+                                    <option value="ID">印度尼西亚-ID</option>
+                                    <option value="PH">菲律宾-PH</option>
+                                    <option value="IN">印度-IN</option>
+                                    <option value="AU">澳大利亚-AU</option>
+                                    <option value="NZ">新西兰-NZ</option>
+                                    <option value="GB">英国-GB</option>
+                                    <option value="DE">德国-DE</option>
+                                    <option value="FR">法国-FR</option>
+                                    <option value="IT">意大利-IT</option>
+                                    <option value="ES">西班牙-ES</option>
+                                    <option value="NL">荷兰-NL</option>
+                                    <option value="BE">比利时-BE</option>
+                                </select>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <label for="modalPortCode" class="form-label">
+                                    港口三字码 <span class="text-danger">*</span>
+                                </label>
+                                <input type="text" class="form-control" id="modalPortCode" name="portCode" 
+                                       maxlength="5" required placeholder="请输入港口三字码" style="text-transform: uppercase;">
+                                <div class="form-text">最多5个字符，建议使用3个字符的标准代码</div>
+                            </div>
+                            
+                            <div class="col-md-12">
+                                <label for="modalCustomsCode" class="form-label">关区代码</label>
+                                <input type="text" class="form-control" id="modalCustomsCode" name="customsCode" 
+                                       maxlength="15" placeholder="请输入关区代码（可选）">
+                                <div class="form-text">最多15个字符，非必填项</div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                        <i class="bi bi-x-circle me-2"></i>取消
+                    </button>
+                    <button type="button" class="btn btn-primary" onclick="savePort()">
+                        <i class="bi bi-check-circle me-2"></i>保存
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 删除确认模态框 -->
+    <div class="modal fade" id="deleteConfirmModal" tabindex="-1" aria-labelledby="deleteConfirmModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title" id="deleteConfirmModalLabel">
+                        <i class="bi bi-exclamation-triangle me-2"></i>确认删除
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="d-flex align-items-center">
+                        <i class="bi bi-exclamation-triangle-fill text-warning fs-1 me-3"></i>
+                        <div>
+                            <p class="mb-2">您确定要删除港口信息吗？</p>
+                            <p class="mb-0 text-muted">港口名称：<span id="deletePortName" class="fw-bold"></span></p>
+                            <small class="text-muted">删除后的港口信息不影响已发运的批次港口展示，但是港口下拉选择框将过滤已删除的港口选项。</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                        <i class="bi bi-x-circle me-2"></i>取消
+                    </button>
+                    <button type="button" class="btn btn-danger" onclick="confirmDelete()">
+                        <i class="bi bi-trash me-2"></i>确认删除
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // 全局变量
+        let currentDeleteId = null;
+        
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeEventListeners();
+            loadPortData();
+        });
+        
+        // 初始化事件监听器
+        function initializeEventListeners() {
+            // 侧边栏切换
+            document.getElementById('toggleSidebar').addEventListener('click', function() {
+                const sidebar = document.getElementById('sidebar');
+                const mainContent = document.getElementById('mainContent');
+                
+                sidebar.classList.toggle('collapsed');
+                mainContent.classList.toggle('expanded');
+            });
+            
+            // 搜索表单提交
+            document.getElementById('searchForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                searchPorts();
+            });
+            
+            // 港口表单提交
+            document.getElementById('portForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                savePort();
+            });
+            
+            // 港口三字码输入自动转大写
+            document.getElementById('modalPortCode').addEventListener('input', function(e) {
+                e.target.value = e.target.value.toUpperCase();
+            });
+            
+            // 搜索框港口三字码输入自动转大写
+            document.getElementById('portCode').addEventListener('input', function(e) {
+                e.target.value = e.target.value.toUpperCase();
+            });
+        }
+        
+        // 模拟港口数据
+        const mockPortData = [
+            {
+                id: 1,
+                chineseName: '上海港',
+                englishName: 'Shanghai Port',
+                country: 'CN',
+                countryName: '中国-CN',
+                portCode: 'SHA',
+                customsCode: '3100',
+                lastModifiedBy: '张三',
+                lastModifiedTime: '2024-12-21 14:30:25'
+            },
+            {
+                id: 2,
+                chineseName: '深圳港',
+                englishName: 'Shenzhen Port',
+                country: 'CN',
+                countryName: '中国-CN',
+                portCode: 'SZX',
+                customsCode: '5300',
+                lastModifiedBy: '李四',
+                lastModifiedTime: '2024-12-21 13:15:10'
+            },
+            {
+                id: 3,
+                chineseName: '曼谷港',
+                englishName: 'Bangkok Port',
+                country: 'TH',
+                countryName: '泰国-TH',
+                portCode: 'BKK',
+                customsCode: '',
+                lastModifiedBy: '王五',
+                lastModifiedTime: '2024-12-21 12:45:33'
+            }
+        ];
+        
+        // 国家映射
+        const countryMap = {
+            'CN': '中国-CN',
+            'US': '美国-US',
+            'JP': '日本-JP',
+            'KR': '韩国-KR',
+            'TH': '泰国-TH',
+            'VN': '越南-VN',
+            'SG': '新加坡-SG',
+            'MY': '马来西亚-MY',
+            'ID': '印度尼西亚-ID',
+            'PH': '菲律宾-PH',
+            'IN': '印度-IN',
+            'AU': '澳大利亚-AU',
+            'NZ': '新西兰-NZ',
+            'GB': '英国-GB',
+            'DE': '德国-DE',
+            'FR': '法国-FR',
+            'IT': '意大利-IT',
+            'ES': '西班牙-ES',
+            'NL': '荷兰-NL',
+            'BE': '比利时-BE'
+        };
+        
+        // 加载港口数据
+        function loadPortData() {
+            renderPortTable(mockPortData);
+        }
+        
+        // 搜索港口
+        function searchPorts() {
+            const chineseName = document.getElementById('portChineseName').value.trim();
+            const englishName = document.getElementById('portEnglishName').value.trim();
+            const country = document.getElementById('countrySelect').value;
+            const portCode = document.getElementById('portCode').value.trim();
+            
+            let filteredData = mockPortData.filter(port => {
+                let match = true;
+                
+                if (chineseName && !port.chineseName.includes(chineseName)) {
+                    match = false;
+                }
+                
+                if (englishName && !port.englishName.toLowerCase().includes(englishName.toLowerCase())) {
+                    match = false;
+                }
+                
+                if (country && port.country !== country) {
+                    match = false;
+                }
+                
+                if (portCode && !port.portCode.includes(portCode)) {
+                    match = false;
+                }
+                
+                return match;
+            });
+            
+            renderPortTable(filteredData);
+        }
+        
+        // 渲染港口表格
+        function renderPortTable(data) {
+            const tbody = document.getElementById('portTableBody');
+            
+            if (data.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="8" class="text-center text-muted py-4">
+                            <i class="bi bi-inbox fs-1 d-block mb-2"></i>
+                            暂无数据
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+            
+            tbody.innerHTML = data.map(port => `
+                <tr>
+                    <td><strong>${port.chineseName}</strong></td>
+                    <td>${port.englishName}</td>
+                    <td><span class="country-badge">${port.countryName}</span></td>
+                    <td><span class="port-code-badge">${port.portCode}</span></td>
+                    <td>${port.customsCode || '-'}</td>
+                    <td>${port.lastModifiedBy}</td>
+                    <td>${port.lastModifiedTime}</td>
+                    <td>
+                        <button class="btn btn-sm btn-outline-primary me-1" onclick="editPort(${port.id})">
+                            <i class="bi bi-pencil me-1"></i>编辑
+                        </button>
+                        <button class="btn btn-sm btn-outline-danger" onclick="deletePort(${port.id}, '${port.chineseName}')">
+                            <i class="bi bi-trash me-1"></i>删除
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+        
+        // 打开新增港口模态框
+        function openAddPortModal() {
+            document.getElementById('portModalLabel').innerHTML = '<i class="bi bi-plus-circle me-2"></i>新增港口信息';
+            document.getElementById('portForm').reset();
+            document.getElementById('portId').value = '';
+            hideValidationErrors();
+            
+            const modal = new bootstrap.Modal(document.getElementById('portModal'));
+            modal.show();
+        }
+        
+        // 编辑港口
+        function editPort(portId) {
+            const port = mockPortData.find(p => p.id === portId);
+            if (!port) return;
+            
+            document.getElementById('portModalLabel').innerHTML = '<i class="bi bi-pencil me-2"></i>编辑港口信息';
+            document.getElementById('portId').value = port.id;
+            document.getElementById('modalPortChineseName').value = port.chineseName;
+            document.getElementById('modalPortEnglishName').value = port.englishName;
+            document.getElementById('modalCountrySelect').value = port.country;
+            document.getElementById('modalPortCode').value = port.portCode;
+            document.getElementById('modalCustomsCode').value = port.customsCode;
+            
+            hideValidationErrors();
+            
+            const modal = new bootstrap.Modal(document.getElementById('portModal'));
+            modal.show();
+        }
+        
+        // 保存港口
+        function savePort() {
+            if (!validatePortForm()) {
+                return;
+            }
+            
+            const formData = {
+                id: document.getElementById('portId').value,
+                chineseName: document.getElementById('modalPortChineseName').value.trim(),
+                englishName: document.getElementById('modalPortEnglishName').value.trim(),
+                country: document.getElementById('modalCountrySelect').value,
+                portCode: document.getElementById('modalPortCode').value.trim(),
+                customsCode: document.getElementById('modalCustomsCode').value.trim()
+            };
+            
+            // 检查唯一性（所属国家+港口三字码）
+            const existingPort = mockPortData.find(port => 
+                port.country === formData.country && 
+                port.portCode === formData.portCode && 
+                port.id != formData.id
+            );
+            
+            if (existingPort) {
+                showValidationErrors([`${countryMap[formData.country]}下港口三字码${formData.portCode}已存在`]);
+                return;
+            }
+            
+            // 模拟保存
+            if (formData.id) {
+                // 编辑
+                const index = mockPortData.findIndex(p => p.id == formData.id);
+                if (index !== -1) {
+                    mockPortData[index] = {
+                        ...mockPortData[index],
+                        chineseName: formData.chineseName,
+                        englishName: formData.englishName,
+                        country: formData.country,
+                        countryName: countryMap[formData.country],
+                        portCode: formData.portCode,
+                        customsCode: formData.customsCode,
+                        lastModifiedBy: '当前用户',
+                        lastModifiedTime: new Date().toLocaleString('zh-CN', {
+                            year: 'numeric',
+                            month: '2-digit',
+                            day: '2-digit',
+                            hour: '2-digit',
+                            minute: '2-digit',
+                            second: '2-digit'
+                        }).replace(/\//g, '-')
+                    };
+                }
+            } else {
+                // 新增
+                const newPort = {
+                    id: Math.max(...mockPortData.map(p => p.id)) + 1,
+                    chineseName: formData.chineseName,
+                    englishName: formData.englishName,
+                    country: formData.country,
+                    countryName: countryMap[formData.country],
+                    portCode: formData.portCode,
+                    customsCode: formData.customsCode,
+                    lastModifiedBy: '当前用户',
+                    lastModifiedTime: new Date().toLocaleString('zh-CN', {
+                        year: 'numeric',
+                        month: '2-digit',
+                        day: '2-digit',
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        second: '2-digit'
+                    }).replace(/\//g, '-')
+                };
+                mockPortData.unshift(newPort);
+            }
+            
+            // 关闭模态框
+            const modal = bootstrap.Modal.getInstance(document.getElementById('portModal'));
+            modal.hide();
+            
+            // 刷新表格
+            loadPortData();
+            
+            // 显示成功提示
+            showAlert('success', formData.id ? '港口信息编辑成功！' : '港口信息新增成功！');
+        }
+        
+        // 验证港口表单
+        function validatePortForm() {
+            const errors = [];
+            
+            const chineseName = document.getElementById('modalPortChineseName').value.trim();
+            const englishName = document.getElementById('modalPortEnglishName').value.trim();
+            const country = document.getElementById('modalCountrySelect').value;
+            const portCode = document.getElementById('modalPortCode').value.trim();
+            
+            if (!chineseName) {
+                errors.push('港口中文名称不能为空');
+            } else if (chineseName.length > 35) {
+                errors.push('港口中文名称不能超过35个字符');
+            }
+            
+            if (!englishName) {
+                errors.push('港口英文名称不能为空');
+            } else if (englishName.length > 50) {
+                errors.push('港口英文名称不能超过50个字符');
+            }
+            
+            if (!country) {
+                errors.push('请选择所属国家');
+            }
+            
+            if (!portCode) {
+                errors.push('港口三字码不能为空');
+            } else if (portCode.length > 5) {
+                errors.push('港口三字码不能超过5个字符');
+            }
+            
+            const customsCode = document.getElementById('modalCustomsCode').value.trim();
+            if (customsCode && customsCode.length > 15) {
+                errors.push('关区代码不能超过15个字符');
+            }
+            
+            if (errors.length > 0) {
+                showValidationErrors(errors);
+                return false;
+            }
+            
+            hideValidationErrors();
+            return true;
+        }
+        
+        // 显示验证错误
+        function showValidationErrors(errors) {
+            const errorDiv = document.getElementById('validationErrors');
+            const errorList = document.getElementById('errorList');
+            
+            errorList.innerHTML = errors.map(error => `<li>${error}</li>`).join('');
+            errorDiv.style.display = 'block';
+            
+            // 滚动到错误提示
+            errorDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+        
+        // 隐藏验证错误
+        function hideValidationErrors() {
+            document.getElementById('validationErrors').style.display = 'none';
+        }
+        
+        // 删除港口
+        function deletePort(portId, portName) {
+            currentDeleteId = portId;
+            document.getElementById('deletePortName').textContent = portName;
+            
+            const modal = new bootstrap.Modal(document.getElementById('deleteConfirmModal'));
+            modal.show();
+        }
+        
+        // 确认删除
+        function confirmDelete() {
+            if (currentDeleteId) {
+                const index = mockPortData.findIndex(p => p.id === currentDeleteId);
+                if (index !== -1) {
+                    mockPortData.splice(index, 1);
+                    loadPortData();
+                    showAlert('success', '港口信息删除成功！');
+                }
+            }
+            
+            const modal = bootstrap.Modal.getInstance(document.getElementById('deleteConfirmModal'));
+            modal.hide();
+            currentDeleteId = null;
+        }
+        
+        // 显示提示信息
+        function showAlert(type, message) {
+            const alertHtml = `
+                <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+                    <i class="bi bi-${type === 'success' ? 'check-circle' : 'exclamation-triangle'}-fill me-2"></i>
+                    ${message}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            `;
+            
+            const container = document.querySelector('.content-area');
+            container.insertAdjacentHTML('afterbegin', alertHtml);
+            
+            // 3秒后自动隐藏
+            setTimeout(() => {
+                const alert = container.querySelector('.alert');
+                if (alert) {
+                    const bsAlert = new bootstrap.Alert(alert);
+                    bsAlert.close();
+                }
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
