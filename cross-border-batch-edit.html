@@ -651,15 +651,16 @@
                                             <th width="5%">
                                                 <input type="checkbox" class="form-check-input" id="selectAllLoading" onchange="toggleAllLoading()">
                                             </th>
-                                            <th width="12%">装箱容器号</th>
-                                            <th width="12%">车牌号/运单号</th>
+                                            <th width="10%">装箱容器号</th>
+                                            <th width="10%">车牌号/运单号</th>
+                                            <th width="10%">封号</th>
                                             <th width="8%">类型</th>
                                             <th width="10%">司机</th>
                                             <th width="10%">司机电话</th>
-                                            <th width="15%">备注</th>
+                                            <th width="12%">备注</th>
                                             <th width="8%">更新人</th>
-                                            <th width="12%">更新时间</th>
-                                            <th width="8%">操作</th>
+                                            <th width="10%">更新时间</th>
+                                            <th width="7%">操作</th>
                                         </tr>
                                     </thead>
                                     <tbody id="loadingTableBody">
@@ -1643,6 +1644,10 @@
                                             <input type="text" class="form-control" id="vehicleNumber" maxlength="35" placeholder="请输入车牌号或运单号" required>
                                         </div>
                                         <div class="col-md-6">
+                                            <label for="sealNumber" class="form-label">封号</label>
+                                            <input type="text" class="form-control" id="sealNumber" maxlength="35" placeholder="请输入封号">
+                                        </div>
+                                        <div class="col-md-6">
                                             <label for="vehicleType" class="form-label">类型 <span class="required">*</span></label>
                                             <select class="form-select" id="vehicleType" required>
                                                 <option value="">请选择类型</option>
@@ -1816,6 +1821,7 @@
             const loadingData = {
                 containerNumber: containerNumber,
                 vehicleNumber: vehicleNumber,
+                sealNumber: document.getElementById('sealNumber').value || '-',
                 vehicleType: vehicleType,
                 driverName: document.getElementById('driverName').value || '-',
                 driverPhone: document.getElementById('driverPhone').value || '-',
@@ -1837,6 +1843,7 @@
                 <td><input type="checkbox" class="form-check-input"></td>
                 <td>${data.containerNumber}</td>
                 <td>${data.vehicleNumber}</td>
+                <td>${data.sealNumber}</td>
                 <td>${data.vehicleType}</td>
                 <td>${data.driverName}</td>
                 <td>${data.driverPhone}</td>
