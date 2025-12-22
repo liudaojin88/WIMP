@@ -639,20 +639,26 @@
                                 <button type="button" class="btn btn-success me-2" onclick="importLoadingInfo()">
                                     <i class="bi bi-upload me-1"></i>导入装车信息
                                 </button>
+                                <button type="button" class="btn btn-outline-danger" onclick="batchDeleteLoading()">
+                                    <i class="bi bi-trash me-1"></i>批量删除
+                                </button>
                             </div>
                             
                             <div class="table-responsive">
                                 <table class="table table-hover">
                                     <thead>
                                         <tr>
-                                            <th width="15%">装箱容器号</th>
-                                            <th width="15%">车牌号/运单号</th>
-                                            <th width="10%">类型</th>
-                                            <th width="12%">司机</th>
-                                            <th width="12%">司机电话</th>
-                                            <th width="20%">备注</th>
+                                            <th width="5%">
+                                                <input type="checkbox" class="form-check-input" id="selectAllLoading" onchange="toggleAllLoading()">
+                                            </th>
+                                            <th width="12%">装箱容器号</th>
+                                            <th width="12%">车牌号/运单号</th>
+                                            <th width="8%">类型</th>
+                                            <th width="10%">司机</th>
+                                            <th width="10%">司机电话</th>
+                                            <th width="15%">备注</th>
                                             <th width="8%">更新人</th>
-                                            <th width="10%">更新时间</th>
+                                            <th width="12%">更新时间</th>
                                             <th width="8%">操作</th>
                                         </tr>
                                     </thead>
@@ -1617,14 +1623,117 @@
 
         // 显示添加装车信息模态框
         function showAddLoadingModal() {
-            showToast('打开新增装车信息界面', 'info');
-            // 这里应该打开新增装车信息的模态框
+            const modalHtml = `
+                <div class="modal fade" id="addLoadingModal" tabindex="-1" style="z-index: 1060;">
+                    <div class="modal-dialog modal-lg">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">新增装车信息</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body">
+                                <form id="loadingForm">
+                                    <div class="row g-3">
+                                        <div class="col-md-6">
+                                            <label for="loadingContainerNumber" class="form-label">装箱容器号 <span class="required">*</span></label>
+                                            <input type="text" class="form-control" id="loadingContainerNumber" maxlength="35" placeholder="请输入装箱容器号" required>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label for="vehicleNumber" class="form-label">车牌号/运单号 <span class="required">*</span></label>
+                                            <input type="text" class="form-control" id="vehicleNumber" maxlength="35" placeholder="请输入车牌号或运单号" required>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label for="vehicleType" class="form-label">类型 <span class="required">*</span></label>
+                                            <select class="form-select" id="vehicleType" required>
+                                                <option value="">请选择类型</option>
+                                                <option value="卡车">卡车</option>
+                                                <option value="货车">货车</option>
+                                                <option value="集装箱车">集装箱车</option>
+                                                <option value="厢式货车">厢式货车</option>
+                                                <option value="平板车">平板车</option>
+                                                <option value="其他">其他</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label for="driverName" class="form-label">司机</label>
+                                            <input type="text" class="form-control" id="driverName" maxlength="50" placeholder="请输入司机姓名">
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label for="driverPhone" class="form-label">司机电话</label>
+                                            <input type="tel" class="form-control" id="driverPhone" maxlength="20" placeholder="请输入司机电话">
+                                        </div>
+                                        <div class="col-md-12">
+                                            <label for="loadingRemarks" class="form-label">备注</label>
+                                            <textarea class="form-control" id="loadingRemarks" rows="3" maxlength="200" placeholder="请输入备注信息"></textarea>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                                <button type="button" class="btn btn-primary" onclick="saveLoadingInfo()">
+                                    <i class="bi bi-check me-2"></i>保存
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
+            const modal = new bootstrap.Modal(document.getElementById('addLoadingModal'));
+            modal.show();
+            
+            document.getElementById('addLoadingModal').addEventListener('hidden.bs.modal', function() {
+                this.remove();
+            });
         }
 
         // 导入装车信息
         function importLoadingInfo() {
-            showToast('下载装车信息导入模板', 'info');
-            // 这里应该下载模板并处理导入
+            // 创建文件导入模态框
+            const modalHtml = `
+                <div class="modal fade" id="importLoadingModal" tabindex="-1" style="z-index: 1060;">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">导入装车信息</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body">
+                                <div class="mb-3">
+                                    <label for="loadingImportFile" class="form-label">选择文件</label>
+                                    <input type="file" class="form-control" id="loadingImportFile" accept=".xlsx,.xls,.csv">
+                                    <small class="form-text text-muted">支持Excel和CSV格式文件</small>
+                                </div>
+                                <div class="alert alert-info">
+                                    <i class="bi bi-info-circle me-2"></i>
+                                    请先下载模板文件，按照模板格式填写装车信息后再导入。
+                                </div>
+                                <div class="mb-3">
+                                    <button type="button" class="btn btn-outline-primary" onclick="downloadLoadingTemplate()">
+                                        <i class="bi bi-download me-2"></i>下载模板
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                                <button type="button" class="btn btn-primary" onclick="executeLoadingImport()">
+                                    <i class="bi bi-upload me-2"></i>导入
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
+            const modal = new bootstrap.Modal(document.getElementById('importLoadingModal'));
+            modal.show();
+            
+            document.getElementById('importLoadingModal').addEventListener('hidden.bs.modal', function() {
+                this.remove();
+            });
         }
 
         // 保存批次
@@ -1683,6 +1792,134 @@
             }
             
             return true;
+        }
+
+        // 保存装车信息
+        function saveLoadingInfo() {
+            const form = document.getElementById('loadingForm');
+            
+            // 验证必填字段
+            const containerNumber = document.getElementById('loadingContainerNumber').value;
+            const vehicleNumber = document.getElementById('vehicleNumber').value;
+            const vehicleType = document.getElementById('vehicleType').value;
+            
+            if (!containerNumber || !vehicleNumber || !vehicleType) {
+                showToast('请填写所有必填字段', 'warning');
+                return;
+            }
+            
+            // 关闭模态框
+            const modal = bootstrap.Modal.getInstance(document.getElementById('addLoadingModal'));
+            modal.hide();
+            
+            // 添加到装车表格
+            const loadingData = {
+                containerNumber: containerNumber,
+                vehicleNumber: vehicleNumber,
+                vehicleType: vehicleType,
+                driverName: document.getElementById('driverName').value || '-',
+                driverPhone: document.getElementById('driverPhone').value || '-',
+                remarks: document.getElementById('loadingRemarks').value || '-',
+                updater: '当前用户',
+                updateTime: new Date().toLocaleString()
+            };
+            
+            addLoadingToTable(loadingData);
+            showToast('装车信息添加成功', 'success');
+        }
+
+        // 添加装车信息到表格
+        function addLoadingToTable(data) {
+            const tableBody = document.getElementById('loadingTableBody');
+            const row = document.createElement('tr');
+            
+            row.innerHTML = `
+                <td><input type="checkbox" class="form-check-input"></td>
+                <td>${data.containerNumber}</td>
+                <td>${data.vehicleNumber}</td>
+                <td>${data.vehicleType}</td>
+                <td>${data.driverName}</td>
+                <td>${data.driverPhone}</td>
+                <td>${data.remarks}</td>
+                <td>${data.updater}</td>
+                <td>${data.updateTime}</td>
+                <td>
+                    <button class="btn btn-sm btn-outline-danger" onclick="removeLoadingFromTable(this)">
+                        <i class="bi bi-trash"></i>
+                    </button>
+                </td>
+            `;
+            
+            tableBody.appendChild(row);
+            loadingData.push(data);
+        }
+
+        // 从表格移除装车信息
+        function removeLoadingFromTable(button) {
+            const row = button.closest('tr');
+            const index = Array.from(row.parentNode.children).indexOf(row);
+            
+            row.remove();
+            loadingData.splice(index, 1);
+            showToast('装车信息已移除', 'success');
+        }
+
+        // 批量删除装车信息
+        function batchDeleteLoading() {
+            const checkedBoxes = document.querySelectorAll('#loadingTableBody input[type="checkbox"]:checked');
+            if (checkedBoxes.length === 0) {
+                showToast('请选择要删除的装车信息', 'warning');
+                return;
+            }
+            
+            if (confirm(`确定要删除选中的 ${checkedBoxes.length} 条装车信息吗？`)) {
+                checkedBoxes.forEach(checkbox => {
+                    const row = checkbox.closest('tr');
+                    const index = Array.from(row.parentNode.children).indexOf(row);
+                    row.remove();
+                    loadingData.splice(index, 1);
+                });
+                showToast(`已删除 ${checkedBoxes.length} 条装车信息`, 'success');
+            }
+        }
+
+        // 切换所有装车信息选择状态
+        function toggleAllLoading() {
+            const selectAll = document.getElementById('selectAllLoading');
+            const checkboxes = document.querySelectorAll('#loadingTableBody input[type="checkbox"]');
+            
+            checkboxes.forEach(checkbox => {
+                checkbox.checked = selectAll.checked;
+            });
+        }
+
+        // 下载装车信息模板
+        function downloadLoadingTemplate() {
+            showToast('正在下载装车信息导入模板...', 'info');
+            // 这里应该下载实际的模板文件
+            setTimeout(() => {
+                showToast('模板下载完成', 'success');
+            }, 1000);
+        }
+
+        // 执行装车信息导入
+        function executeLoadingImport() {
+            const fileInput = document.getElementById('loadingImportFile');
+            if (!fileInput.files.length) {
+                showToast('请选择要导入的文件', 'warning');
+                return;
+            }
+            
+            // 关闭模态框
+            const modal = bootstrap.Modal.getInstance(document.getElementById('importLoadingModal'));
+            modal.hide();
+            
+            showToast('正在导入装车信息...', 'info');
+            
+            // 模拟导入过程
+            setTimeout(() => {
+                showToast('装车信息导入完成', 'success');
+            }, 2000);
         }
 
         // 返回
