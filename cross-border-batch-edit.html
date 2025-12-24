@@ -302,7 +302,7 @@
                 <div class="nav-item">
                     <a href="vietnam-order-list.html" class="nav-link">
                         <i class="bi bi-list-ul"></i>
-                        <span class="nav-text">越南订单列表</span>
+                        <span class="nav-text">越南单据列表</span>
                     </a>
                 </div>
             </div>
@@ -458,8 +458,18 @@
                         </div>
                         
                         <div class="col-md-4">
+                            <label for="billOfLading" class="form-label">提运单号</label>
+                            <input type="text" class="form-control" id="billOfLading" maxlength="35" placeholder="请输入运单号或提单号，航空提单号不需要输入-">
+                        </div>
+
+                        <div class="col-md-4">
                             <label for="transportTool" class="form-label">运输工具号</label>
-                            <input type="text" class="form-control" id="transportTool" maxlength="35" placeholder="请输入运输工具号">
+                            <input type="text" class="form-control" id="transportTool" maxlength="35" placeholder="请输入船名/航次/铁路班列号/车牌">
+                        </div>
+                        
+                        <div class="col-md-4" id="vesselField" style="display: none;">
+                            <label for="vesselName" class="form-label">船名</label>
+                            <input type="text" class="form-control" id="vesselName" maxlength="50" placeholder="请输入船名">
                         </div>
                         
                         <div class="col-md-4">
@@ -523,17 +533,29 @@
                             <input type="number" class="form-control" id="miscFee" step="0.001" min="0" max="999999999999.999" placeholder="0.000">
                         </div>
                     </div>
+
+                    <!-- 基础信息操作按钮，仅保存基础信息 -->
+                    <div class="d-flex justify-content-end mt-3">
+                        <button type="button" class="btn btn-success" onclick="saveBatch()">
+                            <i class="bi bi-check me-2"></i>保存基础信息
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 运输明细提示（仅创建模式未保存时显示） -->
+                <div id="transportPlaceholder" class="alert alert-warning" role="alert" style="display: none;">
+                    请先保存批次基础信息，保存后才能填写运输明细（单据列表、装箱信息、装车信息）。
                 </div>
 
                 <!-- 运输详情信息 -->
-                <div class="form-section">
+                <div class="form-section" id="transportSection">
                     <h5><i class="bi bi-truck me-2"></i>运输详情信息</h5>
                     
                     <!-- 页签导航 -->
                     <ul class="nav nav-tabs" id="transportTabs" role="tablist">
                         <li class="nav-item" role="presentation">
                             <button class="nav-link active" id="orders-tab" data-bs-toggle="tab" data-bs-target="#orders" type="button" role="tab">
-                                订单列表 <span class="badge-count" id="orderCount">0</span>
+                                单据列表 <span class="badge-count" id="orderCount">0</span>
                             </button>
                         </li>
                         <li class="nav-item" role="presentation">
@@ -550,7 +572,7 @@
 
                     <!-- 页签内容 -->
                     <div class="tab-content" id="transportTabContent">
-                        <!-- 订单列表页签 -->
+                        <!-- 单据列表页签 -->
                         <div class="tab-pane fade show active" id="orders" role="tabpanel">
                             <div class="action-buttons">
                                 <button type="button" class="btn btn-primary me-2" onclick="showAddOrderModal()">
@@ -674,18 +696,10 @@
 
                 <!-- 操作按钮 -->
                 <div class="form-section">
-                    <div class="d-flex justify-content-between">
+                    <div class="d-flex justify-content-start">
                         <button type="button" class="btn btn-outline-secondary" onclick="goBack()">
                             <i class="bi bi-arrow-left me-2"></i>返回
                         </button>
-                        <div id="actionButtons">
-                            <button type="button" class="btn btn-success me-2" onclick="saveBatch()">
-                                <i class="bi bi-check me-2"></i>保存
-                            </button>
-                            <button type="button" class="btn btn-primary" onclick="confirmBatch()" id="confirmButton">
-                                <i class="bi bi-check-circle me-2"></i>确认
-                            </button>
-                        </div>
                     </div>
                 </div>
             </form>
@@ -702,6 +716,7 @@
         let orderData = [];
         let packingData = [];
         let loadingData = [];
+        let baseInfoSaved = false;
 
         // 页面加载完成后初始化
         document.addEventListener('DOMContentLoaded', function() {
@@ -753,6 +768,7 @@
             // 运输方式变化时更新整拼标识
             document.getElementById('transportMode').addEventListener('change', function() {
                 updateContainerType();
+                toggleVesselField();
             });
 
             // 贸易条款变化时显示/隐藏费用字段
@@ -804,6 +820,31 @@
                 optionElement.textContent = option.text;
                 containerTypeSelect.appendChild(optionElement);
             });
+
+            toggleVesselField();
+        }
+
+        // 切换船名字段显示（仅海运）
+        function toggleVesselField() {
+            const transportMode = document.getElementById('transportMode').value;
+            const vesselField = document.getElementById('vesselField');
+            if (!vesselField) return;
+            vesselField.style.display = transportMode === 'sea' ? 'block' : 'none';
+        }
+
+
+        // 切换运输明细显示：创建模式需先保存基础信息
+        function toggleTransportSection() {
+            const section = document.getElementById('transportSection');
+            const placeholder = document.getElementById('transportPlaceholder');
+            if (!section || !placeholder) return;
+            if (baseInfoSaved) {
+                section.style.display = 'block';
+                placeholder.style.display = 'none';
+            } else {
+                section.style.display = 'none';
+                placeholder.style.display = 'block';
+            }
         }
 
         // 切换CIF字段显示
@@ -850,8 +891,13 @@
             if (currentMode !== 'create' && batchId) {
                 // 编辑或查看模式，加载现有数据
                 loadBatchData(batchId);
+                baseInfoSaved = true;
+            } else {
+                baseInfoSaved = false;
             }
             updateOrderCount();
+            toggleVesselField();
+            toggleTransportSection();
         }
 
         // 加载批次数据
@@ -864,6 +910,7 @@
                 if (id === 'CB202412210001') {
                     document.getElementById('transportMode').value = 'sea';
                     updateContainerType();
+                    toggleVesselField();
                     setTimeout(() => {
                         document.getElementById('containerType').value = 'FCL';
                     }, 100);
@@ -879,6 +926,8 @@
                     document.getElementById('consignee').value = 'CONSIGNEE_VN_A';
                 }
                 
+                baseInfoSaved = true;
+                toggleTransportSection();
                 showToast('批次数据加载完成', 'success');
             }, 1500);
         }
@@ -960,7 +1009,7 @@
                                     </div>
                                 </div>
                                 
-                                <!-- 订单列表区域 -->
+                                <!-- 单据列表区域 -->
                                 <div class="table-responsive">
                                     <table class="table table-hover table-sm">
                                         <thead>
@@ -1239,7 +1288,7 @@
             const modal = bootstrap.Modal.getInstance(document.getElementById('addOrderModal'));
             modal.hide();
             
-            // 添加到订单列表
+            // 添加到单据列表
             checkedBoxes.forEach(checkbox => {
                 const row = checkbox.closest('tr');
                 const orderData = {
@@ -1272,7 +1321,7 @@
             const modal = bootstrap.Modal.getInstance(document.getElementById('addPurchaseModal'));
             modal.hide();
             
-            // 添加到订单列表
+            // 添加到单据列表
             checkedBoxes.forEach(checkbox => {
                 const row = checkbox.closest('tr');
                 const purchaseData = {
