@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>库存管理 - WIMP</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+  <style>
+    :root {
+      --brand-1: #667eea;
+      --brand-2: #764ba2;
+      --text-main: #2d3748;
+      --text-sub: #6c757d;
+      --card-radius: 12px;
+      --card-shadow: 0 6px 20px rgba(0,0,0,0.06);
+    }
+    body {
+      font-family: 'Microsoft YaHei', Arial, sans-serif;
+      background-color: #f5f7fb;
+      font-size: 0.95rem;
+      margin: 0;
+    }
+    /* 左侧导航 */
+    .sidebar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 100vh;
+      width: 15%;
+      min-width: 200px;
+      background: linear-gradient(180deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      z-index: 1000;
+      overflow-y: auto;
+      transition: all 0.3s ease;
+    }
+    .sidebar.collapsed {
+      width: 60px;
+      min-width: 60px;
+    }
+    .sidebar-header {
+      padding: 20px;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      text-align: center;
+    }
+    .sidebar-header .logo {
+      font-size: 1.5rem;
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+    .sidebar-header .subtitle {
+      font-size: 0.85rem;
+      opacity: 0.8;
+    }
+    .sidebar.collapsed .sidebar-header .subtitle,
+    .sidebar.collapsed .nav-text {
+      display: none;
+    }
+    .nav-menu {
+      padding: 20px 0;
+    }
+    .nav-item { margin-bottom: 5px; }
+    .nav-link {
+      color: rgba(255,255,255,0.9);
+      padding: 12px 20px;
+      display: flex;
+      align-items: center;
+      text-decoration: none;
+      transition: all 0.3s ease;
+      border-radius: 0;
+    }
+    .nav-link:hover { background: rgba(255,255,255,0.1); color: white; }
+    .nav-link.active {
+      background: rgba(255,255,255,0.2);
+      color: white;
+      border-right: 4px solid white;
+    }
+    .nav-link i { width: 20px; margin-right: 12px; text-align: center; }
+    .sidebar.collapsed .nav-link { padding: 12px 30px; justify-content: center; }
+    .sidebar.collapsed .nav-link i { margin-right: 0; }
+    .nav-group { margin-bottom: 25px; }
+    .nav-group-title {
+      padding: 8px 20px;
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      opacity: 0.8;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+    }
+    /* 右侧主内容 */
+    .main-content {
+      margin-left: 15%;
+      min-height: 100vh;
+      transition: all 0.3s ease;
+      padding: 0;
+    }
+    .main-content.expanded { margin-left: 60px; }
+    .top-navbar {
+      background: white;
+      padding: 15px 20px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+    .toggle-btn {
+      background: none;
+      border: none;
+      font-size: 1.2rem;
+      color: #495057;
+      cursor: pointer;
+      padding: 6px 10px;
+      border-radius: 6px;
+      transition: all 0.3s ease;
+    }
+    .toggle-btn:hover { background: #f1f3f5; }
+    /* 页面特定样式 */
+    .page-wrap { padding: 20px; }
+    .page-title { font-size: 1.25rem; font-weight: 700; color: var(--text-main); }
+    .breadcrumb-text { color: var(--text-sub); font-size: 0.9rem; }
+    .card-section {
+      background: #fff;
+      border-radius: var(--card-radius);
+      box-shadow: var(--card-shadow);
+      padding: 16px 18px;
+      margin-bottom: 16px;
+      border: 1px solid #eef2f7;
+    }
+    .form-label { font-weight: 600; color: #495057; margin-bottom: 6px; }
+    .btn-primary {
+      background: linear-gradient(90deg, var(--brand-1), var(--brand-2));
+      border: none;
+      box-shadow: 0 4px 12px rgba(102,126,234,0.35);
+    }
+    .btn-outline-primary { color: var(--brand-1); border-color: var(--brand-1); }
+    .table-card {
+      background: #fff;
+      border-radius: var(--card-radius);
+      box-shadow: var(--card-shadow);
+      padding: 12px 14px;
+      border: 1px solid #eef2f7;
+    }
+    .table thead th {
+      white-space: nowrap;
+      font-weight: 700;
+      background: #f8fafc;
+      color: #4a5568;
+      border-bottom: 1px solid #e5e7eb;
+    }
+    .table tbody td { vertical-align: middle; white-space: nowrap; color: #2d3748; }
+    .table-hover tbody tr:hover { background-color: #f5f8ff; }
+    .link-blue { color: var(--brand-2); cursor: pointer; font-weight: 600; }
+    .link-blue:hover { text-decoration: underline; }
+    .icon-copy { color: var(--text-sub); cursor: pointer; margin-left: 6px; }
+    .icon-copy:hover { color: var(--brand-1); }
+  </style>
+</head>
+<body>
+  <!-- 侧边栏 -->
+  <div class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="logo">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M12 2L2 7v10c0 5.55 3.84 9.74 9 11 5.16-1.26 9-5.45 9-11V7l-10-5z"/>
+          <path d="M9 12l2 2 4-4" stroke="white" stroke-width="2" fill="none"/>
+        </svg>
+        <span class="nav-text">WIMP</span>
+      </div>
+      <div class="subtitle">工采国际</div>
+    </div>
+    <nav class="nav-menu">
+      <div class="nav-group">
+        <div class="nav-group-title"><span class="nav-text">主要功能</span></div>
+        <div class="nav-item">
+          <a href="dashboard.html" class="nav-link">
+            <i class="bi bi-house-door"></i>
+            <span class="nav-text">系统首页</span>
+          </a>
+        </div>
+        <div class="nav-item">
+          <a href="vietnam-order-list.html" class="nav-link">
+            <i class="bi bi-list-ul"></i>
+            <span class="nav-text">越南订单列表</span>
+          </a>
+        </div>
+      </div>
+      <div class="nav-group">
+        <div class="nav-group-title"><span class="nav-text">履约管理</span></div>
+        <div class="nav-item">
+          <a href="vietnam-delivery-list.html" class="nav-link">
+            <i class="bi bi-truck"></i>
+            <span class="nav-text">越南末端派送列表</span>
+          </a>
+        </div>
+        <div class="nav-item">
+          <a href="cross-border-batch-management.html" class="nav-link">
+            <i class="bi bi-box-seam"></i>
+            <span class="nav-text">跨境批次发运管理</span>
+          </a>
+        </div>
+      </div>
+      <div class="nav-group">
+        <div class="nav-group-title"><span class="nav-text">库存中心</span></div>
+        <div class="nav-item">
+          <a href="inventory-management.html" class="nav-link active">
+            <i class="bi bi-box"></i>
+            <span class="nav-text">库存管理</span>
+          </a>
+        </div>
+      </div>
+      <div class="nav-group">
+        <div class="nav-group-title"><span class="nav-text">基础信息维护</span></div>
+        <div class="nav-item">
+          <a href="port-management.html" class="nav-link">
+            <i class="bi bi-geo-alt"></i>
+            <span class="nav-text">港口信息管理</span>
+          </a>
+        </div>
+      </div>
+    </nav>
+  </div>
+
+  <!-- 主内容 -->
+  <div class="main-content" id="mainContent">
+    <div class="top-navbar">
+      <div class="d-flex align-items-center">
+        <button class="toggle-btn" id="toggleSidebar">
+          <i class="bi bi-list"></i>
+        </button>
+        <h5 class="mb-0 ms-3" id="pageTitle">库存管理</h5>
+      </div>
+      <div class="d-flex align-items-center">
+        <span class="text-muted me-3">管理员</span>
+        <div class="dropdown">
+          <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
+            <i class="bi bi-person-circle me-1"></i>
+          </button>
+          <ul class="dropdown-menu">
+            <li><a class="dropdown-item" href="#"><i class="bi bi-gear me-2"></i>设置</a></li>
+            <li><hr class="dropdown-divider"></li>
+            <li><a class="dropdown-item" href="#"><i class="bi bi-box-arrow-right me-2"></i>退出</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="page-wrap">
+      <div class="d-flex align-items-center justify-content-between mb-3">
+        <div>
+          <div class="breadcrumb-text">库存中心</div>
+          <div class="page-title">库存管理</div>
+        </div>
+      </div>
+
+      <!-- 查询条件区域 -->
+      <div class="card-section">
+        <div class="d-flex align-items-center justify-content-between mb-2">
+          <div class="fw-bold text-secondary">查询条件</div>
+        </div>
+        <div class="row g-3 align-items-end">
+          <div class="col-lg-4 col-md-6">
+            <label class="form-label">SKUID：</label>
+            <input type="text" class="form-control" id="skuidInput" placeholder="支持批量搜索，多条SKUID请换行录入">
+          </div>
+          <div class="col-lg-4 col-md-6">
+            <label class="form-label">所属仓库：</label>
+            <div class="row g-2">
+              <div class="col-6">
+                <select class="form-select" id="countrySelect">
+                  <option value="">国家/地区</option>
+                  <option>中国</option>
+                  <option>泰国</option>
+                  <option>越南</option>
+                  <option>马来西亚</option>
+                </select>
+              </div>
+              <div class="col-6">
+                <select class="form-select" id="provinceSelect">
+                  <option value="">请选择国家/地区</option>
+                </select>
+              </div>
+            </div>
+          </div>
+          <div class="col-lg-2 col-md-4">
+            <label class="form-label">备货模式：</label>
+            <select class="form-select" id="modeSelect">
+              <option value="">请选择</option>
+              <option>自营</option>
+              <option>代销</option>
+              <option>直发</option>
+              <option>备货</option>
+            </select>
+          </div>
+          <div class="col-lg-2 col-md-4 text-end">
+            <button class="btn btn-outline-secondary me-2" onclick="resetForm()">重置</button>
+            <button class="btn btn-primary" onclick="doSearch()">查询</button>
+          </div>
+        </div>
+        <div class="row g-3 align-items-end mt-3">
+          <div class="col-lg-4 col-md-6">
+            <label class="form-label">最后更新时间：</label>
+            <div class="row g-2">
+              <div class="col-6">
+                <input type="date" class="form-control" id="dateStart">
+              </div>
+              <div class="col-6">
+                <input type="date" class="form-control" id="dateEnd">
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 查询结果区域 -->
+      <div class="table-card mt-3">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <div class="fw-bold">查询结果</div>
+          <div class="d-flex align-items-center gap-2">
+            <button class="btn btn-outline-primary btn-sm" onclick="openCreateChannelModal()">库存渠道创建</button>
+            <button class="btn btn-outline-primary btn-sm">批量新增商品仓关联</button>
+            <button class="btn btn-outline-primary btn-sm">批量更新库存存储信息</button>
+            <button class="btn btn-link text-muted text-decoration-none p-0" onclick="toggleSettings()">
+              <i class="bi bi-gear"></i>
+            </button>
+          </div>
+        </div>
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0" id="inventoryTable">
+            <thead>
+              <tr>
+                <th>SKUID</th>
+                <th>仓库编码</th>
+                <th>所属仓库</th>
+                <th>备货模式</th>
+                <th>采购员ERP</th>
+                <th>现货库存</th>
+                <th>预占库存</th>
+                <th>可售库存</th>
+                <th>安全库存</th>
+                <th>通知库存</th>
+                <th>通知范围</th>
+                <th>在途库存</th>
+                <th>在途可售</th>
+                <th>渠道</th>
+                <th>最后更新</th>
+                <th>操作</th>
+              </tr>
+            </thead>
+            <tbody id="tableBody">
+              <tr data-sku="80000323153" data-warehouse="WH001" data-channels='[{"code":"WH001-HT001","name":"WH001-海天集团","available":566}]'>
+                <td>80000323153 <i class="bi bi-clipboard icon-copy"></i></td>
+                <td>-</td>
+                <td>-</td>
+                <td>-</td>
+                <td>hejingrong5</td>
+                <td>566</td>
+                <td>0</td>
+                <td>566</td>
+                <td>10</td>
+                <td>低库存和无库存</td>
+                <td>-</td>
+                <td>-</td>
+                <td>-</td>
+                <td>WH001-HT001<br/>WH001-海天集团</td>
+                <td>hejingrong5</td>
+                <td><span class="link-blue me-2" onclick="onTransfer(this)">调拨</span><span class="link-blue" onclick="onUpdate()">更新</span></td>
+              </tr>
+              <tr data-sku="8000013963" data-warehouse="TH001" data-channels='[{"code":"TH001-BYD001","name":"泰国中心仓1号-比亚迪","available":68}]'>
+                <td>8000013963</td>
+                <td>C0000008229</td>
+                <td>泰国中心仓1号（林查班）</td>
+                <td>自营</td>
+                <td>wangqiannan14</td>
+                <td>88</td>
+                <td>20</td>
+                <td>68</td>
+                <td>10</td>
+                <td>低库存和无库存</td>
+                <td>0</td>
+                <td>开启</td>
+                <td>-</td>
+                <td>TH001-BYD001<br/>泰国中心仓1号-比亚迪</td>
+                <td>Bydcom th-local</td>
+                <td><span class="link-blue me-2" onclick="onTransfer(this)">调拨</span><span class="link-blue" onclick="onUpdate()">更新</span></td>
+              </tr>
+              <tr data-sku="80000323149" data-warehouse="WH002" data-channels='[{"code":"WH002-CT000","name":"WH002-默认客户","available":20}]'>
+                <td>80000323149</td>
+                <td>-</td>
+                <td>-</td>
+                <td>-</td>
+                <td>yongsheng.tan1</td>
+                <td>20</td>
+                <td>0</td>
+                <td>20</td>
+                <td>10</td>
+                <td>低库存和无库存</td>
+                <td>-</td>
+                <td>-</td>
+                <td>-</td>
+                <td>WH002-CT000<br/>WH002-默认客户</td>
+                <td>xushengqian1</td>
+                <td><span class="link-blue me-2" onclick="onTransfer(this)">调拨</span><span class="link-blue" onclick="onUpdate()">更新</span></td>
+              </tr>
+              <tr data-sku="80000323150" data-warehouse="WH002" data-channels='[{"code":"WH002-CT000","name":"WH002-默认客户","available":100}]'>
+                <td>80000323150</td>
+                <td>-</td>
+                <td>-</td>
+                <td>-</td>
+                <td>xushengqian1</td>
+                <td>100</td>
+                <td>0</td>
+                <td>100</td>
+                <td>10</td>
+                <td>低库存和无库存</td>
+                <td>-</td>
+                <td>-</td>
+                <td>-</td>
+                <td>xushengqian1</td>
+                <td><span class="link-blue" onclick="onUpdate()">更新</span></td>
+              </tr>
+              <tr>
+                <td>80000323141</td>
+                <td>-</td>
+                <td>-</td>
+                <td>-</td>
+                <td>yongsheng.tan1</td>
+                <td>200</td>
+                <td>0</td>
+                <td>200</td>
+                <td>10</td>
+                <td>低库存和无库存</td>
+                <td>-</td>
+                <td>-</td>
+                <td>-</td>
+                <td>xushengqian1</td>
+                <td><span class="link-blue" onclick="onUpdate()">更新</span></td>
+              </tr>
+              <tr>
+                <td>80000323142</td>
+                <td>-</td>
+                <td>-</td>
+                <td>-</td>
+                <td>xushengqian1</td>
+                <td>50</td>
+                <td>0</td>
+                <td>50</td>
+                <td>10</td>
+                <td>低库存和无库存</td>
+                <td>-</td>
+                <td>-</td>
+                <td>-</td>
+                <td>xushengqian1</td>
+                <td><span class="link-blue" onclick="onUpdate()">更新</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    // 侧边栏切换
+    document.getElementById('toggleSidebar').addEventListener('click', function() {
+      const sidebar = document.getElementById('sidebar');
+      const mainContent = document.getElementById('mainContent');
+      sidebar.classList.toggle('collapsed');
+      mainContent.classList.toggle('expanded');
+    });
+
+    function resetForm() {
+      document.getElementById('skuidInput').value = '';
+      document.getElementById('countrySelect').value = '';
+      document.getElementById('provinceSelect').innerHTML = '<option value="">请选择国家/地区</option>';
+      document.getElementById('modeSelect').value = '';
+      document.getElementById('dateStart').value = '';
+      document.getElementById('dateEnd').value = '';
+    }
+    function doSearch() {
+      alert('已触发查询（示例界面，未接真实数据接口）');
+    }
+    function onUpdate() {
+      alert('更新操作（示例界面，未接真实数据接口）');
+    }
+    function toggleSettings() {
+      alert('列配置面板预留（示例）');
+    }
+
+    // 渠道库存调拨
+    function onTransfer(btn) {
+      const row = btn.closest('tr');
+      const sku = row.dataset.sku || '';
+      const channels = row.dataset.channels ? JSON.parse(row.dataset.channels) : [];
+      const outboundList = channels.filter(c => (c.available || 0) > 0);
+
+      const rowsHtml = outboundList.map((c, idx) => `
+        <tr>
+          <td>${sku}</td>
+          <td>${c.code}</td>
+          <td>${c.name}</td>
+          <td>${c.available || 0}</td>
+        </tr>
+      `).join('') || `<tr><td colspan="4" class="text-center text-muted">无可调出渠道</td></tr>`;
+
+      const modalHtml = `
+        <div class="modal fade" id="transferModal" tabindex="-1" style="z-index:1060;">
+          <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title">渠道库存调拨 - SKU: ${sku}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+              </div>
+              <div class="modal-body">
+                <div class="mb-3">
+                  <div class="fw-bold mb-2">调出渠道（可售库存>0）</div>
+                  <div class="table-responsive">
+                    <table class="table table-sm table-bordered align-middle mb-0">
+                      <thead class="table-light">
+                        <tr>
+                          <th>SKU</th><th>渠道编码</th><th>渠道名称</th><th>可售库存</th>
+                        </tr>
+                      </thead>
+                      <tbody>${rowsHtml}</tbody>
+                    </table>
+                  </div>
+                </div>
+                <div class="mb-2 d-flex align-items-center justify-content-between">
+                  <div class="fw-bold">调入渠道</div>
+                  <button class="btn btn-outline-primary btn-sm" onclick="addInboundRow()">新增调入渠道</button>
+                </div>
+                <div class="table-responsive">
+                  <table class="table table-sm table-bordered align-middle mb-0">
+                    <thead class="table-light">
+                      <tr>
+                        <th style="width:30%">调入渠道</th>
+                        <th style="width:20%">调入数量</th>
+                        <th style="width:10%">操作</th>
+                      </tr>
+                    </thead>
+                    <tbody id="inboundTableBody">
+                      <tr>
+                        <td><input type="text" class="form-control" placeholder="请输入渠道名称或编码"></td>
+                        <td><input type="number" class="form-control inbound-qty" min="0" placeholder="数量"></td>
+                        <td><button class="btn btn-sm btn-outline-danger" onclick="removeInboundRow(this)">删除</button></td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+                <div class="form-text mt-2 text-muted">
+                  总调入数量需小于等于总调出可售库存：${outboundList.reduce((s,c)=>s+(c.available||0),0)}
+                </div>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-primary" onclick="submitTransfer(${outboundList.reduce((s,c)=>s+(c.available||0),0)})">提交调拨</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+      document.body.insertAdjacentHTML('beforeend', modalHtml);
+      const modal = new bootstrap.Modal(document.getElementById('transferModal'));
+      modal.show();
+      document.getElementById('transferModal').addEventListener('hidden.bs.modal', function() {
+        this.remove();
+      });
+    }
+
+    function addInboundRow() {
+      const body = document.getElementById('inboundTableBody');
+      const row = document.createElement('tr');
+      row.innerHTML = `
+        <td><input type="text" class="form-control" placeholder="请输入渠道名称或编码"></td>
+        <td><input type="number" class="form-control inbound-qty" min="0" placeholder="数量"></td>
+        <td><button class="btn btn-sm btn-outline-danger" onclick="removeInboundRow(this)">删除</button></td>
+      `;
+      body.appendChild(row);
+    }
+    function removeInboundRow(btn) {
+      const row = btn.closest('tr');
+      row.remove();
+    }
+    function submitTransfer(maxQty) {
+      const qtyInputs = Array.from(document.querySelectorAll('.inbound-qty'));
+      const total = qtyInputs.reduce((sum, input) => sum + (Number(input.value) || 0), 0);
+      if (total <= 0) {
+        alert('请输入调入数量');
+        return;
+      }
+      if (total > maxQty) {
+        alert(`总调入数量不可超过可调出总量：${maxQty}`);
+        return;
+      }
+      const modal = bootstrap.Modal.getInstance(document.getElementById('transferModal'));
+      modal.hide();
+      alert('调拨提交成功（示例，未接真实接口）');
+    }
+  </script>
+</body>
+</html>
