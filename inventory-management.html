@@ -328,6 +328,8 @@
           <div class="d-flex align-items-center gap-2">
             <button class="btn btn-outline-primary btn-sm">批量新增商品仓关联</button>
             <button class="btn btn-outline-primary btn-sm">批量更新库存存储信息</button>
+            <button class="btn btn-outline-primary btn-sm" onclick="openOpenChannelModal()">开通渠道</button>
+            <button class="btn btn-outline-primary btn-sm" onclick="openBatchOpenModal()">EXCEL批量开通渠道</button>
             <button class="btn btn-link text-muted text-decoration-none p-0" onclick="toggleSettings()">
               <i class="bi bi-gear"></i>
             </button>
@@ -469,6 +471,67 @@
     </div>
   </div>
 
+  <!-- 单条开通渠道弹窗 -->
+  <div class="modal fade" id="openChannelModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">开通渠道</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <div class="row g-3">
+            <div class="col-md-4">
+              <label class="form-label">备货仓 <span class="text-danger">*</span></label>
+              <select class="form-select" id="openWarehouseSelect">
+                <option value="">请选择</option>
+              </select>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">国际SKU <span class="text-danger">*</span></label>
+              <input list="skuOptions" class="form-control" id="openSkuInput" placeholder="选择备货仓后可输入">
+              <datalist id="skuOptions"></datalist>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">渠道 <span class="text-danger">*</span></label>
+              <input list="channelOptions" class="form-control" id="openChannelInput" placeholder="输入名称模糊下拉选择，回车多选">
+              <datalist id="channelOptions"></datalist>
+              <div class="form-text text-muted">可多次输入回车添加多个渠道</div>
+              <div class="mt-2" id="chosenChannels" style="min-height:32px;"></div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-outline-secondary" data-bs-dismiss="modal">取消</button>
+          <button class="btn btn-primary" onclick="submitOpenChannel()">提交</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 批量开通渠道弹窗 -->
+  <div class="modal fade" id="batchOpenModal" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">EXCEL批量开通渠道</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <div class="mb-3">
+            <label class="form-label">上传EXCEL：</label>
+            <input type="file" class="form-control" id="batchFileInput" accept=".xls,.xlsx">
+            <div class="form-text text-muted">示例列：备货仓、国际SKU、渠道（可多渠道用逗号分隔）</div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-outline-secondary" data-bs-dismiss="modal">取消</button>
+          <button class="btn btn-primary" onclick="submitBatchOpen()">上传开通</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script>
     // 侧边栏切换
@@ -495,6 +558,112 @@
     }
     function toggleSettings() {
       alert('列配置面板预留（示例）');
+    }
+
+    // 开通渠道相关示例数据
+    const warehouses = [
+      { code: 'WH001', name: '上海备货仓', skus: ['80000323153', '80000323160'] },
+      { code: 'TH001', name: '泰国中心仓1号', skus: ['8000013963', '8000013964'] },
+      { code: 'WH002', name: '宁波备货仓', skus: ['80000323149', '80000323150', '80000323142'] }
+    ];
+    const availableChannels = [
+      { code: 'WH001-HT001', name: 'WH001-海天集团' },
+      { code: 'TH001-BYD001', name: '泰国中心仓1号-比亚迪' },
+      { code: 'WH002-CT000', name: 'WH002-默认客户' },
+      { code: 'VN001-CUSTB', name: '河内-客户B' }
+    ];
+    let chosenChannelList = [];
+
+    function openOpenChannelModal() {
+      renderWarehouseOptions();
+      renderChannelOptions();
+      renderSkuOptions('');
+      chosenChannelList = [];
+      syncChosenChannelsView();
+      document.getElementById('openWarehouseSelect').value = '';
+      document.getElementById('openSkuInput').value = '';
+      document.getElementById('openChannelInput').value = '';
+      const modal = new bootstrap.Modal(document.getElementById('openChannelModal'));
+      modal.show();
+    }
+
+    function renderWarehouseOptions() {
+      const select = document.getElementById('openWarehouseSelect');
+      select.innerHTML = '<option value=\"\">请选择</option>' + warehouses.map(w => `<option value=\"${w.code}\">${w.name}</option>`).join('');
+    }
+
+    function renderSkuOptions(warehouseCode) {
+      const datalist = document.getElementById('skuOptions');
+      const wh = warehouses.find(w => w.code === warehouseCode);
+      datalist.innerHTML = wh ? wh.skus.map(s => `<option value=\"${s}\">${s}</option>`).join('') : '';
+    }
+
+    function renderChannelOptions() {
+      const datalist = document.getElementById('channelOptions');
+      datalist.innerHTML = availableChannels.map(c => `<option value=\"${c.name}\">${c.name}</option>`).join('');
+    }
+
+    document.getElementById('openWarehouseSelect').addEventListener('change', (e) => {
+      renderSkuOptions(e.target.value);
+      document.getElementById('openSkuInput').value = '';
+    });
+
+    document.getElementById('openChannelInput').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        const val = e.target.value.trim();
+        const found = availableChannels.find(c => c.name.includes(val));
+        if (found && !chosenChannelList.some(c => c.code === found.code)) {
+          chosenChannelList.push(found);
+          syncChosenChannelsView();
+        }
+        e.target.value = '';
+      }
+    });
+
+    function syncChosenChannelsView() {
+      const wrap = document.getElementById('chosenChannels');
+      wrap.innerHTML = chosenChannelList.map(c => `
+        <span class="badge bg-primary me-2 mb-2">
+          ${c.name}
+          <button type="button" class="btn-close btn-close-white btn-sm ms-1" aria-label="Close" onclick="removeChosenChannel('${c.code}')"></button>
+        </span>
+      `).join('') || '<span class="text-muted">未选择渠道</span>';
+    }
+
+    function removeChosenChannel(code) {
+      chosenChannelList = chosenChannelList.filter(c => c.code !== code);
+      syncChosenChannelsView();
+    }
+
+    function submitOpenChannel() {
+      const warehouseCode = document.getElementById('openWarehouseSelect').value;
+      const sku = document.getElementById('openSkuInput').value.trim();
+      if (!warehouseCode) { alert('请选择备货仓'); return; }
+      if (!sku) { alert('请输入国际SKU'); return; }
+      const wh = warehouses.find(w => w.code === warehouseCode);
+      if (!wh || !wh.skus.includes(sku)) { alert('SKU不在所选备货仓范围'); return; }
+      if (!chosenChannelList.length) { alert('请至少选择一个渠道'); return; }
+      const modal = bootstrap.Modal.getInstance(document.getElementById('openChannelModal'));
+      modal.hide();
+      alert('已提交开通请求（示例，无真实接口）');
+    }
+
+    function openBatchOpenModal() {
+      document.getElementById('batchFileInput').value = '';
+      const modal = new bootstrap.Modal(document.getElementById('batchOpenModal'));
+      modal.show();
+    }
+
+    function submitBatchOpen() {
+      const fileInput = document.getElementById('batchFileInput');
+      if (!fileInput.files || !fileInput.files.length) {
+        alert('请上传EXCEL文件');
+        return;
+      }
+      const modal = bootstrap.Modal.getInstance(document.getElementById('batchOpenModal'));
+      modal.hide();
+      alert('批量开通文件已上传（示例，无真实接口）');
     }
 
     // 渠道库存调拨
