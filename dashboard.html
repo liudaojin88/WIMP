@@ -307,6 +307,18 @@
             
             <div class="nav-group">
                 <div class="nav-group-title">
+                    <span class="nav-text">集运中心</span>
+                </div>
+                <div class="nav-item">
+                    <a href="inbound-order-list.html" class="nav-link">
+                        <i class="bi bi-inboxes"></i>
+                        <span class="nav-text">入库订单列表</span>
+                    </a>
+                </div>
+            </div>
+
+            <div class="nav-group">
+                <div class="nav-group-title">
                     <span class="nav-text">库存中心</span>
                 </div>
                 <div class="nav-item">
@@ -315,8 +327,26 @@
                         <span class="nav-text">库存管理</span>
                     </a>
                 </div>
+                <div class="nav-item">
+                    <a href="inventory-channel-management.html" class="nav-link">
+                        <i class="bi bi-diagram-2"></i>
+                        <span class="nav-text">库存渠道管理</span>
+                    </a>
+                </div>
+                <div class="nav-item">
+                    <a href="inventory-transfer-list.html" class="nav-link">
+                        <i class="bi bi-arrow-left-right"></i>
+                        <span class="nav-text">库存调拨列表</span>
+                    </a>
+                </div>
+                <div class="nav-item">
+                    <a href="inventory-transfer-create.html" class="nav-link">
+                        <i class="bi bi-plus-square"></i>
+                        <span class="nav-text">新建渠道调拨</span>
+                    </a>
+                </div>
             </div>
-
+            
             <div class="nav-group">
                 <div class="nav-group-title">
                     <span class="nav-text">系统设置</span>
@@ -440,7 +470,11 @@
                 'vietnam-order-list': '越南订单列表',
                 'vietnam-delivery-list': '越南末端派送列表',
                 'cross-border-batch-management': '跨境批次发运管理',
-                'vietnam-batch-edit': '运输批次编辑'
+                'vietnam-batch-edit': '运输批次编辑',
+                'inventory-management': '库存管理',
+                'inventory-channel-management': '库存渠道管理',
+                'inventory-transfer-list': '库存调拨列表',
+                'inventory-transfer-create': '新建渠道调拨'
             };
             
             // 更新页面标题
@@ -493,12 +527,20 @@
                                     <div class="quick-action-desc">跨境批次发运创建和管理</div>
                                 </div>
                                 
-                                <div class="quick-action-card" onclick="window.location.href='vietnam-batch-edit.html'">
+                                <div class="quick-action-card" onclick="window.location.href='inventory-channel-management.html'">
                                     <div class="quick-action-icon">
-                                        <i class="bi bi-pencil-square"></i>
+                                        <i class="bi bi-diagram-2"></i>
                                     </div>
-                                    <div class="quick-action-title">批次编辑</div>
-                                    <div class="quick-action-desc">编辑运输批次信息和详情</div>
+                                    <div class="quick-action-title">库存渠道管理</div>
+                                    <div class="quick-action-desc">查询、创建与编辑渠道</div>
+                                </div>
+
+                                <div class="quick-action-card" onclick="window.location.href='inventory-transfer-list.html'">
+                                    <div class="quick-action-icon">
+                                        <i class="bi bi-arrow-left-right"></i>
+                                    </div>
+                                    <div class="quick-action-title">库存调拨列表</div>
+                                    <div class="quick-action-desc">查询与管理渠道库存调拨单</div>
                                 </div>
                             </div>
                         </div>

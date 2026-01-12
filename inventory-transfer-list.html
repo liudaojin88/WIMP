@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>库存调拨列表 - WIMP</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+  <style>
+    :root {
+      --brand-1: #667eea;
+      --brand-2: #764ba2;
+      --text-main: #2d3748;
+      --text-sub: #6c757d;
+      --card-radius: 12px;
+      --card-shadow: 0 6px 20px rgba(0,0,0,0.06);
+    }
+    body { font-family: 'Microsoft YaHei', Arial, sans-serif; background: #f5f7fb; font-size: 0.95rem; margin: 0; }
+    .sidebar { position: fixed; top:0; left:0; height:100vh; width:15%; min-width:200px; background:linear-gradient(180deg,#667eea 0%,#764ba2 100%); color:white; z-index:1000; overflow-y:auto; transition:all .3s ease; }
+    .sidebar.collapsed { width:60px; min-width:60px; }
+    .sidebar-header { padding:20px; border-bottom:1px solid rgba(255,255,255,.1); text-align:center; }
+    .sidebar-header .logo { font-size:1.5rem; font-weight:700; margin-bottom:5px; }
+    .sidebar-header .subtitle { font-size:0.85rem; opacity:.8; }
+    .sidebar.collapsed .sidebar-header .subtitle, .sidebar.collapsed .nav-text { display:none; }
+    .nav-menu { padding:20px 0; }
+    .nav-item { margin-bottom:5px; }
+    .nav-link { color:rgba(255,255,255,.9); padding:12px 20px; display:flex; align-items:center; text-decoration:none; transition:all .3s ease; }
+    .nav-link:hover { background:rgba(255,255,255,.1); color:white; }
+    .nav-link.active { background:rgba(255,255,255,.2); color:white; border-right:4px solid white; }
+    .nav-link i { width:20px; margin-right:12px; text-align:center; }
+    .sidebar.collapsed .nav-link { padding:12px 30px; justify-content:center; }
+    .sidebar.collapsed .nav-link i { margin-right:0; }
+    .nav-group { margin-bottom:25px; }
+    .nav-group-title { padding:8px 20px; font-size:0.8rem; text-transform:uppercase; opacity:.8; font-weight:600; letter-spacing:.5px; }
+    .main-content { margin-left:15%; min-height:100vh; transition:all .3s ease; padding:0; }
+    .main-content.expanded { margin-left:60px; }
+    .top-navbar { background:white; padding:15px 20px; box-shadow:0 2px 10px rgba(0,0,0,.08); display:flex; justify-content:space-between; align-items:center; position:sticky; top:0; z-index:10; }
+    .toggle-btn { background:none; border:none; font-size:1.2rem; color:#495057; cursor:pointer; padding:6px 10px; border-radius:6px; transition:all .3s ease; }
+    .toggle-btn:hover { background:#f1f3f5; }
+    .page-wrap { padding:20px; }
+    .page-title { font-size:1.25rem; font-weight:700; color:var(--text-main); }
+    .breadcrumb-text { color:var(--text-sub); font-size:0.9rem; }
+    .card-section { background:#fff; border-radius:var(--card-radius); box-shadow:var(--card-shadow); padding:16px 18px; margin-bottom:16px; border:1px solid #eef2f7; }
+    .form-label { font-weight:600; color:#495057; margin-bottom:6px; }
+    .btn-primary { background:linear-gradient(90deg,var(--brand-1),var(--brand-2)); border:none; box-shadow:0 4px 12px rgba(102,126,234,.35); }
+    .btn-outline-primary { color:var(--brand-1); border-color:var(--brand-1); }
+    .table-card { background:#fff; border-radius:var(--card-radius); box-shadow:var(--card-shadow); padding:12px 14px; border:1px solid #eef2f7; }
+    .table thead th { white-space:nowrap; font-weight:700; background:#f8fafc; color:#4a5568; border-bottom:1px solid #e5e7eb; }
+    .table tbody td { vertical-align:middle; white-space:nowrap; color:#2d3748; }
+    .table-hover tbody tr:hover { background:#f5f8ff; }
+    .badge-status { padding:4px 8px; border-radius:6px; font-size:0.8rem; }
+    .status-待审批 { background:#fff5e6; color:#d48806; }
+    .status-待处理 { background:#e6f7ff; color:#1677ff; }
+    .status-已完成 { background:#e8f5e9; color:#2e7d32; }
+  </style>
+</head>
+<body>
+  <div class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="logo">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M12 2L2 7v10c0 5.55 3.84 9.74 9 11 5.16-1.26 9-5.45 9-11V7l-10-5z"/>
+          <path d="M9 12l2 2 4-4" stroke="white" stroke-width="2" fill="none"/>
+        </svg>
+        <span class="nav-text">WIMP</span>
+      </div>
+      <div class="subtitle">工采国际</div>
+    </div>
+    <nav class="nav-menu">
+      <div class="nav-group">
+        <div class="nav-group-title"><span class="nav-text">主要功能</span></div>
+        <div class="nav-item"><a href="dashboard.html" class="nav-link"><i class="bi bi-house-door"></i><span class="nav-text">系统首页</span></a></div>
+        <div class="nav-item"><a href="vietnam-order-list.html" class="nav-link"><i class="bi bi-list-ul"></i><span class="nav-text">越南订单列表</span></a></div>
+      </div>
+      <div class="nav-group">
+        <div class="nav-group-title"><span class="nav-text">履约管理</span></div>
+        <div class="nav-item"><a href="vietnam-delivery-list.html" class="nav-link"><i class="bi bi-truck"></i><span class="nav-text">越南末端派送列表</span></a></div>
+        <div class="nav-item"><a href="cross-border-batch-management.html" class="nav-link"><i class="bi bi-box-seam"></i><span class="nav-text">跨境批次发运管理</span></a></div>
+      </div>
+      <div class="nav-group">
+        <div class="nav-group-title"><span class="nav-text">库存中心</span></div>
+        <div class="nav-item"><a href="inventory-management.html" class="nav-link"><i class="bi bi-box"></i><span class="nav-text">库存管理</span></a></div>
+        <div class="nav-item"><a href="inventory-channel-management.html" class="nav-link"><i class="bi bi-diagram-2"></i><span class="nav-text">库存渠道管理</span></a></div>
+        <div class="nav-item"><a href="inventory-transfer-list.html" class="nav-link active"><i class="bi bi-arrow-left-right"></i><span class="nav-text">库存调拨列表</span></a></div>
+      </div>
+      <div class="nav-group">
+        <div class="nav-group-title"><span class="nav-text">基础信息维护</span></div>
+        <div class="nav-item"><a href="port-management.html" class="nav-link"><i class="bi bi-geo-alt"></i><span class="nav-text">港口信息管理</span></a></div>
+      </div>
+    </nav>
+  </div>
+
+  <div class="main-content" id="mainContent">
+    <div class="top-navbar">
+      <div class="d-flex align-items-center">
+        <button class="toggle-btn" id="toggleSidebar"><i class="bi bi-list"></i></button>
+        <h5 class="mb-0 ms-3">库存调拨列表</h5>
+      </div>
+      <div class="d-flex align-items-center">
+        <span class="text-muted me-3">管理员</span>
+        <div class="dropdown">
+          <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown"><i class="bi bi-person-circle me-1"></i></button>
+          <ul class="dropdown-menu">
+            <li><a class="dropdown-item" href="#"><i class="bi bi-gear me-2"></i>设置</a></li>
+            <li><hr class="dropdown-divider"></li>
+            <li><a class="dropdown-item" href="#"><i class="bi bi-box-arrow-right me-2"></i>退出</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="page-wrap">
+      <div class="d-flex align-items-center justify-content-between mb-3">
+        <div>
+          <div class="breadcrumb-text">库存中心</div>
+          <div class="page-title">渠道库存调拨列表</div>
+        </div>
+        
+      </div>
+
+      <!-- 查询区域 -->
+      <div class="card-section">
+        <div class="fw-bold text-secondary mb-2">查询条件</div>
+        <div class="row g-3 align-items-end">
+          <div class="col-lg-3 col-md-4">
+            <label class="form-label">调拨单号：</label>
+            <input type="text" class="form-control" id="searchOrderNo" placeholder="精确调拨单号">
+          </div>
+          <div class="col-lg-3 col-md-4">
+            <label class="form-label">备货仓：</label>
+            <select class="form-select" id="searchWarehouse">
+              <option value="">全部</option>
+            </select>
+          </div>
+          <div class="col-lg-3 col-md-4">
+            <label class="form-label">调拨商品SKU：</label>
+            <textarea class="form-control" id="searchSku" rows="1" placeholder="可多条换行/逗号分隔"></textarea>
+          </div>
+          <div class="col-lg-3 col-md-4">
+            <label class="form-label">调入渠道：</label>
+            <input list="channelList" class="form-control" id="searchInboundChannel" placeholder="名称模糊下拉">
+          </div>
+          <div class="col-lg-3 col-md-4">
+            <label class="form-label">调出渠道：</label>
+            <input list="channelList" class="form-control" id="searchOutboundChannel" placeholder="名称模糊下拉">
+          </div>
+          <div class="col-lg-3 col-md-4">
+            <label class="form-label">状态：</label>
+            <select class="form-select" id="searchStatus">
+              <option value="全部">全部</option>
+              <option value="待审批">待审批</option>
+              <option value="待处理">待处理</option>
+              <option value="已完成">已完成</option>
+            </select>
+          </div>
+          <div class="col-lg-3 col-md-4 text-end ms-auto">
+            <button class="btn btn-outline-secondary me-2" onclick="resetSearch()">重置</button>
+            <button class="btn btn-primary" onclick="doSearch()">查询</button>
+          </div>
+        </div>
+        <datalist id="channelList"></datalist>
+      </div>
+
+      <!-- 查询结果 -->
+      <div class="table-card mt-3">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <div class="fw-bold">调拨单列表
+
+          </div>
+
+          <div class="text-muted small">
+            <button class="btn btn-primary btn-sm" onclick="goCreateTransfer()">新增调拨单</button>
+        </div>
+        </div>
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0">
+            <thead>
+              <tr>
+                <th>调拨单号</th>
+                <th>状态</th>
+                <th>调拨商品SKU</th>
+                <th>调入渠道</th>
+                <th>调出渠道</th>
+                <th>调出件数</th>
+                <th>调入件数</th>
+                <th>审批单号</th>
+                <th>创建人</th>
+                <th>创建时间</th>
+                <th>操作</th>
+              </tr>
+            </thead>
+            <tbody id="transferTableBody">
+              <tr><td colspan="11" class="text-center text-muted">加载中...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 详情弹窗 -->
+  <div class="modal fade" id="detailModal" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">调拨单详情</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <div class="mb-2"><strong>调拨单号：</strong><span id="detailOrderNo"></span></div>
+          <div class="mb-2"><strong>备货仓：</strong><span id="detailWarehouse"></span></div>
+          <div class="mb-2"><strong>状态：</strong><span id="detailStatus"></span></div>
+          <div class="mb-2"><strong>审批单号：</strong><a href="#" target="_blank" id="detailApproval"></a></div>
+          <div class="mb-2"><strong>创建人：</strong><span id="detailCreator"></span></div>
+          <div class="mb-2"><strong>创建时间：</strong><span id="detailTime"></span></div>
+          <hr/>
+          <div class="fw-bold mb-2">调出商品</div>
+          <div id="detailOutbound"></div>
+          <div class="fw-bold mt-3 mb-2">调入商品</div>
+          <div id="detailInbound"></div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-primary" data-bs-dismiss="modal">关闭</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    document.getElementById('toggleSidebar').addEventListener('click', () => {
+      const sidebar = document.getElementById('sidebar');
+      const mainContent = document.getElementById('mainContent');
+      sidebar.classList.toggle('collapsed');
+      mainContent.classList.toggle('expanded');
+    });
+
+    // 模拟数据 + 本地存储
+    const warehouses = [
+      { code: 'WH001', name: '上海备货仓' },
+      { code: 'TH001', name: '泰国中心仓1号' },
+      { code: 'WH002', name: '宁波备货仓' }
+    ];
+    const channels = [
+      { code: 'WH001-HT001', name: 'WH001-海天集团' },
+      { code: 'TH001-BYD001', name: '泰国中心仓1号-比亚迪' },
+      { code: 'WH002-CT000', name: 'WH002-默认客户' },
+      { code: 'VN001-CUSTB', name: '河内-客户B' }
+    ];
+    const defaultTransferList = [
+      {
+        orderNo: 'TRF20260110001',
+        status: '待审批',
+        warehouse: 'WH001',
+        skuList: ['80000323153'],
+        inboundChannels: ['WH001-HT001'],
+        outboundChannels: ['WH002-CT000'],
+        outQty: 35,
+        inQty: 35,
+        approvalNo: 'JS-202601-001',
+        creator: 'admin',
+        time: '2026-01-10 10:00',
+        outboundDetails: [{ sku: '80000323153', channel: 'WH002-CT000', available: 40, qty: 35 }],
+        inboundDetails: [{ sku: '80000323153', channel: 'WH001-HT001', qty: 35 }]
+      },
+      {
+        orderNo: 'TRF20260110002',
+        status: '待处理',
+        warehouse: 'TH001',
+        skuList: ['8000013963','8000013964','8000013965','8000013966','8000013967','8000013968'],
+        inboundChannels: ['TH001-BYD001','VN001-CUSTB','WH002-CT000','WH001-HT001','TH001-BYD002','TH001-BYD003'],
+        outboundChannels: ['WH002-CT000','VN001-CUSTB'],
+        outQty: 120,
+        inQty: 120,
+        approvalNo: 'JS-202601-002',
+        creator: 'Bydcom',
+        time: '2026-01-10 12:30',
+        outboundDetails: [
+          { sku: '8000013963', channel: 'WH002-CT000', available: 80, qty: 60 },
+          { sku: '8000013964', channel: 'VN001-CUSTB', available: 70, qty: 60 }
+        ],
+        inboundDetails: [
+          { sku: '8000013963', channel: 'TH001-BYD001', qty: 40 },
+          { sku: '8000013964', channel: 'VN001-CUSTB', qty: 40 },
+          { sku: '8000013963', channel: 'WH001-HT001', qty: 20 },
+          { sku: '8000013964', channel: 'WH002-CT000', qty: 20 }
+        ]
+      },
+      {
+        orderNo: 'TRF20260110003',
+        status: '已完成',
+        warehouse: 'WH002',
+        skuList: ['80000323149','80000323150'],
+        inboundChannels: ['WH001-HT001'],
+        outboundChannels: ['WH002-CT000'],
+        outQty: 60,
+        inQty: 60,
+        approvalNo: 'JS-202601-003',
+        creator: 'system',
+        time: '2026-01-09 18:00',
+        outboundDetails: [
+          { sku: '80000323149', channel: 'WH002-CT000', available: 60, qty: 30 },
+          { sku: '80000323150', channel: 'WH002-CT000', available: 60, qty: 30 }
+        ],
+        inboundDetails: [
+          { sku: '80000323149', channel: 'WH001-HT001', qty: 30 },
+          { sku: '80000323150', channel: 'WH001-HT001', qty: 30 }
+        ]
+      }
+    ];
+
+    function loadTransferList() {
+      const cache = localStorage.getItem('transferListCache');
+      if (cache) {
+        try { return JSON.parse(cache); } catch (e) { return [...defaultTransferList]; }
+      }
+      return [...defaultTransferList];
+    }
+    function saveTransferList(list) {
+      localStorage.setItem('transferListCache', JSON.stringify(list));
+    }
+
+    let transferList = loadTransferList();
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const prefill = {
+      sku: urlParams.get('sku') || '',
+      warehouse: urlParams.get('warehouse') || '',
+      channelCode: urlParams.get('channelCode') || '',
+      channelName: urlParams.get('channelName') || '',
+      available: urlParams.get('available') || ''
+    };
+
+    function initFilters() {
+      const whSelect = document.getElementById('searchWarehouse');
+      whSelect.innerHTML = '<option value=\"\">全部</option>' + warehouses.map(w => `<option value=\"${w.code}\">${w.name}</option>`).join('');
+      const channelList = document.getElementById('channelList');
+      channelList.innerHTML = channels.map(c => `<option value=\"${c.name}\">${c.name}</option>`).join('');
+      if (prefill.warehouse) whSelect.value = prefill.warehouse;
+      if (prefill.sku) document.getElementById('searchSku').value = prefill.sku;
+      if (prefill.channelName) document.getElementById('searchOutboundChannel').value = prefill.channelName;
+    }
+
+    function splitInput(val) {
+      return val.split(/[\n,，\s]+/).map(v => v.trim()).filter(Boolean);
+    }
+
+    function ellipsisList(arr) {
+      if (!arr || !arr.length) return '-';
+      if (arr.length <= 5) return arr.join('<br/>');
+      return arr.slice(0,5).join('<br/>') + '<br/>...';
+    }
+
+    function renderTable(list = transferList) {
+      const tbody = document.getElementById('transferTableBody');
+      if (!tbody) return;
+      tbody.innerHTML = list.map(item => `
+        <tr>
+          <td>${item.orderNo}</td>
+          <td><span class="badge-status status-${item.status}">${item.status}</span></td>
+          <td>${ellipsisList(item.skuList)}</td>
+          <td>${ellipsisList(item.inboundChannels)}</td>
+          <td>${ellipsisList(item.outboundChannels)}</td>
+          <td>${item.outQty}</td>
+          <td>${item.inQty}</td>
+          <td><a href="https://joysky.example/approval/${item.approvalNo}" target="_blank">${item.approvalNo}</a></td>
+          <td>${item.creator}</td>
+          <td>${item.time}</td>
+          <td>${renderActions(item)}</td>
+        </tr>
+      `).join('') || `<tr><td colspan="11" class="text-center text-muted">暂无数据</td></tr>`;
+    }
+
+    function renderActions(item) {
+      const detailBtn = `<button class="btn btn-link p-0 me-2" onclick="openDetail('${item.orderNo}')">详情</button>`;
+      if (item.status === '待审批' || item.status === '待处理') {
+        return `<button class="btn btn-link text-danger p-0 me-2" onclick="cancelTransfer('${item.orderNo}')">取消</button>${detailBtn}`;
+      }
+      return detailBtn;
+    }
+
+    function doSearch() {
+      const orderNo = document.getElementById('searchOrderNo').value.trim();
+      const warehouse = document.getElementById('searchWarehouse').value;
+      const skuList = splitInput(document.getElementById('searchSku').value);
+      const inCh = document.getElementById('searchInboundChannel').value.trim();
+      const outCh = document.getElementById('searchOutboundChannel').value.trim();
+      const status = document.getElementById('searchStatus').value;
+      const result = transferList.filter(item => {
+        if (orderNo && item.orderNo !== orderNo) return false;
+        if (warehouse && item.warehouse !== warehouse) return false;
+        if (skuList.length && !skuList.some(s => item.skuList.includes(s))) return false;
+        if (inCh && !item.inboundChannels.some(c => c.includes(inCh))) return false;
+        if (outCh && !item.outboundChannels.some(c => c.includes(outCh))) return false;
+        if (status !== '全部' && item.status !== status) return false;
+        return true;
+      });
+      renderTable(result);
+    }
+
+    function resetSearch() {
+      document.getElementById('searchOrderNo').value = '';
+      document.getElementById('searchWarehouse').value = '';
+      document.getElementById('searchSku').value = '';
+      document.getElementById('searchInboundChannel').value = '';
+      document.getElementById('searchOutboundChannel').value = '';
+      document.getElementById('searchStatus').value = '全部';
+      renderTable(transferList);
+    }
+
+    function goCreateTransfer() {
+      window.location.href = 'inventory-transfer-create.html';
+    }
+
+    function openDetail(orderNo) {
+      window.location.href = `inventory-transfer-detail.html?orderNo=${orderNo}`;
+    }
+
+    function cancelTransfer(orderNo) {
+      if (!confirm('确认取消该调拨单？')) return;
+      transferList = transferList.map(i => i.orderNo === orderNo ? { ...i, status: '已完成' } : i);
+      saveTransferList(transferList);
+      renderTable(transferList);
+      alert('已取消调拨单，释放调出预占并取消审批（示例，无真实接口）');
+    }
+
+    initFilters();
+    renderTable(transferList);
+    if (prefill.sku || prefill.warehouse || prefill.channelName) doSearch();
+  </script>
+</body>
+</html>

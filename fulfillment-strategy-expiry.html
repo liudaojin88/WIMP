@@ -423,21 +423,21 @@
                     <div class="col-md-6">
                       <label class="form-label">临期天数</label>
                       <div class="input-group">
-                        <select class="form-select calc-type" data-target="linqi">
+                        <select class="form-select calc-type" data-target="linqi" required>
                           <option value="percent">效期百分比</option>
                           <option value="days">允许天数</option>
                         </select>
-                        <input type="number" class="form-control calc-value" data-target="linqi" min="0" placeholder="数值">
+                        <input type="number" class="form-control calc-value" data-target="linqi" min="0" placeholder="数值" required>
                       </div>
                     </div>
                     <div class="col-md-6">
                       <label class="form-label">预警天数</label>
                       <div class="input-group">
-                        <select class="form-select calc-type" data-target="yujing">
+                        <select class="form-select calc-type" data-target="yujing" required>
                           <option value="percent">效期百分比</option>
                           <option value="days">允许天数</option>
                         </select>
-                        <input type="number" class="form-control calc-value" data-target="yujing" min="0" placeholder="数值">
+                        <input type="number" class="form-control calc-value" data-target="yujing" min="0" placeholder="数值" required>
                       </div>
                     </div>
                     <div class="col-12">
@@ -465,10 +465,16 @@
     }
 
     function saveRule(mode) {
-      // 这里只做前端示例校验
       const country = document.getElementById('ruleCountry').value;
       if (!country) {
         alert('请选择备货国家');
+        return;
+      }
+      const types = Array.from(document.querySelectorAll('#ruleForm .calc-type'));
+      const vals = Array.from(document.querySelectorAll('#ruleForm .calc-value'));
+      const allFilled = types.every(s => s.value) && vals.every(v => v.value !== '');
+      if (!allFilled) {
+        alert('请填写完整的效期规则，所有计算类型和数值均为必填');
         return;
       }
       const modal = bootstrap.Modal.getInstance(document.getElementById('ruleModal'));

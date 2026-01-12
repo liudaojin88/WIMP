@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>新建渠道库存调拨 - WIMP</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+  <style>
+    :root { --brand-1:#667eea; --brand-2:#764ba2; --text-main:#2d3748; --text-sub:#6c757d; --card-radius:12px; --card-shadow:0 6px 20px rgba(0,0,0,0.06); }
+    body { font-family:'Microsoft YaHei',Arial,sans-serif; background:#f5f7fb; font-size:0.95rem; margin:0; }
+    .sidebar { position:fixed; top:0; left:0; height:100vh; width:15%; min-width:200px; background:linear-gradient(180deg,#667eea 0%,#764ba2 100%); color:#fff; z-index:1000; overflow-y:auto; transition:all .3s ease; }
+    .sidebar.collapsed { width:60px; min-width:60px; }
+    .sidebar-header { padding:20px; border-bottom:1px solid rgba(255,255,255,.1); text-align:center; }
+    .sidebar-header .logo { font-size:1.5rem; font-weight:700; margin-bottom:5px; }
+    .sidebar-header .subtitle { font-size:0.85rem; opacity:.8; }
+    .sidebar.collapsed .sidebar-header .subtitle, .sidebar.collapsed .nav-text { display:none; }
+    .nav-menu { padding:20px 0; }
+    .nav-item { margin-bottom:5px; }
+    .nav-link { color:rgba(255,255,255,.9); padding:12px 20px; display:flex; align-items:center; text-decoration:none; transition:all .3s ease; }
+    .nav-link:hover { background:rgba(255,255,255,.1); color:#fff; }
+    .nav-link.active { background:rgba(255,255,255,.2); color:#fff; border-right:4px solid #fff; }
+    .nav-link i { width:20px; margin-right:12px; text-align:center; }
+    .sidebar.collapsed .nav-link { padding:12px 30px; justify-content:center; }
+    .sidebar.collapsed .nav-link i { margin-right:0; }
+    .nav-group { margin-bottom:25px; }
+    .nav-group-title { padding:8px 20px; font-size:0.8rem; text-transform:uppercase; opacity:.8; font-weight:600; letter-spacing:.5px; }
+    .main-content { margin-left:15%; min-height:100vh; transition:all .3s ease; padding:0; }
+    .main-content.expanded { margin-left:60px; }
+    .top-navbar { background:#fff; padding:15px 20px; box-shadow:0 2px 10px rgba(0,0,0,.08); display:flex; justify-content:space-between; align-items:center; position:sticky; top:0; z-index:10; }
+    .toggle-btn { background:none; border:none; font-size:1.2rem; color:#495057; cursor:pointer; padding:6px 10px; border-radius:6px; transition:all .3s ease; }
+    .toggle-btn:hover { background:#f1f3f5; }
+    .page-wrap { padding:20px; }
+    .page-title { font-size:1.25rem; font-weight:700; color:var(--text-main); }
+    .breadcrumb-text { color:var(--text-sub); font-size:0.9rem; }
+    .card-section { background:#fff; border-radius:var(--card-radius); box-shadow:var(--card-shadow); padding:16px 18px; margin-bottom:16px; border:1px solid #eef2f7; }
+    .form-label { font-weight:600; color:#495057; margin-bottom:6px; }
+    .btn-primary { background:linear-gradient(90deg,var(--brand-1),var(--brand-2)); border:none; box-shadow:0 4px 12px rgba(102,126,234,.35); }
+    .btn-outline-primary { color:var(--brand-1); border-color:var(--brand-1); }
+    .table-card { background:#fff; border-radius:var(--card-radius); box-shadow:var(--card-shadow); padding:12px 14px; border:1px solid #eef2f7; }
+    .table thead th { white-space:nowrap; font-weight:700; background:#f8fafc; color:#4a5568; border-bottom:1px solid #e5e7eb; }
+    .table tbody td { vertical-align:middle; white-space:nowrap; color:#2d3748; }
+    .table-hover tbody tr:hover { background:#f5f8ff; }
+    .badge-sum { background:#eef2ff; color:#4c51bf; border-radius:8px; padding:6px 10px; display:inline-block; }
+  </style>
+</head>
+<body>
+  <div class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="logo">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M12 2L2 7v10c0 5.55 3.84 9.74 9 11 5.16-1.26 9-5.45 9-11V7l-10-5z"/>
+          <path d="M9 12l2 2 4-4" stroke="white" stroke-width="2" fill="none"/>
+        </svg>
+        <span class="nav-text">WIMP</span>
+      </div>
+      <div class="subtitle">工采国际</div>
+    </div>
+    <nav class="nav-menu">
+      <div class="nav-group">
+        <div class="nav-group-title"><span class="nav-text">主要功能</span></div>
+        <div class="nav-item"><a href="dashboard.html" class="nav-link"><i class="bi bi-house-door"></i><span class="nav-text">系统首页</span></a></div>
+        <div class="nav-item"><a href="vietnam-order-list.html" class="nav-link"><i class="bi bi-list-ul"></i><span class="nav-text">越南订单列表</span></a></div>
+      </div>
+      <div class="nav-group">
+        <div class="nav-group-title"><span class="nav-text">履约管理</span></div>
+        <div class="nav-item"><a href="vietnam-delivery-list.html" class="nav-link"><i class="bi bi-truck"></i><span class="nav-text">越南末端派送列表</span></a></div>
+        <div class="nav-item"><a href="cross-border-batch-management.html" class="nav-link"><i class="bi bi-box-seam"></i><span class="nav-text">跨境批次发运管理</span></a></div>
+      </div>
+      <div class="nav-group">
+        <div class="nav-group-title"><span class="nav-text">库存中心</span></div>
+        <div class="nav-item"><a href="inventory-management.html" class="nav-link"><i class="bi bi-box"></i><span class="nav-text">库存管理</span></a></div>
+        <div class="nav-item"><a href="inventory-channel-management.html" class="nav-link"><i class="bi bi-diagram-2"></i><span class="nav-text">库存渠道管理</span></a></div>
+        <div class="nav-item"><a href="inventory-transfer-list.html" class="nav-link"><i class="bi bi-arrow-left-right"></i><span class="nav-text">库存调拨列表</span></a></div>
+        <div class="nav-item"><a href="inventory-transfer-create.html" class="nav-link active"><i class="bi bi-plus-square"></i><span class="nav-text">新建渠道调拨</span></a></div>
+      </div>
+      <div class="nav-group">
+        <div class="nav-group-title"><span class="nav-text">基础信息维护</span></div>
+        <div class="nav-item"><a href="port-management.html" class="nav-link"><i class="bi bi-geo-alt"></i><span class="nav-text">港口信息管理</span></a></div>
+      </div>
+    </nav>
+  </div>
+
+  <div class="main-content" id="mainContent">
+    <div class="top-navbar">
+      <div class="d-flex align-items-center">
+        <button class="toggle-btn" id="toggleSidebar"><i class="bi bi-list"></i></button>
+        <h5 class="mb-0 ms-3">新建渠道库存调拨</h5>
+      </div>
+      <div class="d-flex align-items-center">
+        <span class="text-muted me-3">管理员</span>
+        <div class="dropdown">
+          <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown"><i class="bi bi-person-circle me-1"></i></button>
+          <ul class="dropdown-menu">
+            <li><a class="dropdown-item" href="#"><i class="bi bi-gear me-2"></i>设置</a></li>
+            <li><hr class="dropdown-divider"></li>
+            <li><a class="dropdown-item" href="#"><i class="bi bi-box-arrow-right me-2"></i>退出</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="page-wrap">
+      <div class="breadcrumb-text">库存中心 / 渠道库存调拨</div>
+      <div class="page-title mb-3">新建调拨单</div>
+
+      <!-- 备货仓信息 -->
+      <div class="card-section">
+        <div class="fw-bold text-secondary mb-2">备货仓信息</div>
+        <div class="row g-3">
+          <div class="col-md-4">
+            <label class="form-label">备货仓 <span class="text-danger">*</span></label>
+            <select class="form-select" id="warehouseSelect">
+              <option value="">请选择备货仓</option>
+            </select>
+          </div>
+          <div class="col-md-8 d-flex align-items-end justify-content-end">
+            <button class="btn btn-outline-primary btn-sm" onclick="backList()">返回列表</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 调出商品 -->
+      <div class="card-section">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <div class="fw-bold text-secondary">调出商品</div>
+          <button class="btn btn-outline-primary btn-sm" onclick="addOutboundRow()">新增调出商品</button>
+        </div>
+        <div class="table-responsive">
+          <table class="table table-bordered align-middle mb-0">
+            <thead class="table-light">
+              <tr>
+                <th style="width:18%">商品SKU</th>
+                <th style="width:20%">调出渠道</th>
+                <th style="width:15%">可调拨现货</th>
+                <th style="width:18%">调拨数量</th>
+                <th style="width:10%">操作</th>
+              </tr>
+            </thead>
+            <tbody id="outboundBody">
+              <tr>
+                <td><input list="skuOptions" class="form-control outbound-sku" placeholder="选择SKU"></td>
+                <td><input list="channelOptions" class="form-control outbound-channel" placeholder="选择调出渠道"></td>
+                <td class="text-center avail-cell">0</td>
+                <td><input type="number" class="form-control outbound-qty" min="0" value="0"></td>
+                <td><button class="btn btn-sm btn-outline-danger" onclick="removeRow(this)">删除</button></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="mt-2 badge-sum" id="outSummary">商品：-，调出库存汇总：0</div>
+      </div>
+
+      <!-- 调入商品 -->
+      <div class="card-section">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <div class="fw-bold text-secondary">调入商品</div>
+          <button class="btn btn-outline-primary btn-sm" onclick="addInboundRow()">新增调入记录</button>
+        </div>
+        <div class="table-responsive">
+          <table class="table table-bordered align-middle mb-0">
+            <thead class="table-light">
+              <tr>
+                <th style="width:18%">商品SKU</th>
+                <th style="width:20%">调入渠道</th>
+                <th style="width:18%">调入数量</th>
+                <th style="width:10%">操作</th>
+              </tr>
+            </thead>
+            <tbody id="inboundBody">
+              <tr>
+                <td><input list="skuOptions" class="form-control inbound-sku" placeholder="选择SKU"></td>
+                <td><input list="channelOptions" class="form-control inbound-channel" placeholder="选择调入渠道"></td>
+                <td><input type="number" class="form-control inbound-qty" min="0" value="0"></td>
+                <td><button class="btn btn-sm btn-outline-danger" onclick="removeRow(this)">删除</button></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="mt-2 badge-sum" id="inSummary">商品：-，调入汇总：0</div>
+      </div>
+
+      <!-- 提交 -->
+      <div class="card-section d-flex justify-content-end gap-2">
+        <button class="btn btn-outline-secondary" onclick="backList()">取消</button>
+        <button class="btn btn-primary" onclick="submitTransfer()">提交调拨</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    const warehouses = [
+      { code: 'WH001', name: '上海备货仓', skus: ['80000323153','80000323160','80000323149'] },
+      { code: 'TH001', name: '泰国中心仓1号', skus: ['8000013963','8000013964'] },
+      { code: 'WH002', name: '宁波备货仓', skus: ['80000323149','80000323150','80000323142'] }
+    ];
+    const channels = [
+      { code: 'WH001-HT001', name: 'WH001-海天集团', available: 60 },
+      { code: 'TH001-BYD001', name: '泰国中心仓1号-比亚迪', available: 120 },
+      { code: 'WH002-CT000', name: 'WH002-默认客户', available: 80 },
+      { code: 'VN001-CUSTB', name: '河内-客户B', available: 50 }
+    ];
+    const urlParams = new URLSearchParams(window.location.search);
+    const prefillSku = urlParams.get('sku') || '';
+    const prefillWarehouse = urlParams.get('warehouse') || '';
+    const prefillChannel = urlParams.get('channelName') || '';
+    const prefillAvailable = Number(urlParams.get('available') || 0);
+
+    document.getElementById('toggleSidebar').addEventListener('click', () => {
+      document.getElementById('sidebar').classList.toggle('collapsed');
+      document.getElementById('mainContent').classList.toggle('expanded');
+    });
+
+    function initOptions() {
+      const whSelect = document.getElementById('warehouseSelect');
+      whSelect.innerHTML = '<option value=\"\">请选择备货仓</option>' + warehouses.map(w => `<option value=\"${w.code}\">${w.name}</option>`).join('');
+      if (prefillWarehouse) whSelect.value = prefillWarehouse;
+      renderSkuOptions(whSelect.value);
+      const channelDatalist = document.getElementById('channelOptions');
+      channelDatalist.innerHTML = channels.map(c => `<option value=\"${c.name}\">${c.name}</option>`).join('');
+      if (prefillSku) document.querySelector('.outbound-sku').value = prefillSku;
+      if (prefillChannel) document.querySelector('.outbound-channel').value = prefillChannel;
+      if (prefillAvailable) document.querySelector('.avail-cell').innerText = prefillAvailable;
+      calcSummary();
+    }
+
+    function renderSkuOptions(warehouseCode) {
+      const wh = warehouses.find(w => w.code === warehouseCode);
+      const skuDatalist = document.getElementById('skuOptions');
+      skuDatalist.innerHTML = wh ? wh.skus.map(s => `<option value=\"${s}\">${s}</option>`).join('') : '';
+    }
+
+    document.getElementById('warehouseSelect').addEventListener('change', (e) => {
+      renderSkuOptions(e.target.value);
+      syncInboundSkusFromOutbound();
+    });
+
+    function addOutboundRow() {
+      const body = document.getElementById('outboundBody');
+      const row = document.createElement('tr');
+      row.innerHTML = `
+        <td><input list="skuOptions" class="form-control outbound-sku" placeholder="选择SKU"></td>
+        <td><input list="channelOptions" class="form-control outbound-channel" placeholder="选择调出渠道"></td>
+        <td class="text-center avail-cell">0</td>
+        <td><input type="number" class="form-control outbound-qty" min="0" value="0"></td>
+        <td><button class="btn btn-sm btn-outline-danger" onclick="removeRow(this)">删除</button></td>
+      `;
+      body.appendChild(row);
+    }
+
+    function addInboundRow() {
+      const body = document.getElementById('inboundBody');
+      const row = document.createElement('tr');
+      row.innerHTML = `
+        <td><input list="skuOptions" class="form-control inbound-sku" placeholder="选择SKU"></td>
+        <td><input list="channelOptions" class="form-control inbound-channel" placeholder="选择调入渠道"></td>
+        <td><input type="number" class="form-control inbound-qty" min="0" value="0"></td>
+        <td><button class="btn btn-sm btn-outline-danger" onclick="removeRow(this)">删除</button></td>
+      `;
+      body.appendChild(row);
+    }
+
+    function removeRow(btn) {
+      const row = btn.closest('tr');
+      const section = row.closest('tbody').id;
+      row.remove();
+      if (section === 'outboundBody') syncInboundSkusFromOutbound();
+      calcSummary();
+    }
+
+    function syncInboundSkusFromOutbound() {
+      const outboundSkus = Array.from(document.querySelectorAll('.outbound-sku')).map(i => i.value.trim()).filter(Boolean);
+      if (!outboundSkus.length) return;
+      const inboundRows = document.querySelectorAll('.inbound-sku');
+      inboundRows.forEach((input, idx) => { if (!input.value) input.value = outboundSkus[Math.min(idx, outboundSkus.length-1)]; });
+      calcSummary();
+    }
+
+    function calcSummary() {
+      const outboundRows = Array.from(document.querySelectorAll('#outboundBody tr'));
+      const summaryMap = {};
+      outboundRows.forEach(r => {
+        const sku = r.querySelector('.outbound-sku')?.value.trim();
+        const qty = Number(r.querySelector('.outbound-qty')?.value || 0);
+        if (!sku) return;
+        summaryMap[sku] = (summaryMap[sku] || 0) + qty;
+      });
+      const outboundText = Object.keys(summaryMap).length ? Object.entries(summaryMap).map(([k,v]) => `商品：${k}，调出汇总：${v}`).join('；') : '商品：-，调出库存汇总：0';
+      document.getElementById('outSummary').innerText = outboundText;
+
+      const inboundRows = Array.from(document.querySelectorAll('#inboundBody tr'));
+      const inMap = {};
+      inboundRows.forEach(r => {
+        const sku = r.querySelector('.inbound-sku')?.value.trim();
+        const qty = Number(r.querySelector('.inbound-qty')?.value || 0);
+        if (!sku) return;
+        inMap[sku] = (inMap[sku] || 0) + qty;
+      });
+      const inboundText = Object.keys(inMap).length ? Object.entries(inMap).map(([k,v]) => `商品：${k}，调入汇总：${v}`).join('；') : '商品：-，调入汇总：0';
+      document.getElementById('inSummary').innerText = inboundText;
+    }
+
+    document.getElementById('outboundBody').addEventListener('input', calcSummary);
+    document.getElementById('inboundBody').addEventListener('input', calcSummary);
+
+    function validateUnique(tbodySelector, skuClass, channelClass) {
+      const rows = Array.from(document.querySelectorAll(`${tbodySelector} tr`));
+      const set = new Set();
+      for (const r of rows) {
+        const sku = r.querySelector(skuClass)?.value.trim();
+        const ch = r.querySelector(channelClass)?.value.trim();
+        if (!sku || !ch) continue;
+        const key = `${sku}__${ch}`;
+        if (set.has(key)) return false;
+        set.add(key);
+      }
+      return true;
+    }
+
+    function submitTransfer() {
+      const wh = document.getElementById('warehouseSelect').value;
+      if (!wh) { alert('请选择备货仓'); return; }
+      const outboundRows = Array.from(document.querySelectorAll('#outboundBody tr'));
+      const inboundRows = Array.from(document.querySelectorAll('#inboundBody tr'));
+      if (!outboundRows.length) { alert('请至少添加一条调出商品'); return; }
+      for (const r of outboundRows) {
+        const sku = r.querySelector('.outbound-sku')?.value.trim();
+        const ch = r.querySelector('.outbound-channel')?.value.trim();
+        const qty = Number(r.querySelector('.outbound-qty')?.value || 0);
+        const avail = Number(r.querySelector('.avail-cell')?.innerText || 0);
+        if (!sku || !ch) { alert('调出商品与渠道必填'); return; }
+        if (qty <= 0) { alert('调出数量需大于0'); return; }
+        if (qty > avail && avail > 0) { alert('调出数量不可超过可调拨库存'); return; }
+      }
+      if (!validateUnique('#outboundBody','.outbound-sku','.outbound-channel')) { alert('调出记录商品+渠道需唯一'); return; }
+
+      if (!inboundRows.length) { alert('请添加调入记录'); return; }
+      if (!validateUnique('#inboundBody','.inbound-sku','.inbound-channel')) { alert('调入记录商品+渠道需唯一'); return; }
+      let outTotal = 0, inTotal = 0;
+      outboundRows.forEach(r => outTotal += Number(r.querySelector('.outbound-qty')?.value || 0));
+      inboundRows.forEach(r => {
+        const sku = r.querySelector('.inbound-sku')?.value.trim();
+        const qty = Number(r.querySelector('.inbound-qty')?.value || 0);
+        if (!sku || qty <= 0) { alert('调入商品与数量必填且>0'); return; }
+        inTotal += qty;
+      });
+      if (inTotal !== outTotal) { alert('调入总量需等于调出总量'); return; }
+
+      alert('已提交调拨，自动触发Joysky审批（示例，无真实接口）');
+      window.location.href = 'inventory-transfer-list.html';
+    }
+
+    function backList() {
+      window.location.href = 'inventory-transfer-list.html';
+    }
+
+    initOptions();
+    calcSummary();
+    if (prefillSku) syncInboundSkusFromOutbound();
+  </script>
+</body>
+</html>

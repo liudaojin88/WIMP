@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>调拨单详情 - WIMP</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+  <style>
+    :root { --brand-1:#667eea; --brand-2:#764ba2; --text-main:#2d3748; --text-sub:#6c757d; --card-radius:12px; --card-shadow:0 6px 20px rgba(0,0,0,0.06); }
+    body { font-family:'Microsoft YaHei',Arial,sans-serif; background:#f5f7fb; font-size:0.95rem; margin:0; }
+    .sidebar { position:fixed; top:0; left:0; height:100vh; width:15%; min-width:200px; background:linear-gradient(180deg,#667eea 0%,#764ba2 100%); color:#fff; z-index:1000; overflow-y:auto; transition:all .3s ease; }
+    .sidebar.collapsed { width:60px; min-width:60px; }
+    .sidebar-header { padding:20px; border-bottom:1px solid rgba(255,255,255,.1); text-align:center; }
+    .sidebar-header .logo { font-size:1.5rem; font-weight:700; margin-bottom:5px; }
+    .sidebar-header .subtitle { font-size:0.85rem; opacity:.8; }
+    .sidebar.collapsed .sidebar-header .subtitle, .sidebar.collapsed .nav-text { display:none; }
+    .nav-menu { padding:20px 0; }
+    .nav-item { margin-bottom:5px; }
+    .nav-link { color:rgba(255,255,255,.9); padding:12px 20px; display:flex; align-items:center; text-decoration:none; transition:all .3s ease; }
+    .nav-link:hover { background:rgba(255,255,255,.1); color:#fff; }
+    .nav-link.active { background:rgba(255,255,255,.2); color:#fff; border-right:4px solid #fff; }
+    .nav-link i { width:20px; margin-right:12px; text-align:center; }
+    .sidebar.collapsed .nav-link { padding:12px 30px; justify-content:center; }
+    .sidebar.collapsed .nav-link i { margin-right:0; }
+    .nav-group { margin-bottom:25px; }
+    .nav-group-title { padding:8px 20px; font-size:0.8rem; text-transform:uppercase; opacity:.8; font-weight:600; letter-spacing:.5px; }
+    .main-content { margin-left:15%; min-height:100vh; transition:all .3s ease; padding:0; }
+    .main-content.expanded { margin-left:60px; }
+    .top-navbar { background:#fff; padding:15px 20px; box-shadow:0 2px 10px rgba(0,0,0,.08); display:flex; justify-content:space-between; align-items:center; position:sticky; top:0; z-index:10; }
+    .toggle-btn { background:none; border:none; font-size:1.2rem; color:#495057; cursor:pointer; padding:6px 10px; border-radius:6px; transition:all .3s ease; }
+    .toggle-btn:hover { background:#f1f3f5; }
+    .page-wrap { padding:20px; }
+    .page-title { font-size:1.25rem; font-weight:700; color:var(--text-main); }
+    .breadcrumb-text { color:var(--text-sub); font-size:0.9rem; }
+    .card-section { background:#fff; border-radius:var(--card-radius); box-shadow:var(--card-shadow); padding:16px 18px; margin-bottom:16px; border:1px solid #eef2f7; }
+    .form-label { font-weight:600; color:#495057; margin-bottom:6px; }
+    .table-card { background:#fff; border-radius:var(--card-radius); box-shadow:var(--card-shadow); padding:12px 14px; border:1px solid #eef2f7; }
+    .table thead th { white-space:nowrap; font-weight:700; background:#f8fafc; color:#4a5568; border-bottom:1px solid #e5e7eb; }
+    .table tbody td { vertical-align:middle; white-space:nowrap; color:#2d3748; }
+    .badge-status { padding:4px 8px; border-radius:6px; font-size:0.8rem; }
+    .status-待审批 { background:#fff5e6; color:#d48806; }
+    .status-待处理 { background:#e6f7ff; color:#1677ff; }
+    .status-已完成 { background:#e8f5e9; color:#2e7d32; }
+  </style>
+</head>
+<body>
+  <div class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="logo">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M12 2L2 7v10c0 5.55 3.84 9.74 9 11 5.16-1.26 9-5.45 9-11V7l-10-5z"/>
+          <path d="M9 12l2 2 4-4" stroke="white" stroke-width="2" fill="none"/>
+        </svg>
+        <span class="nav-text">WIMP</span>
+      </div>
+      <div class="subtitle">工采国际</div>
+    </div>
+    <nav class="nav-menu">
+      <div class="nav-group">
+        <div class="nav-group-title"><span class="nav-text">主要功能</span></div>
+        <div class="nav-item"><a href="dashboard.html" class="nav-link"><i class="bi bi-house-door"></i><span class="nav-text">系统首页</span></a></div>
+        <div class="nav-item"><a href="vietnam-order-list.html" class="nav-link"><i class="bi bi-list-ul"></i><span class="nav-text">越南订单列表</span></a></div>
+      </div>
+      <div class="nav-group">
+        <div class="nav-group-title"><span class="nav-text">履约管理</span></div>
+        <div class="nav-item"><a href="vietnam-delivery-list.html" class="nav-link"><i class="bi bi-truck"></i><span class="nav-text">越南末端派送列表</span></a></div>
+        <div class="nav-item"><a href="cross-border-batch-management.html" class="nav-link"><i class="bi bi-box-seam"></i><span class="nav-text">跨境批次发运管理</span></a></div>
+      </div>
+      <div class="nav-group">
+        <div class="nav-group-title"><span class="nav-text">库存中心</span></div>
+        <div class="nav-item"><a href="inventory-management.html" class="nav-link"><i class="bi bi-box"></i><span class="nav-text">库存管理</span></a></div>
+        <div class="nav-item"><a href="inventory-channel-management.html" class="nav-link"><i class="bi bi-diagram-2"></i><span class="nav-text">库存渠道管理</span></a></div>
+        <div class="nav-item"><a href="inventory-transfer-list.html" class="nav-link"><i class="bi bi-arrow-left-right"></i><span class="nav-text">库存调拨列表</span></a></div>
+        <div class="nav-item"><a href="inventory-transfer-create.html" class="nav-link"><i class="bi bi-plus-square"></i><span class="nav-text">新建渠道调拨</span></a></div>
+        <div class="nav-item"><a href="inventory-transfer-detail.html" class="nav-link active"><i class="bi bi-file-earmark-text"></i><span class="nav-text">调拨单详情</span></a></div>
+      </div>
+      <div class="nav-group">
+        <div class="nav-group-title"><span class="nav-text">基础信息维护</span></div>
+        <div class="nav-item"><a href="port-management.html" class="nav-link"><i class="bi bi-geo-alt"></i><span class="nav-text">港口信息管理</span></a></div>
+      </div>
+    </nav>
+  </div>
+
+  <div class="main-content" id="mainContent">
+    <div class="top-navbar">
+      <div class="d-flex align-items-center">
+        <button class="toggle-btn" id="toggleSidebar"><i class="bi bi-list"></i></button>
+        <h5 class="mb-0 ms-3">调拨单详情</h5>
+      </div>
+      <div class="d-flex align-items-center">
+        <span class="text-muted me-3">管理员</span>
+        <div class="dropdown">
+          <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown"><i class="bi bi-person-circle me-1"></i></button>
+          <ul class="dropdown-menu">
+            <li><a class="dropdown-item" href="#"><i class="bi bi-gear me-2"></i>设置</a></li>
+            <li><hr class="dropdown-divider"></li>
+            <li><a class="dropdown-item" href="#"><i class="bi bi-box-arrow-right me-2"></i>退出</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="page-wrap">
+      <div class="breadcrumb-text">库存中心 / 渠道库存调拨 / 调拨单详情</div>
+      <div class="page-title mb-3" id="detailTitle">调拨单详情</div>
+
+      <!-- 头部信息 -->
+      <div class="card-section">
+        <div class="row g-3">
+          <div class="col-md-3"><label class="form-label">调拨单号</label><div id="infoOrderNo">-</div></div>
+          <div class="col-md-3"><label class="form-label">状态</label><div id="infoStatus">-</div></div>
+          <div class="col-md-3"><label class="form-label">审批单号</label><a href="#" target="_blank" id="infoApproval">-</a></div>
+          <div class="col-md-3"><label class="form-label">备货仓</label><div id="infoWarehouse">-</div></div>
+          <div class="col-md-3"><label class="form-label">创建人</label><div id="infoCreator">-</div></div>
+          <div class="col-md-3"><label class="form-label">创建时间</label><div id="infoTime">-</div></div>
+        </div>
+      </div>
+
+      <!-- 调出商品 -->
+      <div class="card-section">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <div class="fw-bold text-secondary">调出商品</div>
+          <div class="small text-muted" id="outSummaryText">调出汇总：-</div>
+        </div>
+        <div class="table-responsive">
+          <table class="table table-bordered align-middle mb-0">
+            <thead class="table-light">
+              <tr>
+                <th>SKU</th>
+                <th>调出渠道</th>
+                <th>可调拨现货</th>
+                <th>调拨数量</th>
+              </tr>
+            </thead>
+            <tbody id="outDetailBody">
+              <tr><td colspan="4" class="text-center text-muted">加载中...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- 调入商品 -->
+      <div class="card-section">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <div class="fw-bold text-secondary">调入商品</div>
+          <div class="small text-muted" id="inSummaryText">调入汇总：-</div>
+        </div>
+        <div class="table-responsive">
+          <table class="table table-bordered align-middle mb-0">
+            <thead class="table-light">
+              <tr>
+                <th>SKU</th>
+                <th>调入渠道</th>
+                <th>调入数量</th>
+              </tr>
+            </thead>
+            <tbody id="inDetailBody">
+              <tr><td colspan="3" class="text-center text-muted">加载中...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="card-section d-flex justify-content-end">
+        <button class="btn btn-outline-secondary me-2" onclick="goList()">返回列表</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    document.getElementById('toggleSidebar').addEventListener('click', () => {
+      document.getElementById('sidebar').classList.toggle('collapsed');
+      document.getElementById('mainContent').classList.toggle('expanded');
+    });
+
+    const detailParams = new URLSearchParams(window.location.search);
+    const orderNo = detailParams.get('orderNo');
+
+    const warehouses = [
+      { code: 'WH001', name: '上海备货仓' },
+      { code: 'TH001', name: '泰国中心仓1号' },
+      { code: 'WH002', name: '宁波备货仓' }
+    ];
+
+    const cache = localStorage.getItem('transferListCache');
+    const transferList = cache ? JSON.parse(cache) : [];
+    const target = transferList.find(i => i.orderNo === orderNo) || {};
+
+    function renderInfo() {
+      document.getElementById('infoOrderNo').innerText = target.orderNo || '-';
+      document.getElementById('infoStatus').innerHTML = target.status ? `<span class="badge-status status-${target.status}">${target.status}</span>` : '-';
+      const whName = warehouses.find(w => w.code === target.warehouse)?.name || target.warehouse || '-';
+      document.getElementById('infoWarehouse').innerText = whName;
+      document.getElementById('infoCreator').innerText = target.creator || '-';
+      document.getElementById('infoTime').innerText = target.time || '-';
+      const approval = document.getElementById('infoApproval');
+      approval.innerText = target.approvalNo || '-';
+      approval.href = target.approvalNo ? `https://joysky.example/approval/${target.approvalNo}` : '#';
+      document.getElementById('detailTitle').innerText = `调拨单详情 - ${target.orderNo || ''}`;
+    }
+
+    function renderOutbound() {
+      const body = document.getElementById('outDetailBody');
+      const list = target.outboundDetails || [];
+      const rows = list.map(i => `
+        <tr>
+          <td>${i.sku}</td>
+          <td>${i.channel}</td>
+          <td>${i.available ?? '-'}</td>
+          <td>${i.qty ?? '-'}</td>
+        </tr>
+      `).join('');
+      body.innerHTML = rows || `<tr><td colspan="4" class="text-center text-muted">暂无数据</td></tr>`;
+      const sum = list.reduce((s,i)=>s+(Number(i.qty)||0),0);
+      document.getElementById('outSummaryText').innerText = `调出汇总：${sum}`;
+    }
+
+    function renderInbound() {
+      const body = document.getElementById('inDetailBody');
+      const list = target.inboundDetails || [];
+      const rows = list.map(i => `
+        <tr>
+          <td>${i.sku}</td>
+          <td>${i.channel}</td>
+          <td>${i.qty ?? '-'}</td>
+        </tr>
+      `).join('');
+      body.innerHTML = rows || `<tr><td colspan="3" class="text-center text-muted">暂无数据</td></tr>`;
+      const sum = list.reduce((s,i)=>s+(Number(i.qty)||0),0);
+      document.getElementById('inSummaryText').innerText = `调入汇总：${sum}`;
+    }
+
+    function goList() {
+      window.location.href = 'inventory-transfer-list.html';
+    }
+
+    renderInfo();
+    renderOutbound();
+    renderInbound();
+  </script>
+</body>
+</html>
