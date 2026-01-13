@@ -322,7 +322,8 @@
         <div class="modal-body">
           <div class="mb-3">
             <label class="form-label">渠道编码 <span class="text-danger">*</span></label>
-            <input type="text" class="form-control" id="modalChannelCode" maxlength="35" placeholder="唯一且必填，长度≤35">
+            <input type="text" class="form-control" id="modalChannelCode" maxlength="35" placeholder="默认CH，格式：CH+国家代码+客户简称3字母，如 CHTHBYD" readonly>
+            <div class="form-text text-muted">编码规范：CH + 国家代码 + 客户简称3字母，例如：CHTHBYD；默认以 CH 开头且不可修改。</div>
           </div>
           <div class="mb-3">
             <label class="form-label">渠道名称 <span class="text-danger">*</span></label>
@@ -424,7 +425,8 @@
     function openCreateChannelModal() {
       editingChannelCode = null;
       document.getElementById('channelModalTitle').innerText = '新增渠道';
-      document.getElementById('modalChannelCode').value = '';
+      document.getElementById('modalChannelCode').value = 'CH';
+      document.getElementById('modalChannelCode').readOnly = true;
       document.getElementById('modalChannelName').value = '';
       document.getElementById('modalChannelCustomer').value = '';
       const modal = new bootstrap.Modal(document.getElementById('channelModal'));
@@ -437,6 +439,7 @@
       editingChannelCode = code;
       document.getElementById('channelModalTitle').innerText = '编辑渠道';
       document.getElementById('modalChannelCode').value = target.code;
+      document.getElementById('modalChannelCode').readOnly = true;
       document.getElementById('modalChannelName').value = target.name;
       document.getElementById('modalChannelCustomer').value = target.customerName;
       const modal = new bootstrap.Modal(document.getElementById('channelModal'));
@@ -451,6 +454,10 @@
 
       if (!codeInput) {
         alert('渠道编码为必填项');
+        return;
+      }
+      if (!codeInput.startsWith('CH')) {
+        alert('渠道编码必须以 CH 开头');
         return;
       }
       if (codeInput.length > 35) {
