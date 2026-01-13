@@ -125,10 +125,6 @@
             <label class="form-label">商品SKU <span class="text-danger">*</span></label>
             <input list="skuOptions" class="form-control" id="outboundSku" placeholder="选择SKU（随备货仓联动）">
           </div>
-          <div class="col-md-4">
-            <label class="form-label">调拨数量 <span class="text-danger">*</span></label>
-            <input type="number" class="form-control" id="transferQty" min="0" value="0">
-          </div>
           <div class="col-md-3 d-flex align-items-end">
             <div class="text-muted small">
               选择备货仓后将过滤可调拨SKU；数量将与第三区域调出渠道合计校验。
@@ -201,6 +197,15 @@
       { code: 'TH001', name: '泰国中心仓1号', skus: ['8000013963','8000013964'] },
       { code: 'WH002', name: '宁波备货仓', skus: ['80000323149','80000323150','80000323142'] }
     ];
+    const skuNameMap = {
+      '80000323153': '商品80000323153',
+      '80000323160': '商品80000323160',
+      '80000323149': '商品80000323149',
+      '80000323150': '商品80000323150',
+      '80000323142': '商品80000323142',
+      '8000013963': '商品8000013963',
+      '8000013964': '商品8000013964'
+    };
     const channelInventories = [
       { warehouse: 'WH001', sku: '80000323153', channelCode: 'WH001-HT001', channelName: 'WH001-海天集团', available: 60 },
       { warehouse: 'WH001', sku: '80000323160', channelCode: 'WH001-HT001', channelName: 'WH001-海天集团', available: 45 },
@@ -239,6 +244,7 @@
 
       // 预填
       if (prefillSku) document.getElementById('outboundSku').value = prefillSku;
+      updateSkuName();
       if (prefillAvailable) document.getElementById('transferQty').value = prefillAvailable;
       if (prefillChannel) {
         const firstOutRow = document.querySelector('#outChannelBody tr');
@@ -341,11 +347,19 @@
     document.getElementById('inChannelBody').addEventListener('input', calcSummary);
     document.getElementById('transferQty').addEventListener('input', calcSummary);
     document.getElementById('outboundSku').addEventListener('change', () => {
+      updateSkuName();
       document.querySelectorAll('#outChannelBody tr').forEach(updateOutRowAvailability);
       calcSummary();
     });
 
     // 汇总显示
+    function updateSkuName() {
+      const sku = document.getElementById('outboundSku').value.trim();
+      const name = skuNameMap[sku] || '-';
+      const hint = document.getElementById('skuNameHint');
+      if (hint) hint.innerText = `商品名称：${name}`;
+    }
+
     function calcSummary() {
       const outRows = Array.from(document.querySelectorAll('#outChannelBody tr'));
       const outSum = outRows.reduce((s, r) => s + Number(r.querySelector('.out-qty')?.value || 0), 0);
