@@ -672,114 +672,24 @@
       alert('批量开通文件已上传（示例，无真实接口）');
     }
 
-    // 渠道库存调拨
+    // 渠道库存调拨：跳转至新建调拨页并自动带入仓库、SKU、渠道与可用现货
     function onTransfer(btn) {
       const row = btn.closest('tr');
       const sku = row.dataset.sku || '';
+      const warehouse = row.dataset.warehouse || '';
       const channels = row.dataset.channels ? JSON.parse(row.dataset.channels) : [];
-      const outboundList = channels.filter(c => (c.available || 0) > 0);
-
-      const rowsHtml = outboundList.map((c, idx) => `
-        <tr>
-          <td>${sku}</td>
-          <td>${c.code}</td>
-          <td>${c.name}</td>
-          <td>${c.available || 0}</td>
-        </tr>
-      `).join('') || `<tr><td colspan="4" class="text-center text-muted">无可调出渠道</td></tr>`;
-
-      const modalHtml = `
-        <div class="modal fade" id="transferModal" tabindex="-1" style="z-index:1060;">
-          <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-              <div class="modal-header">
-                <h5 class="modal-title">渠道库存调拨 - SKU: ${sku}</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-              </div>
-              <div class="modal-body">
-                <div class="mb-3">
-                  <div class="fw-bold mb-2">调出渠道（可售库存>0）</div>
-                  <div class="table-responsive">
-                    <table class="table table-sm table-bordered align-middle mb-0">
-                      <thead class="table-light">
-                        <tr>
-                          <th>SKU</th><th>渠道编码</th><th>渠道名称</th><th>可售库存</th>
-                        </tr>
-                      </thead>
-                      <tbody>${rowsHtml}</tbody>
-                    </table>
-                  </div>
-                </div>
-                <div class="mb-2 d-flex align-items-center justify-content-between">
-                  <div class="fw-bold">调入渠道</div>
-                  <button class="btn btn-outline-primary btn-sm" onclick="addInboundRow()">新增调入渠道</button>
-                </div>
-                <div class="table-responsive">
-                  <table class="table table-sm table-bordered align-middle mb-0">
-                    <thead class="table-light">
-                      <tr>
-                        <th style="width:30%">调入渠道</th>
-                        <th style="width:20%">调入数量</th>
-                        <th style="width:10%">操作</th>
-                      </tr>
-                    </thead>
-                    <tbody id="inboundTableBody">
-                      <tr>
-                        <td><input type="text" class="form-control" placeholder="请输入渠道名称或编码"></td>
-                        <td><input type="number" class="form-control inbound-qty" min="0" placeholder="数量"></td>
-                        <td><button class="btn btn-sm btn-outline-danger" onclick="removeInboundRow(this)">删除</button></td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
-                <div class="form-text mt-2 text-muted">
-                  总调入数量需小于等于总调出可售库存：${outboundList.reduce((s,c)=>s+(c.available||0),0)}
-                </div>
-              </div>
-              <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
-                <button type="button" class="btn btn-primary" onclick="submitTransfer(${outboundList.reduce((s,c)=>s+(c.available||0),0)})">提交调拨</button>
-              </div>
-            </div>
-          </div>
-        </div>
-      `;
-      document.body.insertAdjacentHTML('beforeend', modalHtml);
-      const modal = new bootstrap.Modal(document.getElementById('transferModal'));
-      modal.show();
-      document.getElementById('transferModal').addEventListener('hidden.bs.modal', function() {
-        this.remove();
+      const firstAvailable = channels.find(c => (c.available || 0) > 0);
+      if (!firstAvailable) {
+        alert('该商品无可用调出渠道库存');
+        return;
+      }
+      const params = new URLSearchParams({
+        sku,
+        warehouse,
+        channelName: firstAvailable.name || '',
+        available: firstAvailable.available || 0
       });
-    }
-
-    function addInboundRow() {
-      const body = document.getElementById('inboundTableBody');
-      const row = document.createElement('tr');
-      row.innerHTML = `
-        <td><input type="text" class="form-control" placeholder="请输入渠道名称或编码"></td>
-        <td><input type="number" class="form-control inbound-qty" min="0" placeholder="数量"></td>
-        <td><button class="btn btn-sm btn-outline-danger" onclick="removeInboundRow(this)">删除</button></td>
-      `;
-      body.appendChild(row);
-    }
-    function removeInboundRow(btn) {
-      const row = btn.closest('tr');
-      row.remove();
-    }
-    function submitTransfer(maxQty) {
-      const qtyInputs = Array.from(document.querySelectorAll('.inbound-qty'));
-      const total = qtyInputs.reduce((sum, input) => sum + (Number(input.value) || 0), 0);
-      if (total <= 0) {
-        alert('请输入调入数量');
-        return;
-      }
-      if (total > maxQty) {
-        alert(`总调入数量不可超过可调出总量：${maxQty}`);
-        return;
-      }
-      const modal = bootstrap.Modal.getInstance(document.getElementById('transferModal'));
-      modal.hide();
-      alert('调拨提交成功（示例，未接真实接口）');
+      window.location.href = `inventory-transfer-create.html?${params.toString()}`;
     }
   </script>
 </body>

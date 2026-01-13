@@ -104,103 +104,113 @@
       <div class="breadcrumb-text">库存中心 / 渠道库存调拨</div>
       <div class="page-title mb-3">新建调拨单</div>
 
-      <!-- 备货仓信息 -->
+      <!-- 第一区域：备货仓信息 -->
       <div class="card-section">
-        <div class="fw-bold text-secondary mb-2">备货仓信息</div>
+        <div class="fw-bold text-secondary mb-2">调拨备货仓信息</div>
         <div class="row g-3">
           <div class="col-md-4">
             <label class="form-label">备货仓 <span class="text-danger">*</span></label>
             <select class="form-select" id="warehouseSelect">
               <option value="">请选择备货仓</option>
             </select>
+          </div>  
+        </div>
+      </div>
+
+      <!-- 第二区域：调拨商品信息 -->
+      <div class="card-section">
+        <div class="fw-bold text-secondary mb-2">调拨商品信息</div>
+        <div class="row g-3">
+          <div class="col-md-5">
+            <label class="form-label">商品SKU <span class="text-danger">*</span></label>
+            <input list="skuOptions" class="form-control" id="outboundSku" placeholder="选择SKU（随备货仓联动）">
           </div>
-          <div class="col-md-8 d-flex align-items-end justify-content-end">
-            <button class="btn btn-outline-primary btn-sm" onclick="backList()">返回列表</button>
+          <div class="col-md-4">
+            <label class="form-label">调拨数量 <span class="text-danger">*</span></label>
+            <input type="number" class="form-control" id="transferQty" min="0" value="0">
+          </div>
+          <div class="col-md-3 d-flex align-items-end">
+            <div class="text-muted small">
+              选择备货仓后将过滤可调拨SKU；数量将与第三区域调出渠道合计校验。
+            </div>
           </div>
         </div>
       </div>
 
-      <!-- 调出商品 -->
+      <!-- 第三区域：调出渠道库存 -->
       <div class="card-section">
         <div class="d-flex justify-content-between align-items-center mb-2">
-          <div class="fw-bold text-secondary">调出商品</div>
-          <button class="btn btn-outline-primary btn-sm" onclick="addOutboundRow()">新增调出商品</button>
+          <div class="fw-bold text-secondary">调出渠道库存</div>
+          <button class="btn btn-outline-primary btn-sm" onclick="addOutChannelRow()">新增调出渠道</button>
         </div>
         <div class="table-responsive">
           <table class="table table-bordered align-middle mb-0">
             <thead class="table-light">
               <tr>
-                <th style="width:18%">商品SKU</th>
-                <th style="width:20%">调出渠道</th>
-                <th style="width:15%">可调拨现货</th>
-                <th style="width:18%">调拨数量</th>
-                <th style="width:10%">操作</th>
+                <th style="width:28%">渠道</th>
+                <th style="width:18%">可调拨现货</th>
+                <th style="width:18%">调出数量</th>
+                <th style="width:12%">操作</th>
               </tr>
             </thead>
-            <tbody id="outboundBody">
-              <tr>
-                <td><input list="skuOptions" class="form-control outbound-sku" placeholder="选择SKU"></td>
-                <td><input list="channelOptions" class="form-control outbound-channel" placeholder="选择调出渠道"></td>
-                <td class="text-center avail-cell">0</td>
-                <td><input type="number" class="form-control outbound-qty" min="0" value="0"></td>
-                <td><button class="btn btn-sm btn-outline-danger" onclick="removeRow(this)">删除</button></td>
-              </tr>
+            <tbody id="outChannelBody">
             </tbody>
           </table>
         </div>
-        <div class="mt-2 badge-sum" id="outSummary">商品：-，调出库存汇总：0</div>
+        <div class="mt-2 badge-sum" id="outChannelsSummary">调出渠道合计：0</div>
       </div>
 
-      <!-- 调入商品 -->
+      <!-- 第四区域：调入渠道库存 -->
       <div class="card-section">
         <div class="d-flex justify-content-between align-items-center mb-2">
-          <div class="fw-bold text-secondary">调入商品</div>
-          <button class="btn btn-outline-primary btn-sm" onclick="addInboundRow()">新增调入记录</button>
+          <div class="fw-bold text-secondary">调入渠道库存</div>
+          <button class="btn btn-outline-primary btn-sm" onclick="addInChannelRow()">新增调入渠道</button>
         </div>
         <div class="table-responsive">
           <table class="table table-bordered align-middle mb-0">
             <thead class="table-light">
               <tr>
-                <th style="width:18%">商品SKU</th>
-                <th style="width:20%">调入渠道</th>
-                <th style="width:18%">调入数量</th>
-                <th style="width:10%">操作</th>
+                <th style="width:30%">调入渠道</th>
+                <th style="width:20%">调入数量</th>
+                <th style="width:12%">操作</th>
               </tr>
             </thead>
-            <tbody id="inboundBody">
-              <tr>
-                <td><input list="skuOptions" class="form-control inbound-sku" placeholder="选择SKU"></td>
-                <td><input list="channelOptions" class="form-control inbound-channel" placeholder="选择调入渠道"></td>
-                <td><input type="number" class="form-control inbound-qty" min="0" value="0"></td>
-                <td><button class="btn btn-sm btn-outline-danger" onclick="removeRow(this)">删除</button></td>
-              </tr>
+            <tbody id="inChannelBody">
             </tbody>
           </table>
         </div>
-        <div class="mt-2 badge-sum" id="inSummary">商品：-，调入汇总：0</div>
+        <div class="mt-2 badge-sum" id="inChannelsSummary">调入渠道合计：0</div>
       </div>
+
+      <datalist id="skuOptions"></datalist>
+      <datalist id="channelOptions"></datalist>
 
       <!-- 提交 -->
       <div class="card-section d-flex justify-content-end gap-2">
         <button class="btn btn-outline-secondary" onclick="backList()">取消</button>
-        <button class="btn btn-primary" onclick="submitTransfer()">提交调拨</button>
+        <button class="btn btn-primary" onclick="submitTransfer()">提交</button>
       </div>
     </div>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script>
+    // 数据示例：备货仓、SKU与渠道库存
     const warehouses = [
       { code: 'WH001', name: '上海备货仓', skus: ['80000323153','80000323160','80000323149'] },
       { code: 'TH001', name: '泰国中心仓1号', skus: ['8000013963','8000013964'] },
       { code: 'WH002', name: '宁波备货仓', skus: ['80000323149','80000323150','80000323142'] }
     ];
-    const channels = [
-      { code: 'WH001-HT001', name: 'WH001-海天集团', available: 60 },
-      { code: 'TH001-BYD001', name: '泰国中心仓1号-比亚迪', available: 120 },
-      { code: 'WH002-CT000', name: 'WH002-默认客户', available: 80 },
-      { code: 'VN001-CUSTB', name: '河内-客户B', available: 50 }
+    const channelInventories = [
+      { warehouse: 'WH001', sku: '80000323153', channelCode: 'WH001-HT001', channelName: 'WH001-海天集团', available: 60 },
+      { warehouse: 'WH001', sku: '80000323160', channelCode: 'WH001-HT001', channelName: 'WH001-海天集团', available: 45 },
+      { warehouse: 'WH002', sku: '80000323149', channelCode: 'WH002-CT000', channelName: 'WH002-默认客户', available: 80 },
+      { warehouse: 'WH002', sku: '80000323150', channelCode: 'WH002-CT000', channelName: 'WH002-默认客户', available: 60 },
+      { warehouse: 'TH001', sku: '8000013963', channelCode: 'TH001-BYD001', channelName: '泰国中心仓1号-比亚迪', available: 120 },
+      { warehouse: 'VN001', sku: '80000323153', channelCode: 'VN001-CUSTB', channelName: '河内-客户B', available: 50 }
     ];
+
+    // 预填参数（从列表页调拨按钮带入）
     const urlParams = new URLSearchParams(window.location.search);
     const prefillSku = urlParams.get('sku') || '';
     const prefillWarehouse = urlParams.get('warehouse') || '';
@@ -212,140 +222,191 @@
       document.getElementById('mainContent').classList.toggle('expanded');
     });
 
+    // 初始化下拉与默认行
     function initOptions() {
       const whSelect = document.getElementById('warehouseSelect');
-      whSelect.innerHTML = '<option value=\"\">请选择备货仓</option>' + warehouses.map(w => `<option value=\"${w.code}\">${w.name}</option>`).join('');
+      whSelect.innerHTML = '<option value="">请选择备货仓</option>' + warehouses.map(w => `<option value="${w.code}">${w.name}</option>`).join('');
       if (prefillWarehouse) whSelect.value = prefillWarehouse;
       renderSkuOptions(whSelect.value);
+
       const channelDatalist = document.getElementById('channelOptions');
-      channelDatalist.innerHTML = channels.map(c => `<option value=\"${c.name}\">${c.name}</option>`).join('');
-      if (prefillSku) document.querySelector('.outbound-sku').value = prefillSku;
-      if (prefillChannel) document.querySelector('.outbound-channel').value = prefillChannel;
-      if (prefillAvailable) document.querySelector('.avail-cell').innerText = prefillAvailable;
+      const uniqueChannels = Array.from(new Set(channelInventories.map(c => c.channelName)));
+      channelDatalist.innerHTML = uniqueChannels.map(c => `<option value="${c}">${c}</option>`).join('');
+
+      // 初始化默认行
+      addOutChannelRow();
+      addInChannelRow();
+
+      // 预填
+      if (prefillSku) document.getElementById('outboundSku').value = prefillSku;
+      if (prefillAvailable) document.getElementById('transferQty').value = prefillAvailable;
+      if (prefillChannel) {
+        const firstOutRow = document.querySelector('#outChannelBody tr');
+        if (firstOutRow) {
+          firstOutRow.querySelector('.out-channel')?.setAttribute('value', prefillChannel);
+          updateOutRowAvailability(firstOutRow);
+          const qtyInput = firstOutRow.querySelector('.out-qty');
+          qtyInput.value = prefillAvailable || 0;
+        }
+      }
       calcSummary();
     }
 
+    // SKU 随备货仓联动
     function renderSkuOptions(warehouseCode) {
       const wh = warehouses.find(w => w.code === warehouseCode);
       const skuDatalist = document.getElementById('skuOptions');
-      skuDatalist.innerHTML = wh ? wh.skus.map(s => `<option value=\"${s}\">${s}</option>`).join('') : '';
+      skuDatalist.innerHTML = wh ? wh.skus.map(s => `<option value="${s}">${s}</option>`).join('') : '';
+      if (warehouseCode && wh && !wh.skus.includes(document.getElementById('outboundSku').value)) {
+        document.getElementById('outboundSku').value = '';
+      }
+      clearChannelRows();
     }
 
     document.getElementById('warehouseSelect').addEventListener('change', (e) => {
       renderSkuOptions(e.target.value);
-      syncInboundSkusFromOutbound();
     });
 
-    function addOutboundRow() {
-      const body = document.getElementById('outboundBody');
+    // 清空并重建渠道行
+    function clearChannelRows() {
+      document.getElementById('outChannelBody').innerHTML = '';
+      document.getElementById('inChannelBody').innerHTML = '';
+      addOutChannelRow();
+      addInChannelRow();
+      calcSummary();
+    }
+
+    // 第三区域行增删
+    function addOutChannelRow(channelName = '', avail = 0, qty = 0) {
+      const body = document.getElementById('outChannelBody');
       const row = document.createElement('tr');
       row.innerHTML = `
-        <td><input list="skuOptions" class="form-control outbound-sku" placeholder="选择SKU"></td>
-        <td><input list="channelOptions" class="form-control outbound-channel" placeholder="选择调出渠道"></td>
-        <td class="text-center avail-cell">0</td>
-        <td><input type="number" class="form-control outbound-qty" min="0" value="0"></td>
-        <td><button class="btn btn-sm btn-outline-danger" onclick="removeRow(this)">删除</button></td>
+        <td><input list="channelOptions" class="form-control out-channel" placeholder="选择调出渠道" value="${channelName}"></td>
+        <td class="text-center out-avail">${avail}</td>
+        <td><input type="number" class="form-control out-qty" min="0" value="${qty}"></td>
+        <td><button class="btn btn-sm btn-outline-danger" onclick="removeOutRow(this)">删除</button></td>
+      `;
+      body.appendChild(row);
+      updateOutRowAvailability(row);
+    }
+
+    function removeOutRow(btn) {
+      btn.closest('tr').remove();
+      if (!document.querySelectorAll('#outChannelBody tr').length) addOutChannelRow();
+      calcSummary();
+    }
+
+    // 第四区域行增删
+    function addInChannelRow(channelName = '', qty = 0) {
+      const body = document.getElementById('inChannelBody');
+      const row = document.createElement('tr');
+      row.innerHTML = `
+        <td><input list="channelOptions" class="form-control in-channel" placeholder="选择调入渠道" value="${channelName}"></td>
+        <td><input type="number" class="form-control in-qty" min="0" value="${qty}"></td>
+        <td><button class="btn btn-sm btn-outline-danger" onclick="removeInRow(this)">删除</button></td>
       `;
       body.appendChild(row);
     }
 
-    function addInboundRow() {
-      const body = document.getElementById('inboundBody');
-      const row = document.createElement('tr');
-      row.innerHTML = `
-        <td><input list="skuOptions" class="form-control inbound-sku" placeholder="选择SKU"></td>
-        <td><input list="channelOptions" class="form-control inbound-channel" placeholder="选择调入渠道"></td>
-        <td><input type="number" class="form-control inbound-qty" min="0" value="0"></td>
-        <td><button class="btn btn-sm btn-outline-danger" onclick="removeRow(this)">删除</button></td>
-      `;
-      body.appendChild(row);
-    }
-
-    function removeRow(btn) {
-      const row = btn.closest('tr');
-      const section = row.closest('tbody').id;
-      row.remove();
-      if (section === 'outboundBody') syncInboundSkusFromOutbound();
+    function removeInRow(btn) {
+      btn.closest('tr').remove();
+      if (!document.querySelectorAll('#inChannelBody tr').length) addInChannelRow();
       calcSummary();
     }
 
-    function syncInboundSkusFromOutbound() {
-      const outboundSkus = Array.from(document.querySelectorAll('.outbound-sku')).map(i => i.value.trim()).filter(Boolean);
-      if (!outboundSkus.length) return;
-      const inboundRows = document.querySelectorAll('.inbound-sku');
-      inboundRows.forEach((input, idx) => { if (!input.value) input.value = outboundSkus[Math.min(idx, outboundSkus.length-1)]; });
-      calcSummary();
+    // 获取可用库存
+    function getAvailable(warehouseCode, sku, channelName) {
+      if (!warehouseCode || !sku || !channelName) return 0;
+      const found = channelInventories.find(c => c.warehouse === warehouseCode && c.sku === sku && c.channelName === channelName);
+      return found ? Number(found.available || 0) : 0;
     }
 
+    function updateOutRowAvailability(row) {
+      const wh = document.getElementById('warehouseSelect').value;
+      const sku = document.getElementById('outboundSku').value.trim();
+      const channelName = row.querySelector('.out-channel')?.value.trim();
+      const avail = getAvailable(wh, sku, channelName);
+      row.querySelector('.out-avail').innerText = avail;
+      const qtyInput = row.querySelector('.out-qty');
+      if (!qtyInput.value || Number(qtyInput.value) === 0) qtyInput.value = avail || 0;
+    }
+
+    // 事件绑定
+    document.getElementById('outChannelBody').addEventListener('input', (e) => {
+      const row = e.target.closest('tr');
+      if (!row) return;
+      if (e.target.classList.contains('out-channel')) updateOutRowAvailability(row);
+      calcSummary();
+    });
+    document.getElementById('inChannelBody').addEventListener('input', calcSummary);
+    document.getElementById('transferQty').addEventListener('input', calcSummary);
+    document.getElementById('outboundSku').addEventListener('change', () => {
+      document.querySelectorAll('#outChannelBody tr').forEach(updateOutRowAvailability);
+      calcSummary();
+    });
+
+    // 汇总显示
     function calcSummary() {
-      const outboundRows = Array.from(document.querySelectorAll('#outboundBody tr'));
-      const summaryMap = {};
-      outboundRows.forEach(r => {
-        const sku = r.querySelector('.outbound-sku')?.value.trim();
-        const qty = Number(r.querySelector('.outbound-qty')?.value || 0);
-        if (!sku) return;
-        summaryMap[sku] = (summaryMap[sku] || 0) + qty;
-      });
-      const outboundText = Object.keys(summaryMap).length ? Object.entries(summaryMap).map(([k,v]) => `商品：${k}，调出汇总：${v}`).join('；') : '商品：-，调出库存汇总：0';
-      document.getElementById('outSummary').innerText = outboundText;
+      const outRows = Array.from(document.querySelectorAll('#outChannelBody tr'));
+      const outSum = outRows.reduce((s, r) => s + Number(r.querySelector('.out-qty')?.value || 0), 0);
+      document.getElementById('outChannelsSummary').innerText = `调出渠道合计：${outSum}`;
 
-      const inboundRows = Array.from(document.querySelectorAll('#inboundBody tr'));
-      const inMap = {};
-      inboundRows.forEach(r => {
-        const sku = r.querySelector('.inbound-sku')?.value.trim();
-        const qty = Number(r.querySelector('.inbound-qty')?.value || 0);
-        if (!sku) return;
-        inMap[sku] = (inMap[sku] || 0) + qty;
-      });
-      const inboundText = Object.keys(inMap).length ? Object.entries(inMap).map(([k,v]) => `商品：${k}，调入汇总：${v}`).join('；') : '商品：-，调入汇总：0';
-      document.getElementById('inSummary').innerText = inboundText;
+      const inRows = Array.from(document.querySelectorAll('#inChannelBody tr'));
+      const inSum = inRows.reduce((s, r) => s + Number(r.querySelector('.in-qty')?.value || 0), 0);
+      document.getElementById('inChannelsSummary').innerText = `调入渠道合计：${inSum}`;
     }
 
-    document.getElementById('outboundBody').addEventListener('input', calcSummary);
-    document.getElementById('inboundBody').addEventListener('input', calcSummary);
-
-    function validateUnique(tbodySelector, skuClass, channelClass) {
+    // 唯一性校验（渠道唯一）
+    function validateUniqueChannel(tbodySelector, inputClass) {
       const rows = Array.from(document.querySelectorAll(`${tbodySelector} tr`));
       const set = new Set();
       for (const r of rows) {
-        const sku = r.querySelector(skuClass)?.value.trim();
-        const ch = r.querySelector(channelClass)?.value.trim();
-        if (!sku || !ch) continue;
-        const key = `${sku}__${ch}`;
-        if (set.has(key)) return false;
-        set.add(key);
+        const ch = r.querySelector(inputClass)?.value.trim();
+        if (!ch) continue;
+        if (set.has(ch)) return false;
+        set.add(ch);
       }
       return true;
     }
 
+    // 提交校验
     function submitTransfer() {
       const wh = document.getElementById('warehouseSelect').value;
+      const sku = document.getElementById('outboundSku').value.trim();
+      const transferQty = Number(document.getElementById('transferQty').value || 0);
       if (!wh) { alert('请选择备货仓'); return; }
-      const outboundRows = Array.from(document.querySelectorAll('#outboundBody tr'));
-      const inboundRows = Array.from(document.querySelectorAll('#inboundBody tr'));
-      if (!outboundRows.length) { alert('请至少添加一条调出商品'); return; }
-      for (const r of outboundRows) {
-        const sku = r.querySelector('.outbound-sku')?.value.trim();
-        const ch = r.querySelector('.outbound-channel')?.value.trim();
-        const qty = Number(r.querySelector('.outbound-qty')?.value || 0);
-        const avail = Number(r.querySelector('.avail-cell')?.innerText || 0);
-        if (!sku || !ch) { alert('调出商品与渠道必填'); return; }
-        if (qty <= 0) { alert('调出数量需大于0'); return; }
-        if (qty > avail && avail > 0) { alert('调出数量不可超过可调拨库存'); return; }
-      }
-      if (!validateUnique('#outboundBody','.outbound-sku','.outbound-channel')) { alert('调出记录商品+渠道需唯一'); return; }
+      if (!sku) { alert('请选择调拨商品SKU'); return; }
+      if (transferQty <= 0) { alert('调拨数量需大于0'); return; }
 
-      if (!inboundRows.length) { alert('请添加调入记录'); return; }
-      if (!validateUnique('#inboundBody','.inbound-sku','.inbound-channel')) { alert('调入记录商品+渠道需唯一'); return; }
-      let outTotal = 0, inTotal = 0;
-      outboundRows.forEach(r => outTotal += Number(r.querySelector('.outbound-qty')?.value || 0));
-      inboundRows.forEach(r => {
-        const sku = r.querySelector('.inbound-sku')?.value.trim();
-        const qty = Number(r.querySelector('.inbound-qty')?.value || 0);
-        if (!sku || qty <= 0) { alert('调入商品与数量必填且>0'); return; }
-        inTotal += qty;
-      });
-      if (inTotal !== outTotal) { alert('调入总量需等于调出总量'); return; }
+      const outRows = Array.from(document.querySelectorAll('#outChannelBody tr'));
+      if (!outRows.length) { alert('请至少添加一个调出渠道'); return; }
+      if (!validateUniqueChannel('#outChannelBody', '.out-channel')) { alert('调出渠道需唯一'); return; }
+
+      let outSum = 0;
+      for (const r of outRows) {
+        const ch = r.querySelector('.out-channel')?.value.trim();
+        const qty = Number(r.querySelector('.out-qty')?.value || 0);
+        const avail = Number(r.querySelector('.out-avail')?.innerText || 0);
+        if (!ch) { alert('调出渠道必填'); return; }
+        if (qty <= 0) { alert('调出数量需大于0'); return; }
+        if (avail >= 0 && qty > avail) { alert('调出数量不可超过可用调拨现货'); return; }
+        outSum += qty;
+      }
+      if (outSum !== transferQty) { alert('第三区域调出数量合计必须等于调拨数量'); return; }
+
+      const inRows = Array.from(document.querySelectorAll('#inChannelBody tr'));
+      if (!inRows.length) { alert('请至少添加一个调入渠道'); return; }
+      if (!validateUniqueChannel('#inChannelBody', '.in-channel')) { alert('调入渠道需唯一'); return; }
+
+      let inSum = 0;
+      for (const r of inRows) {
+        const ch = r.querySelector('.in-channel')?.value.trim();
+        const qty = Number(r.querySelector('.in-qty')?.value || 0);
+        if (!ch) { alert('调入渠道必填'); return; }
+        if (qty <= 0) { alert('调入数量需大于0'); return; }
+        inSum += qty;
+      }
+      if (inSum !== transferQty) { alert('第四区域调入数量合计必须等于调拨数量'); return; }
 
       alert('已提交调拨，自动触发Joysky审批（示例，无真实接口）');
       window.location.href = 'inventory-transfer-list.html';
@@ -355,9 +416,8 @@
       window.location.href = 'inventory-transfer-list.html';
     }
 
+    // 初始化
     initOptions();
-    calcSummary();
-    if (prefillSku) syncInboundSkusFromOutbound();
   </script>
 </body>
 </html>
