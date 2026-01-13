@@ -105,8 +105,9 @@
       <div class="breadcrumb-text">库存中心 / 渠道库存调拨 / 调拨单详情</div>
       <div class="page-title mb-3" id="detailTitle">调拨单详情</div>
 
-      <!-- 头部信息 -->
+      <!-- 第一区域：备货仓信息 -->
       <div class="card-section">
+        <div class="fw-bold text-secondary mb-2">第一区域：备货仓信息</div>
         <div class="row g-3">
           <div class="col-md-3"><label class="form-label">调拨单号</label><div id="infoOrderNo">-</div></div>
           <div class="col-md-3"><label class="form-label">状态</label><div id="infoStatus">-</div></div>
@@ -117,10 +118,28 @@
         </div>
       </div>
 
-      <!-- 调出商品 -->
+      <!-- 第二区域：调拨商品信息 -->
+      <div class="card-section">
+        <div class="fw-bold text-secondary mb-2">第二区域：调拨商品信息</div>
+        <div class="row g-3">
+          <div class="col-md-4">
+            <label class="form-label">商品SKU</label>
+            <div id="infoSku">-</div>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">调拨数量</label>
+            <div id="infoTransferQty">-</div>
+          </div>
+          <div class="col-md-4">
+            <div class="text-muted small mt-4">调拨数量将与调出/调入渠道合计保持一致</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 第三区域：调出渠道库存 -->
       <div class="card-section">
         <div class="d-flex justify-content-between align-items-center mb-2">
-          <div class="fw-bold text-secondary">调出商品</div>
+          <div class="fw-bold text-secondary">第三区域：调出渠道库存</div>
           <div class="small text-muted" id="outSummaryText">调出汇总：-</div>
         </div>
         <div class="table-responsive">
@@ -130,7 +149,7 @@
                 <th>SKU</th>
                 <th>调出渠道</th>
                 <th>可调拨现货</th>
-                <th>调拨数量</th>
+                <th>调出数量</th>
               </tr>
             </thead>
             <tbody id="outDetailBody">
@@ -140,10 +159,10 @@
         </div>
       </div>
 
-      <!-- 调入商品 -->
+      <!-- 第四区域：调入渠道库存 -->
       <div class="card-section">
         <div class="d-flex justify-content-between align-items-center mb-2">
-          <div class="fw-bold text-secondary">调入商品</div>
+          <div class="fw-bold text-secondary">第四区域：调入渠道库存</div>
           <div class="small text-muted" id="inSummaryText">调入汇总：-</div>
         </div>
         <div class="table-responsive">
@@ -199,6 +218,11 @@
       approval.innerText = target.approvalNo || '-';
       approval.href = target.approvalNo ? `https://joysky.example/approval/${target.approvalNo}` : '#';
       document.getElementById('detailTitle').innerText = `调拨单详情 - ${target.orderNo || ''}`;
+
+      const sku = target.skuList && target.skuList.length ? target.skuList[0] : '-';
+      const outSum = (target.outboundDetails || []).reduce((s,i)=>s+(Number(i.qty)||0),0);
+      document.getElementById('infoSku').innerText = sku;
+      document.getElementById('infoTransferQty').innerText = outSum || '-';
     }
 
     function renderOutbound() {
@@ -215,6 +239,8 @@
       body.innerHTML = rows || `<tr><td colspan="4" class="text-center text-muted">暂无数据</td></tr>`;
       const sum = list.reduce((s,i)=>s+(Number(i.qty)||0),0);
       document.getElementById('outSummaryText').innerText = `调出汇总：${sum}`;
+      // 同步商品区域数量
+      document.getElementById('infoTransferQty').innerText = sum || '-';
     }
 
     function renderInbound() {
