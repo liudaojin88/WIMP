@@ -253,37 +253,37 @@
         status: '待审批',
         warehouse: 'WH001',
         skuList: ['80000323153'],
-        inboundChannels: ['WH001-HT001'],
-        outboundChannels: ['WH002-CT000'],
+        inboundChannels: ['CHCNHTG'],
+        outboundChannels: ['CHCNDEF'],
         outQty: 35,
         inQty: 35,
         approvalNo: 'JS-202601-001',
         creator: 'admin',
         time: '2026-01-10 10:00',
-        outboundDetails: [{ sku: '80000323153', channel: 'WH002-CT000', available: 40, qty: 35 }],
-        inboundDetails: [{ sku: '80000323153', channel: 'WH001-HT001', qty: 35 }]
+        outboundDetails: [{ sku: '80000323153', channel: 'CHCNDEF', available: 40, qty: 35 }],
+        inboundDetails: [{ sku: '80000323153', channel: 'CHCNHTG', qty: 35 }]
       },
       {
         orderNo: 'TRF20260110002',
         status: '待处理',
         warehouse: 'TH001',
         skuList: ['8000013963','8000013964','8000013965','8000013966','8000013967','8000013968'],
-        inboundChannels: ['TH001-BYD001','VN001-CUSTB','WH002-CT000','WH001-HT001','TH001-BYD002','TH001-BYD003'],
-        outboundChannels: ['WH002-CT000','VN001-CUSTB'],
+        inboundChannels: ['CHTHBYD','CHVNCUB','CHCNDEF','CHCNHTG','CHTHBY2','CHTHBY3'],
+        outboundChannels: ['CHCNDEF','CHVNCUB'],
         outQty: 120,
         inQty: 120,
         approvalNo: 'JS-202601-002',
         creator: 'Bydcom',
         time: '2026-01-10 12:30',
         outboundDetails: [
-          { sku: '8000013963', channel: 'WH002-CT000', available: 80, qty: 60 },
-          { sku: '8000013964', channel: 'VN001-CUSTB', available: 70, qty: 60 }
+          { sku: '8000013963', channel: 'CHCNDEF', available: 80, qty: 60 },
+          { sku: '8000013964', channel: 'CHVNCUB', available: 70, qty: 60 }
         ],
         inboundDetails: [
-          { sku: '8000013963', channel: 'TH001-BYD001', qty: 40 },
-          { sku: '8000013964', channel: 'VN001-CUSTB', qty: 40 },
-          { sku: '8000013963', channel: 'WH001-HT001', qty: 20 },
-          { sku: '8000013964', channel: 'WH002-CT000', qty: 20 }
+          { sku: '8000013963', channel: 'CHTHBYD', qty: 40 },
+          { sku: '8000013964', channel: 'CHVNCUB', qty: 40 },
+          { sku: '8000013963', channel: 'CHCNHTG', qty: 20 },
+          { sku: '8000013964', channel: 'CHCNDEF', qty: 20 }
         ]
       },
       {
@@ -291,20 +291,20 @@
         status: '已完成',
         warehouse: 'WH002',
         skuList: ['80000323149','80000323150'],
-        inboundChannels: ['WH001-HT001'],
-        outboundChannels: ['WH002-CT000'],
+        inboundChannels: ['CHCNHTG'],
+        outboundChannels: ['CHCNDEF'],
         outQty: 60,
         inQty: 60,
         approvalNo: 'JS-202601-003',
         creator: 'system',
         time: '2026-01-09 18:00',
         outboundDetails: [
-          { sku: '80000323149', channel: 'WH002-CT000', available: 60, qty: 30 },
-          { sku: '80000323150', channel: 'WH002-CT000', available: 60, qty: 30 }
+          { sku: '80000323149', channel: 'CHCNDEF', available: 60, qty: 30 },
+          { sku: '80000323150', channel: 'CHCNDEF', available: 60, qty: 30 }
         ],
         inboundDetails: [
-          { sku: '80000323149', channel: 'WH001-HT001', qty: 30 },
-          { sku: '80000323150', channel: 'WH001-HT001', qty: 30 }
+          { sku: '80000323149', channel: 'CHCNHTG', qty: 30 },
+          { sku: '80000323150', channel: 'CHCNHTG', qty: 30 }
         ]
       }
     ];

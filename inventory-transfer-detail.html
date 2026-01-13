@@ -231,7 +231,7 @@
       const rows = list.map(i => `
         <tr>
           <td>${i.sku}</td>
-          <td>${i.channel}</td>
+          <td>${formatChannel(i.channel)}</td>
           <td>${i.available ?? '-'}</td>
           <td>${i.qty ?? '-'}</td>
         </tr>
@@ -239,7 +239,6 @@
       body.innerHTML = rows || `<tr><td colspan="4" class="text-center text-muted">暂无数据</td></tr>`;
       const sum = list.reduce((s,i)=>s+(Number(i.qty)||0),0);
       document.getElementById('outSummaryText').innerText = `调出汇总：${sum}`;
-      // 同步商品区域数量
       document.getElementById('infoTransferQty').innerText = sum || '-';
     }
 
@@ -249,7 +248,7 @@
       const rows = list.map(i => `
         <tr>
           <td>${i.sku}</td>
-          <td>${i.channel}</td>
+          <td>${formatChannel(i.channel)}</td>
           <td>${i.qty ?? '-'}</td>
         </tr>
       `).join('');
@@ -260,6 +259,13 @@
 
     function goList() {
       window.location.href = 'inventory-transfer-list.html';
+    }
+
+    function formatChannel(code) {
+      if (!code) return '-';
+      if (code.startsWith('CH')) return code;
+      // 兼容旧数据，若无CH前缀则补充展示
+      return `CH${code}`;
     }
 
     renderInfo();
