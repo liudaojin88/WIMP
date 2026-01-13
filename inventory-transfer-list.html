@@ -354,11 +354,13 @@
     function renderTable(list = transferList) {
       const tbody = document.getElementById('transferTableBody');
       if (!tbody) return;
-      tbody.innerHTML = list.map(item => `
+      tbody.innerHTML = list.map(item => {
+        const skuText = (item.skuList && item.skuList.length) ? item.skuList[0] : '-'; // 列表仅展示单SKU
+        return `
         <tr>
           <td>${item.orderNo}</td>
           <td><span class="badge-status status-${item.status}">${item.status}</span></td>
-          <td>${ellipsisList(item.skuList)}</td>
+          <td>${skuText}</td>
           <td>${ellipsisList(item.inboundChannels)}</td>
           <td>${ellipsisList(item.outboundChannels)}</td>
           <td>${item.outQty}</td>
@@ -368,7 +370,8 @@
           <td>${item.time}</td>
           <td>${renderActions(item)}</td>
         </tr>
-      `).join('') || `<tr><td colspan="11" class="text-center text-muted">暂无数据</td></tr>`;
+      `;
+      }).join('') || `<tr><td colspan="11" class="text-center text-muted">暂无数据</td></tr>`;
     }
 
     function renderActions(item) {
