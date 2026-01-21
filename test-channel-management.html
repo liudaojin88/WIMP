@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>渠道管理功能测试</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container mt-5">
+        <h1>渠道管理功能测试</h1>
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">测试场景</h5>
+                <ol>
+                    <li>打开 inventory-channel-management.html 页面</li>
+                    <li>验证查询结果表格中是否显示备注列</li>
+                    <li>点击"新增渠道"按钮</li>
+                    <li>在弹窗中填写渠道信息，包括备注字段</li>
+                    <li>提交表单，验证新渠道是否正确创建并包含备注信息</li>
+                    <li>点击编辑按钮，验证备注字段是否正确显示</li>
+                    <li>修改备注信息并提交，验证更新是否成功</li>
+                    <li>使用渠道类型筛选功能，验证筛选是否正常工作</li>
+                </ol>
+                
+                <h5 class="card-title mt-4">预期结果</h5>
+                <ul>
+                    <li>查询结果表格显示8列：渠道编码、渠道名称、渠道客户、渠道类型、备注、最后更新人、最后更新时间、操作</li>
+                    <li>新增/编辑弹窗包含备注字段（文本域，最大长度500）</li>
+                    <li>渠道类型默认为"客户"</li>
+                    <li>备注字段为非必填项</li>
+                    <li>所有功能正常工作，无JavaScript错误</li>
+                </ul>
+                
+                <div class="mt-4">
+                    <a href="inventory-channel-management.html" class="btn btn-primary" target="_blank">打开渠道管理页面</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
