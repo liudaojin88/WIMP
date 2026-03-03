@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>日历维护 - 履约管理</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Microsoft YaHei', Arial, sans-serif;
+        }
+        .sidebar {
+            min-height: 100vh;
+            background: #fff;
+            border-right: 1px solid #e9ecef;
+            padding: 20px 0;
+        }
+        .nav-group-title {
+            padding: 8px 20px;
+            font-size: 12px;
+            color: #6c757d;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .nav-link {
+            color: #495057;
+            padding: 10px 20px;
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+            border-radius: 6px;
+        }
+        .nav-link i { margin-right: 10px; }
+        .nav-link.active {
+            background-color: #e7f1ff;
+            color: #0d6efd;
+            font-weight: 600;
+        }
+        .page-header {
+            padding: 16px 20px;
+            background-color: #fff;
+            border-bottom: 1px solid #e9ecef;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .page-title { font-size: 20px; font-weight: 600; margin: 0; }
+        .content-wrapper { padding: 20px; }
+        .card-block {
+            background: #fff;
+            border-radius: 8px;
+            padding: 16px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            margin-bottom: 16px;
+        }
+        .table-card { padding: 0; }
+        .table > :not(caption) > * > * { vertical-align: middle; }
+        .table thead th { background-color: #f5f7fa; font-weight: 600; }
+        .table-empty { text-align: center; padding: 24px; color: #6c757d; }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-dark bg-dark px-4 py-3">
+        <div class="d-flex align-items-center">
+            <span class="navbar-brand mb-0 h1">JDI京东工业</span>
+            <span class="text-white-50 ms-3">工业国际运营平台</span>
+        </div>
+        <div class="flex-grow-1 px-4">
+            <div class="input-group">
+                <input type="text" class="form-control form-control-sm" placeholder="搜索">
+                <button class="btn btn-outline-light btn-sm" type="button"><i class="bi bi-search"></i></button>
+            </div>
+        </div>
+        <div class="d-flex align-items-center gap-3 text-white">
+            <a class="text-white text-decoration-none" href="#">帮助与反馈</a>
+            <a class="text-white text-decoration-none" href="#">值班信息</a>
+            <div class="d-flex align-items-center gap-2">
+                <i class="bi bi-person-circle fs-5"></i>
+                <span>liudaojin1</span>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-12 col-md-2 col-lg-2 sidebar">
+                <div class="nav-group-title">主要功能</div>
+                <a href="dashboard.html" class="nav-link">
+                    <i class="bi bi-house-door"></i><span>系统首页</span>
+                </a>
+                <a href="vietnam-order-list.html" class="nav-link">
+                    <i class="bi bi-list-ul"></i><span>越南订单列表</span>
+                </a>
+
+                <div class="nav-group-title mt-3">履约管理</div>
+                <a href="vietnam-delivery-list.html" class="nav-link">
+                    <i class="bi bi-truck"></i><span>越南末端派送列表</span>
+                </a>
+                <a href="cross-border-batch-management.html" class="nav-link">
+                    <i class="bi bi-box-seam"></i><span>跨境批次发运管理</span>
+                </a>
+                <a href="fulfillment-strategy-expiry.html" class="nav-link">
+                    <i class="bi bi-clipboard-check"></i><span>履约策略中心</span>
+                </a>
+                <a href="fulfillment-product-binding.html" class="nav-link">
+                    <i class="bi bi-bag"></i><span>商品绑仓配置</span>
+                </a>
+                <a href="fulfillment-timeliness-setting.html" class="nav-link">
+                    <i class="bi bi-clock-history"></i><span>时效设置</span>
+                </a>
+                <a href="customer-delivery-rule.html" class="nav-link">
+                    <i class="bi bi-calendar2-check"></i><span>客户配送规则</span>
+                </a>
+                <a href="calendar-maintenance.html" class="nav-link active">
+                    <i class="bi bi-calendar3"></i><span>日历维护</span>
+                </a>
+
+                <div class="nav-group-title mt-3">库存中心</div>
+                <a href="inventory-management.html" class="nav-link">
+                    <i class="bi bi-box"></i><span>库存管理</span>
+                </a>
+                <a href="inventory-channel-management.html" class="nav-link">
+                    <i class="bi bi-diagram-2"></i><span>库存渠道管理</span>
+                </a>
+                <a href="inventory-transfer-list.html" class="nav-link">
+                    <i class="bi bi-arrow-left-right"></i><span>库存调拨列表</span>
+                </a>
+                <a href="inventory-transfer-create.html" class="nav-link">
+                    <i class="bi bi-plus-square"></i><span>新建渠道调拨</span>
+                </a>
+                <a href="inventory-operation-log.html" class="nav-link">
+                    <i class="bi bi-journal-text"></i><span>库存操作日志</span>
+                </a>
+            </div>
+
+            <div class="col-12 col-md-10 col-lg-10 p-0">
+                <div class="page-header">
+                    <h1 class="page-title">日历维护</h1>
+                    <div class="d-flex align-items-center gap-2">
+                        <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addModal">
+                            <i class="bi bi-plus-lg me-1"></i>新增记录
+                        </button>
+                    </div>
+                </div>
+
+                <div class="content-wrapper">
+                    <div class="card-block">
+                        <form class="row g-3 align-items-end">
+                            <div class="col-md-4">
+                                <label class="form-label">日期</label>
+                                <input type="date" class="form-control form-control-sm" id="filterDate">
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">是否工作日</label>
+                                <select class="form-select form-select-sm" id="filterWorkday">
+                                    <option value="全部">全部</option>
+                                    <option value="是">是</option>
+                                    <option value="否">否</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">适用国家</label>
+                                <select class="form-select form-select-sm" id="filterCountry">
+                                    <option value="全部">全部</option>
+                                    <option value="中国-CN">中国-CN</option>
+                                    <option value="泰国-TH">泰国-TH</option>
+                                    <option value="越南-VN">越南-VN</option>
+                                </select>
+                            </div>
+                            <div class="col-12 d-flex justify-content-end gap-2">
+                                <button type="button" class="btn btn-outline-secondary btn-sm" id="resetBtn">重置</button>
+                                <button type="button" class="btn btn-primary btn-sm" id="searchBtn">查询</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div class="card-block table-card">
+                        <div class="d-flex justify-content-between align-items-center p-3">
+                            <div class="fw-semibold">查询结果</div>
+                            <div class="d-flex gap-2">
+                                <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addModal">
+                                    <i class="bi bi-plus-lg me-1"></i>新增记录
+                                </button>
+                            </div>
+                        </div>
+                        <table class="table mb-0">
+                            <thead>
+                                <tr>
+                                    <th style="width: 16%;">日期</th>
+                                    <th style="width: 14%;">是否工作日</th>
+                                    <th style="width: 20%;">适用国家</th>
+                                    <th style="width: 14%;">创建人</th>
+                                    <th style="width: 20%;">创建时间</th>
+                                    <th style="width: 16%;">操作</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tableBody">
+                                <tr>
+                                    <td colspan="6" class="table-empty">暂无数据</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <div class="d-flex justify-content-between align-items-center px-3 py-2">
+                            <div class="text-muted small" id="paginationInfo">共 0 条</div>
+                            <ul class="pagination pagination-sm mb-0">
+                                <li class="page-item disabled"><span class="page-link">上一页</span></li>
+                                <li class="page-item active"><span class="page-link">1</span></li>
+                                <li class="page-item disabled"><span class="page-link">下一页</span></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- 新增记录弹窗 -->
+    <div class="modal fade" id="addModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">新增记录</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="关闭"></button>
+                </div>
+                <div class="modal-body">
+                    <form class="row g-3">
+                        <div class="col-12">
+                            <label class="form-label">日期</label>
+                            <input type="date" class="form-control form-control-sm" id="formDate">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">是否工作日</label>
+                            <select class="form-select form-select-sm" id="formWorkday">
+                                <option value="是">是</option>
+                                <option value="否" selected>否</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">适用国家</label>
+                            <select class="form-select form-select-sm" id="formCountry">
+                                <option value="">请选择</option>
+                                <option value="中国-CN">中国-CN</option>
+                                <option value="泰国-TH">泰国-TH</option>
+                                <option value="越南-VN">越南-VN</option>
+                            </select>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">取消</button>
+                    <button class="btn btn-primary btn-sm" id="saveBtn">保存</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const dataSource = [
+            {
+                id: 1,
+                date: '2026-05-01',
+                isWorkday: '否',
+                country: '中国-CN',
+                createdBy: 'admin',
+                createdAt: '2026-03-01 10:00:00'
+            }
+        ];
+        let filtered = [];
+        function renderTable() {
+            const tbody = document.getElementById('tableBody');
+            if (!filtered.length) {
+                tbody.innerHTML = '<tr><td colspan="6" class="table-empty">暂无数据</td></tr>';
+                document.getElementById('paginationInfo').textContent = '共 0 条';
+                return;
+            }
+            tbody.innerHTML = filtered.map((item, idx) => `
+                <tr>
+                    <td>${item.date}</td>
+                    <td>${item.isWorkday}</td>
+                    <td>${item.country}</td>
+                    <td>${item.createdBy}</td>
+                    <td>${item.createdAt}</td>
+                    <td class="text-primary">
+                        <a href="javascript:void(0)" data-idx="${idx}" class="link-delete">删除</a>
+                    </td>
+                </tr>
+            `).join('');
+            document.getElementById('paginationInfo').textContent = `共 ${filtered.length} 条`;
+            tbody.querySelectorAll('.link-delete').forEach(el => el.addEventListener('click', onDelete));
+        }
+        function applyFilter() {
+            const date = document.getElementById('filterDate').value;
+            const workday = document.getElementById('filterWorkday').value;
+            const country = document.getElementById('filterCountry').value;
+            filtered = dataSource.filter(item => {
+                if (date && item.date !== date) return false;
+                if (workday !== '全部' && item.isWorkday !== workday) return false;
+                if (country !== '全部' && item.country !== country) return false;
+                return true;
+            });
+            renderTable();
+        }
+        function resetFilter() {
+            document.getElementById('filterDate').value = '';
+            document.getElementById('filterWorkday').value = '全部';
+            document.getElementById('filterCountry').value = '全部';
+            filtered = [...dataSource];
+            renderTable();
+        }
+        function onDelete(e) {
+            const idx = Number(e.currentTarget.dataset.idx);
+            const item = filtered[idx];
+            if (!item) return;
+            if (!confirm('确认删除该记录？')) return;
+            const originIdx = dataSource.findIndex(r => r.id === item.id);
+            if (originIdx > -1) dataSource.splice(originIdx, 1);
+            filtered.splice(idx, 1);
+            renderTable();
+        }
+        function getFormData() {
+            return {
+                date: document.getElementById('formDate').value,
+                isWorkday: document.getElementById('formWorkday').value,
+                country: document.getElementById('formCountry').value
+            };
+        }
+        function validateForm(data) {
+            if (!data.date) { alert('请选择日期'); return false; }
+            if (!data.country) { alert('请选择适用国家'); return false; }
+            const weekday = new Date(data.date).getDay(); // 0 周日 6 周六
+            const isWeekend = (weekday === 0 || weekday === 6);
+            if (isWeekend && data.isWorkday === '是') {
+                const ok = confirm('选择的日期已经是工作日，请确认是否继续！');
+                if (!ok) return false;
+            }
+            return true;
+        }
+        function saveRecord() {
+            const data = getFormData();
+            if (!validateForm(data)) return;
+            const now = new Date().toISOString().slice(0,19).replace('T',' ');
+            dataSource.unshift({
+                id: Date.now(),
+                date: data.date,
+                isWorkday: data.isWorkday,
+                country: data.country,
+                createdBy: 'admin',
+                createdAt: now
+            });
+            filtered = [...dataSource];
+            renderTable();
+            const modal = bootstrap.Modal.getInstance(document.getElementById('addModal'));
+            modal.hide();
+        }
+        function bindEvents() {
+            document.getElementById('searchBtn').addEventListener('click', applyFilter);
+            document.getElementById('resetBtn').addEventListener('click', resetFilter);
+            document.getElementById('saveBtn').addEventListener('click', saveRecord);
+        }
+        function init() {
+            filtered = [...dataSource];
+            renderTable();
+            bindEvents();
+        }
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>

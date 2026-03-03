@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>客户配送规则 - 履约管理</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Microsoft YaHei', Arial, sans-serif;
+        }
+        .sidebar {
+            min-height: 100vh;
+            background: #fff;
+            border-right: 1px solid #e9ecef;
+            padding: 20px 0;
+        }
+        .nav-group-title {
+            padding: 8px 20px;
+            font-size: 12px;
+            color: #6c757d;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .nav-link {
+            color: #495057;
+            padding: 10px 20px;
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+            border-radius: 6px;
+        }
+        .nav-link.active {
+            background-color: #e7f1ff;
+            color: #0d6efd;
+            font-weight: 600;
+        }
+        .nav-link i { margin-right: 10px; }
+        .page-header {
+            padding: 16px 20px;
+            background-color: #fff;
+            border-bottom: 1px solid #e9ecef;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .page-title { font-size: 20px; font-weight: 600; margin: 0; }
+        .content-wrapper { padding: 20px; }
+        .card-block {
+            background: #fff;
+            border-radius: 8px;
+            padding: 16px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            margin-bottom: 16px;
+        }
+        .table-card { padding: 0; }
+        .table > :not(caption) > * > * { vertical-align: middle; }
+        .table thead th { background-color: #f5f7fa; font-weight: 600; }
+        .table-empty { text-align: center; padding: 24px; color: #6c757d; }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-dark bg-dark px-4 py-3">
+        <div class="d-flex align-items-center">
+            <span class="navbar-brand mb-0 h1">JDI京东工业</span>
+            <span class="text-white-50 ms-3">工业国际运营平台</span>
+        </div>
+        <div class="flex-grow-1 px-4">
+            <div class="input-group">
+                <input type="text" class="form-control form-control-sm" placeholder="搜索">
+                <button class="btn btn-outline-light btn-sm" type="button"><i class="bi bi-search"></i></button>
+            </div>
+        </div>
+        <div class="d-flex align-items-center gap-3 text-white">
+            <a class="text-white text-decoration-none" href="#">帮助与反馈</a>
+            <a class="text-white text-decoration-none" href="#">值班信息</a>
+            <div class="d-flex align-items-center gap-2">
+                <i class="bi bi-person-circle fs-5"></i>
+                <span>liudaojin1</span>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-12 col-md-2 col-lg-2 sidebar">
+                <div class="nav-group-title">主要功能</div>
+                <a href="dashboard.html" class="nav-link">
+                    <i class="bi bi-house-door"></i><span>系统首页</span>
+                </a>
+                <a href="vietnam-order-list.html" class="nav-link">
+                    <i class="bi bi-list-ul"></i><span>越南订单列表</span>
+                </a>
+
+                <div class="nav-group-title mt-3">履约管理</div>
+                <a href="vietnam-delivery-list.html" class="nav-link">
+                    <i class="bi bi-truck"></i><span>越南末端派送列表</span>
+                </a>
+                <a href="cross-border-batch-management.html" class="nav-link">
+                    <i class="bi bi-box-seam"></i><span>跨境批次发运管理</span>
+                </a>
+                <a href="fulfillment-strategy-expiry.html" class="nav-link">
+                    <i class="bi bi-clipboard-check"></i><span>履约策略中心</span>
+                </a>
+                <a href="fulfillment-product-binding.html" class="nav-link">
+                    <i class="bi bi-bag"></i><span>商品绑仓配置</span>
+                </a>
+                <a href="fulfillment-timeliness-setting.html" class="nav-link">
+                    <i class="bi bi-clock-history"></i><span>时效设置</span>
+                </a>
+                <a href="customer-delivery-rule.html" class="nav-link active">
+                    <i class="bi bi-calendar2-check"></i><span>客户配送规则</span>
+                </a>
+
+                <div class="nav-group-title mt-3">库存中心</div>
+                <a href="inventory-management.html" class="nav-link">
+                    <i class="bi bi-box"></i><span>库存管理</span>
+                </a>
+                <a href="inventory-channel-management.html" class="nav-link">
+                    <i class="bi bi-diagram-2"></i><span>库存渠道管理</span>
+                </a>
+                <a href="inventory-transfer-list.html" class="nav-link">
+                    <i class="bi bi-arrow-left-right"></i><span>库存调拨列表</span>
+                </a>
+                <a href="inventory-transfer-create.html" class="nav-link">
+                    <i class="bi bi-plus-square"></i><span>新建渠道调拨</span>
+                </a>
+                <a href="inventory-operation-log.html" class="nav-link">
+                    <i class="bi bi-journal-text"></i><span>库存操作日志</span>
+                </a>
+            </div>
+
+            <div class="col-12 col-md-10 col-lg-10 p-0">
+                <div class="page-header">
+                    <h1 class="page-title">客户配送规则</h1>
+                    <div class="d-flex align-items-center gap-2">
+                        <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#newRecordModal">
+                            <i class="bi bi-plus-lg me-1"></i>新增记录
+                        </button>
+                    </div>
+                </div>
+
+                <div class="content-wrapper">
+                    <div class="card-block">
+                        <form class="row g-3 align-items-end">
+                            <div class="col-md-3">
+                                <label class="form-label">规则类型</label>
+                                <select class="form-select form-select-sm" id="filterRuleType">
+                                    <option value="全部">全部</option>
+                                    <option value="客户维度">客户维度</option>
+                                    <option value="客户PIN">客户PIN</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">客户</label>
+                                <input type="text" class="form-control form-control-sm" id="filterCustomer" placeholder="请输入客户名称或PIN">
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">周维度可配送时间</label>
+                                <select class="form-select form-select-sm" id="filterWeek">
+                                    <option value="全部">全部</option>
+                                    <option value="周一">周一</option>
+                                    <option value="周二">周二</option>
+                                    <option value="周三">周三</option>
+                                    <option value="周四">周四</option>
+                                    <option value="周五">周五</option>
+                                    <option value="周六">周六</option>
+                                    <option value="周天">周天</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">仅工作日配送</label>
+                                <select class="form-select form-select-sm" id="filterWorkday">
+                                    <option value="全部">全部</option>
+                                    <option value="是">是</option>
+                                    <option value="否">否</option>
+                                </select>
+                            </div>
+                            <div class="col-12 d-flex justify-content-end gap-2">
+                                <button type="button" class="btn btn-outline-secondary btn-sm">重置</button>
+                                <button type="button" class="btn btn-primary btn-sm">查询</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div class="card-block table-card">
+                        <div class="d-flex justify-content-between align-items-center p-3">
+                            <div class="fw-semibold">查询结果</div>
+                            <div class="d-flex gap-2">
+                                <button class="btn btn-primary btn-sm" onclick="window.location.href='customer-delivery-rule-create.html'">
+                                    <i class="bi bi-plus-lg me-1"></i>新增记录
+                                </button>
+                            </div>
+                        </div>
+                        <table class="table mb-0">
+                            <thead>
+                                <tr>
+                                    <th style="width: 10%;">规则类型</th>
+                                    <th style="width: 14%;">客户/客户PIN</th>
+                                    <th style="width: 20%;">周维度可配送时间</th>
+                                    <th style="width: 10%;">仅工作日配送</th>
+                                    <th style="width: 10%;">创建人</th>
+                                    <th style="width: 12%;">创建时间</th>
+                                    <th style="width: 10%;">最后更新人</th>
+                                    <th style="width: 12%;">最后更新时间</th>
+                                    <th style="width: 12%;">操作</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tableBody">
+                                <tr>
+                                    <td colspan="9" class="table-empty">暂无数据</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <div class="d-flex justify-content-between align-items-center px-3 py-2">
+                            <div class="text-muted small">共 0 条</div>
+                            <ul class="pagination pagination-sm mb-0">
+                                <li class="page-item disabled"><span class="page-link">上一页</span></li>
+                                <li class="page-item active"><span class="page-link">1</span></li>
+                                <li class="page-item disabled"><span class="page-link">下一页</span></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- 新增/编辑记录弹窗 -->
+    <div class="modal fade" id="recordModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="recordModalTitle">新增记录</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="关闭"></button>
+                </div>
+                <div class="modal-body">
+                    <form class="row g-3">
+                        <div class="col-md-4">
+                            <label class="form-label">规则类型</label>
+                            <select class="form-select form-select-sm" id="formRuleType">
+                                <option value="客户维度">客户维度</option>
+                                <option value="客户PIN">客户PIN</option>
+                            </select>
+                        </div>
+                        <div class="col-md-8">
+                            <label class="form-label">客户/客户PIN</label>
+                            <input type="text" class="form-control form-control-sm" id="formCustomer" placeholder="输入客户名称或PIN">
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label d-block">周维度可配送时间</label>
+                            <div id="formWeeks" class="d-flex flex-wrap gap-3"></div>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">仅工作日配送</label>
+                            <select class="form-select form-select-sm" id="formWorkday">
+                                <option value="否">否</option>
+                                <option value="是">是</option>
+                            </select>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">取消</button>
+                    <button class="btn btn-primary btn-sm" id="saveRecordBtn">保存</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 修改日志弹窗 -->
+    <div class="modal fade" id="logModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">修改日志</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="关闭"></button>
+                </div>
+                <div class="modal-body">
+                    <table class="table table-sm align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th style="width: 10%;">修改类型</th>
+                                <th style="width: 30%;">修改前信息</th>
+                                <th style="width: 30%;">修改后信息</th>
+                                <th style="width: 15%;">修改人</th>
+                                <th style="width: 15%;">修改时间</th>
+                            </tr>
+                        </thead>
+                        <tbody id="logBody">
+                            <tr><td colspan="5" class="text-center text-muted">暂无日志</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const weekOptions = ['周一','周二','周三','周四','周五','周六','周天'];
+        let dataSource = [
+            {
+                id: 1,
+                ruleType: '客户维度',
+                customer: '测试客户A',
+                weeks: ['周一','周三','周五'],
+                workday: '否',
+                createdBy: 'admin',
+                createdAt: '2026-03-01 10:00:00',
+                updatedBy: 'admin',
+                updatedAt: '2026-03-01 10:00:00',
+                logs: [
+                    {
+                        type: '新增',
+                        before: '-',
+                        after: '规则类型：客户维度，客户：测试客户A，周维度可配送时间：周一、周三、周五，是否工作日配送：否',
+                        user: 'admin',
+                        time: '2026-03-01 10:00:00'
+                    }
+                ]
+            }
+        ];
+        let filtered = [...dataSource];
+        let currentEditId = null;
+        const recordModal = new bootstrap.Modal(document.getElementById('recordModal'));
+        const logModal = new bootstrap.Modal(document.getElementById('logModal'));
+
+        // 渲染周选择
+        function renderWeekCheckboxes(containerId, selected = []) {
+            const box = document.getElementById(containerId);
+            box.innerHTML = weekOptions.map((w, idx) => {
+                const checked = selected.includes(w) ? 'checked' : '';
+                return `
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="checkbox" id="week-${idx}" value="${w}" ${checked}>
+                        <label class="form-check-label" for="week-${idx}">${w}</label>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function renderTable() {
+            const tbody = document.getElementById('tableBody');
+            if (!filtered.length) {
+                tbody.innerHTML = '<tr><td colspan="9" class="table-empty">暂无数据</td></tr>';
+                return;
+            }
+            tbody.innerHTML = filtered.map((item, idx) => `
+                <tr>
+                    <td>${item.ruleType}</td>
+                    <td>${item.customer}</td>
+                    <td>${item.weeks.join('、')}</td>
+                    <td>${item.workday}</td>
+                    <td>${item.createdBy}</td>
+                    <td>${item.createdAt}</td>
+                    <td>${item.updatedBy}</td>
+                    <td>${item.updatedAt}</td>
+                    <td class="text-primary">
+                        <a href="javascript:void(0)" data-idx="${idx}" class="link-edit">编辑</a>
+                        <a href="javascript:void(0)" data-idx="${idx}" class="link-delete ms-2">删除</a>
+                        <a href="javascript:void(0)" data-idx="${idx}" class="link-log ms-2">修改日志</a>
+                    </td>
+                </tr>
+            `).join('');
+
+            tbody.querySelectorAll('.link-edit').forEach(el => el.addEventListener('click', onEdit));
+            tbody.querySelectorAll('.link-delete').forEach(el => el.addEventListener('click', onDelete));
+            tbody.querySelectorAll('.link-log').forEach(el => el.addEventListener('click', onLog));
+        }
+
+        function openCreate() {
+            currentEditId = null;
+            document.getElementById('recordModalTitle').textContent = '新增记录';
+            document.getElementById('formRuleType').value = '客户维度';
+            document.getElementById('formCustomer').value = '';
+            document.getElementById('formWorkday').value = '否';
+            renderWeekCheckboxes('formWeeks', []);
+            recordModal.show();
+        }
+
+        function onEdit(e) {
+            const idx = Number(e.currentTarget.dataset.idx);
+            const item = filtered[idx];
+            if (!item) return;
+            currentEditId = item.id;
+            document.getElementById('recordModalTitle').textContent = '编辑记录';
+            document.getElementById('formRuleType').value = item.ruleType;
+            document.getElementById('formCustomer').value = item.customer;
+            document.getElementById('formWorkday').value = item.workday;
+            renderWeekCheckboxes('formWeeks', item.weeks || []);
+            recordModal.show();
+        }
+
+        function onDelete(e) {
+            const idx = Number(e.currentTarget.dataset.idx);
+            const item = filtered[idx];
+            if (!item) return;
+            if (!confirm('确认删除该记录？')) return;
+            dataSource = dataSource.filter(r => r.id !== item.id);
+            filtered = filtered.filter((_, i) => i !== idx);
+            renderTable();
+        }
+
+        function onLog(e) {
+            const idx = Number(e.currentTarget.dataset.idx);
+            const item = filtered[idx];
+            const logBody = document.getElementById('logBody');
+            if (!item || !item.logs || !item.logs.length) {
+                logBody.innerHTML = '<tr><td colspan="5" class="text-center text-muted">暂无日志</td></tr>';
+            } else {
+                logBody.innerHTML = item.logs.map(l => `
+                    <tr>
+                        <td>${l.type}</td>
+                        <td class="text-wrap">${l.before}</td>
+                        <td class="text-wrap">${l.after}</td>
+                        <td>${l.user}</td>
+                        <td>${l.time}</td>
+                    </tr>
+                `).join('');
+            }
+            logModal.show();
+        }
+
+        function getFormData() {
+            const ruleType = document.getElementById('formRuleType').value.trim();
+            const customer = document.getElementById('formCustomer').value.trim();
+            const workday = document.getElementById('formWorkday').value;
+            const weeks = Array.from(document.querySelectorAll('#formWeeks input:checked')).map(i => i.value);
+            return { ruleType, customer, workday, weeks };
+        }
+
+        function validateForm(data) {
+            if (!data.customer) { alert('请输入客户/客户PIN'); return false; }
+            if (!data.weeks.length) { alert('请至少选择一个周配送时间'); return false; }
+            const hasWeekend = data.weeks.includes('周六') || data.weeks.includes('周天');
+            if (hasWeekend && data.workday === '是') {
+                const ok = confirm('选择的日期已经是工作日，请确认是否继续！');
+                if (!ok) return false;
+            }
+            return true;
+        }
+
+        function saveRecord() {
+            const formData = getFormData();
+            if (!validateForm(formData)) return;
+            const now = new Date();
+            const nowStr = now.toISOString().slice(0, 19).replace('T', ' ');
+            if (currentEditId) {
+                const idx = dataSource.findIndex(r => r.id === currentEditId);
+                if (idx > -1) {
+                    const before = dataSource[idx];
+                    dataSource[idx] = {
+                        ...before,
+                        ...formData,
+                        updatedBy: 'admin',
+                        updatedAt: nowStr,
+                        logs: [
+                            ...(before.logs || []),
+                            {
+                                type: '修改',
+                                before: `规则类型：${before.ruleType}，客户：${before.customer}，周维度可配送时间：${before.weeks.join('、')}，是否工作日配送：${before.workday}`,
+                                after: `规则类型：${formData.ruleType}，客户：${formData.customer}，周维度可配送时间：${formData.weeks.join('、')}，是否工作日配送：${formData.workday}`,
+                                user: 'admin',
+                                time: nowStr
+                            }
+                        ]
+                    };
+                }
+            } else {
+                const newId = Date.now();
+                dataSource.unshift({
+                    id: newId,
+                    ...formData,
+                    createdBy: 'admin',
+                    createdAt: nowStr,
+                    updatedBy: 'admin',
+                    updatedAt: nowStr,
+                    logs: [
+                        {
+                            type: '新增',
+                            before: '-',
+                            after: `规则类型：${formData.ruleType}，客户：${formData.customer}，周维度可配送时间：${formData.weeks.join('、')}，是否工作日配送：${formData.workday}`,
+                            user: 'admin',
+                            time: nowStr
+                        }
+                    ]
+                });
+            }
+            filtered = [...dataSource];
+            renderTable();
+            recordModal.hide();
+        }
+
+        function applyFilter() {
+            const ruleType = document.getElementById('filterRuleType').value;
+            const customer = document.getElementById('filterCustomer').value.trim();
+            const week = document.getElementById('filterWeek').value;
+            const workday = document.getElementById('filterWorkday').value;
+            filtered = dataSource.filter(item => {
+                if (ruleType !== '全部' && item.ruleType !== ruleType) return false;
+                if (customer && !item.customer.includes(customer)) return false;
+                if (week !== '全部' && !(item.weeks || []).includes(week)) return false;
+                if (workday !== '全部' && item.workday !== workday) return false;
+                return true;
+            });
+            renderTable();
+        }
+
+        function resetFilter() {
+            document.getElementById('filterRuleType').value = '全部';
+            document.getElementById('filterCustomer').value = '';
+            document.getElementById('filterWeek').value = '全部';
+            document.getElementById('filterWorkday').value = '全部';
+            filtered = [...dataSource];
+            renderTable();
+        }
+
+        function bindEvents() {
+            document.querySelectorAll('.btn.btn-primary.btn-sm').forEach(btn => {
+                if (btn.textContent.includes('新增记录')) {
+                    btn.addEventListener('click', openCreate);
+                }
+            });
+            document.getElementById('saveRecordBtn').addEventListener('click', saveRecord);
+            const resetBtn = document.querySelector('.card-block button.btn-outline-secondary');
+            const searchBtn = document.querySelector('.card-block button.btn-primary');
+            if (resetBtn) resetBtn.addEventListener('click', resetFilter);
+            if (searchBtn) searchBtn.addEventListener('click', applyFilter);
+        }
+
+        function init() {
+            renderWeekCheckboxes('formWeeks', []);
+            renderTable();
+            bindEvents();
+        }
+
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>

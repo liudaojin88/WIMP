@@ -1,0 +1,912 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>商品绑仓配置 - WIMP</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet" />
+  <style>
+    body {
+      font-family: 'Microsoft YaHei', Arial, sans-serif;
+      background-color: #f8f9fa;
+      font-size: 0.9rem;
+    }
+    .page-title-bar {
+      background: #fffbe6;
+      border: 1px solid #ffe58f;
+      color: #ad8b00;
+      padding: 10px 15px;
+      border-radius: 8px;
+      margin-bottom: 15px;
+    }
+    .card {
+      box-shadow: 0 3px 12px rgba(0,0,0,0.08);
+      border: none;
+      border-radius: 12px;
+    }
+    .card-header {
+      background: #fff;
+      border-bottom: 1px solid #eee;
+      font-weight: 600;
+    }
+    .filter-icon {
+      color: #52c41a;
+      margin-right: 8px;
+    }
+    .filter-actions .btn {
+      min-width: 80px;
+    }
+    .table thead th {
+      background: #fafafa;
+      font-weight: 600;
+    }
+    .pagination-info {
+      color: #6c757d;
+    }
+    .floating-action {
+      position: fixed;
+      right: 24px;
+      bottom: 24px;
+      z-index: 1050;
+    }
+    .sku-counter {
+      font-size: 0.8rem;
+      color: #6c757d;
+    }
+    .batch-toolbar .btn {
+      min-width: 120px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container-fluid p-4">
+    <!-- 顶部说明条 -->
+    <div class="page-title-bar d-flex align-items-center justify-content-between">
+      <div>
+        <span class="me-2">履约商品管理 / 商品绑仓配置</span>
+        <span class="text-muted">商品绑仓配置</span>
+      </div>
+      <div class="text-muted">
+        <i class="bi bi-info-circle me-1"></i> 按照截图布局创建的页面骨架（占位）
+      </div>
+    </div>
+
+    <!-- 筛选卡 -->
+    <div class="card mb-3">
+      <div class="card-header d-flex align-items-center">
+        <i class="bi bi-funnel filter-icon"></i>
+        <span>筛选条件</span>
+        <div class="ms-auto filter-actions">
+          <button id="btnToggle" class="btn btn-outline-secondary btn-sm">
+            <i class="bi bi-chevron-up me-1"></i>收起筛选
+          </button>
+        </div>
+      </div>
+      <div class="card-body" id="filterBody">
+        <form id="filterForm">
+          <!-- 国际SKU 文本域 -->
+          <div class="row g-3">
+            <div class="col-12">
+              <label class="form-label">国际SKU</label>
+              <textarea id="skuText" class="form-control" rows="3" maxlength="2000"
+                placeholder="请输入国际SKU，多个用换行或逗号分隔，最多100个&#10;示例：SKU001, SKU002"></textarea>
+              <div class="d-flex justify-content-between mt-1">
+                <small class="sku-counter"><span id="skuCharCount">0</span>/2000</small>
+                <small class="text-muted">最多100个SKU</small>
+              </div>
+            </div>
+          </div>
+
+          <!-- 选择项 -->
+          <div class="row g-3 mt-1">
+            <div class="col-md-3">
+              <label class="form-label">备货仓</label>
+              <select id="warehouseCode" class="form-select">
+                <option value="">请选择备货仓</option>
+                <option value="C000000893">印尼中心仓1号（雅加达）[C000000893]</option>
+                <option value="C000000229">泰国中心仓1号（梧莲班）[C000000229]</option>
+                <option value="C000000101">越南中心A仓[C000000101]</option>
+              </select>
+            </div>
+            <div class="col-md-3">
+              <label class="form-label">备货模式</label>
+              <select id="stockMode" class="form-select">
+                <option value="">请选择备货模式</option>
+                <option value="自营">自营</option>
+                <option value="代营">代营</option>
+                <option value="代仓">代仓</option>
+              </select>
+            </div>
+            <div class="col-md-3">
+              <label class="form-label">在途可售</label>
+              <select id="salableInTransit" class="form-select">
+                <option value="">请选择在途可售</option>
+                <option value="on">开启</option>
+                <option value="off">关闭</option>
+              </select>
+            </div>
+            <div class="col-md-3">
+              <label class="form-label">更新时间（开始）</label>
+              <input id="timeStart" type="datetime-local" class="form-control" />
+            </div>
+            <div class="col-md-3">
+              <label class="form-label mt-3 mt-md-0">更新时间（结束）</label>
+              <input id="timeEnd" type="datetime-local" class="form-control" />
+            </div>
+          </div>
+
+          <!-- 操作按钮 -->
+          <div class="mt-3 d-flex gap-2">
+            <button type="button" id="btnSearch" class="btn btn-primary">
+              <i class="bi bi-search me-1"></i>查询
+            </button>
+            <button type="button" id="btnReset" class="btn btn-outline-secondary">
+              <i class="bi bi-arrow-counterclockwise me-1"></i>重置
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- 批量操作工具条 -->
+    <div class="d-flex justify-content-between align-items-center mb-2 batch-toolbar">
+      <div class="d-flex gap-2">
+        <button id="btnBatchBind" class="btn btn-outline-primary" disabled>
+          批量绑仓
+        </button>
+        <button id="btnBatchUnbind" class="btn btn-outline-danger" disabled>
+          批量解绑
+        </button>
+        <button id="btnBatchSalable" class="btn btn-outline-success" disabled>
+          批量更新在途可售
+        </button>
+      </div>
+      <div class="d-flex align-items-center gap-2">
+        <button id="btnCreateBind" class="btn btn-primary">
+          <i class="bi bi-plus-circle me-1"></i>新增绑仓
+        </button>
+        <button class="btn btn-outline-secondary">
+          <i class="bi bi-gear"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- 列表表格 -->
+    <div class="card">
+      <div class="card-body">
+        <div class="table-responsive">
+          <table class="table table-hover table-bordered align-middle">
+            <thead>
+              <tr>
+                <th style="width: 40px;">
+                  <input type="checkbox" id="selectAll" />
+                </th>
+                <th>国际SKU</th>
+                <th>商品名称</th>
+                <th>备货仓</th>
+                <th>备货模式</th>
+                <th>在途可售</th>
+                <th>采销ERP</th>
+                <th>更新人</th>
+                <th>更新时间</th>
+                <th>操作</th>
+              </tr>
+            </thead>
+            <tbody id="tableBody">
+              <tr>
+                <td colspan="10" class="text-center text-muted py-4">
+                  暂无数据，占位内容。后续任务将渲染数据与勾选交互。
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- 分页占位 -->
+        <div class="d-flex justify-content-between align-items-center">
+          <div class="pagination-info">每页 20 条</div>
+          <nav aria-label="分页">
+            <ul class="pagination mb-0">
+              <li class="page-item disabled">
+                <a class="page-link">上一页</a>
+              </li>
+              <li class="page-item active">
+                <a class="page-link">1</a>
+              </li>
+              <li class="page-item disabled">
+                <a class="page-link">下一页</a>
+              </li>
+            </ul>
+          </nav>
+        </div>
+      </div>
+    </div>
+
+    <!-- 右下角悬浮操作按钮（占位） -->
+    <div class="floating-action">
+      <button class="btn btn-primary btn-lg rounded-circle" title="快捷操作占位">
+        <i class="bi bi-pencil"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- 批量操作占位 Modals -->
+  <div class="modal fade" id="batchBindModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">批量绑仓</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="关闭"></button>
+        </div>
+        <div class="modal-body">
+          <div class="mb-2 text-muted">已选择 <span id="bindSelectedCount">0</span> 个SKU</div>
+          <div class="mb-3">
+            <label class="form-label">备货仓</label>
+            <select id="bindWarehouseCode" class="form-select">
+              <option value="">请选择备货仓</option>
+              <option value="C000000893">印尼中心仓1号（雅加达）[C000000893]</option>
+              <option value="C000000229">泰国中心仓1号（梧莲班）[C000000229]</option>
+              <option value="C000000101">越南中心A仓[C000000101]</option>
+            </select>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">备货模式</label>
+            <select id="bindStockMode" class="form-select">
+              <option value="">请选择备货模式</option>
+              <option value="自营">自营</option>
+              <option value="代营">代营</option>
+              <option value="代仓">代仓</option>
+            </select>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">在途可售</label>
+            <select id="bindSalable" class="form-select">
+              <option value="">请选择在途可售</option>
+              <option value="on">开启</option>
+              <option value="off">关闭</option>
+            </select>
+          </div>
+          <div class="text-muted">提示：为选中SKU批量设置备货仓/模式/在途可售（占位，不接后端）。</div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">取消</button>
+          <button type="button" class="btn btn-primary btn-sm" id="confirmBatchBind">确定</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade" id="batchUnbindModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">批量解绑</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="关闭"></button>
+        </div>
+        <div class="modal-body">
+          <p>将对选中的 <strong id="unbindSelectedCount">0</strong> 个SKU执行解绑操作。</p>
+          <p class="text-muted mb-0">此为占位确认弹窗，提交后仅前端提示。</p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">取消</button>
+          <button type="button" class="btn btn-danger btn-sm" id="confirmBatchUnbind">确认解绑</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade" id="batchSalableModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">批量更新在途可售</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="关闭"></button>
+        </div>
+        <div class="modal-body">
+          <div class="mb-2 text-muted">已选择 <span id="salableSelectedCount">0</span> 个SKU</div>
+          <div class="mb-3">
+            <label class="form-label">在途可售状态</label>
+            <select id="salableValue" class="form-select">
+              <option value="on">开启</option>
+              <option value="off">关闭</option>
+            </select>
+          </div>
+          <div class="text-muted">提示：批量设置在途可售（占位，不接后端）。</div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">取消</button>
+          <button type="button" class="btn btn-success btn-sm" id="confirmBatchSalable">确定</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- 单项操作占位 Modals -->
+  <div class="modal fade" id="createBindModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">新增绑仓</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="关闭"></button>
+        </div>
+        <div class="modal-body">
+          <div class="mb-2 text-muted">可输入多个国际SKU，逗号/换行分隔（占位）。</div>
+          <div class="mb-3">
+            <label class="form-label">国际SKU</label>
+            <textarea id="createSkuTextarea" class="form-control" rows="3" maxlength="2000" placeholder="SKU001, SKU002"></textarea>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">备货仓</label>
+            <select id="createWarehouseCode" class="form-select">
+              <option value="">请选择备货仓</option>
+              <option value="C000000893">印尼中心仓1号（雅加达）[C000000893]</option>
+              <option value="C000000229">泰国中心仓1号（梧莲班）[C000000229]</option>
+              <option value="C000000101">越南中心A仓[C000000101]</option>
+            </select>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">备货模式</label>
+            <select id="createStockMode" class="form-select">
+              <option value="">请选择备货模式</option>
+              <option value="自营">自营</option>
+              <option value="代营">代营</option>
+              <option value="代仓">代仓</option>
+            </select>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">在途可售</label>
+            <select id="createSalable" class="form-select">
+              <option value="">请选择在途可售</option>
+              <option value="on">开启</option>
+              <option value="off">关闭</option>
+            </select>
+          </div>
+          <div class="text-muted">提示：提交为占位行为，仅前端提示，不接入后端。</div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">取消</button>
+          <button type="button" class="btn btn-primary btn-sm" id="confirmCreateBind">确定</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade" id="editBindModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">编辑绑仓</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="关闭"></button>
+        </div>
+        <div class="modal-body">
+          <div class="mb-2">国际SKU：<strong id="editSkuId">-</strong></div>
+          <div class="mb-3">
+            <label class="form-label">备货仓</label>
+            <select id="editWarehouseCode" class="form-select">
+              <option value="C000000893">印尼中心仓1号（雅加达）[C000000893]</option>
+              <option value="C000000229">泰国中心仓1号（梧莲班）[C000000229]</option>
+              <option value="C000000101">越南中心A仓[C000000101]</option>
+              <option value="C000000333">上海中心B仓[C000000333]</option>
+              <option value="C000000055">宁波保税仓[C000000055]</option>
+            </select>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">备货模式</label>
+            <select id="editStockMode" class="form-select">
+              <option value="自营">自营</option>
+              <option value="代营">代营</option>
+              <option value="代仓">代仓</option>
+            </select>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">在途可售</label>
+            <select id="editSalable" class="form-select">
+              <option value="on">开启</option>
+              <option value="off">关闭</option>
+            </select>
+          </div>
+          <div class="text-muted">提示：提交为占位行为，仅前端提示。</div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">取消</button>
+          <button type="button" class="btn btn-primary btn-sm" id="confirmEditBind">保存</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade" id="unbindSingleModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">解绑确认</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="关闭"></button>
+        </div>
+        <div class="modal-body">
+          确认对国际SKU <strong id="unbindSingleSkuId">-</strong> 执行解绑操作？（占位，不接后端）
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">取消</button>
+          <button type="button" class="btn btn-danger btn-sm" id="confirmUnbindSingle">确认解绑</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+  // 构建模拟数据、表格与勾选渲染（任务2）
+  (function () {
+    /* ===== 模块结构 =====
+       1) 数据与状态: state/rawData/filteredData/selectedSet/page
+       2) 工具: pad, formatDateTime
+       3) 数据生成: generateMockData
+       4) 渲染: renderTable, renderPagination
+       5) 分页: paginate, changePage
+       6) 勾选: toggleRowSelect, toggleAllSelect, updateBatchButtons
+       7) 初始化: init()
+    */
+
+    // 页面元素
+    const filterBody = document.getElementById('filterBody');
+    const btnToggle = document.getElementById('btnToggle');
+    const btnSearch = document.getElementById('btnSearch');
+    const btnReset = document.getElementById('btnReset');
+    const skuText = document.getElementById('skuText');
+    const skuCharCount = document.getElementById('skuCharCount');
+    const selectAll = document.getElementById('selectAll');
+    const tableBody = document.getElementById('tableBody');
+
+    const btnBatchBind = document.getElementById('btnBatchBind');
+    const btnBatchUnbind = document.getElementById('btnBatchUnbind');
+    const btnBatchSalable = document.getElementById('btnBatchSalable');
+    const btnCreateBind = document.getElementById('btnCreateBind');
+
+    // 状态
+    const state = {
+      rawData: [],
+      filteredData: [],
+      selectedSet: new Set(),  // skuId 集合
+      page: { current: 1, size: 20, total: 0 }
+    };
+
+    // 工具
+    function pad(n) { return n < 10 ? '0' + n : '' + n; }
+    function formatDateTime(date) {
+      const y = date.getFullYear();
+      const m = pad(date.getMonth() + 1);
+      const d = pad(date.getDate());
+      const hh = pad(date.getHours());
+      const mm = pad(date.getMinutes());
+      const ss = pad(date.getSeconds());
+      return `${y}-${m}-${d} ${hh}:${mm}:${ss}`;
+    }
+
+    // 模拟数据
+    function generateMockData(count = 120) {
+      const warehouses = [
+        { code: 'C000000893', name: '印尼中心仓1号（雅加达）' },
+        { code: 'C000000229', name: '泰国中心仓1号（梧莲班）' },
+        { code: 'C000000101', name: '越南中心A仓' },
+        { code: 'C000000333', name: '上海中心B仓' },
+        { code: 'C000000055', name: '宁波保税仓' }
+      ];
+      const stockModes = ['自营', '代营', '代仓'];
+      const erps = ['nico.antonius1', 'chenanwei1', 'hejingrong5', 'viktor.malik1', 'huyuan26'];
+      const updaters = ['nico.antonius1', 'chenanwei1', 'hejingrong5', 'viktor.malik1', 'huyuan26'];
+
+      const now = Date.now();
+      const list = [];
+      for (let i = 0; i < count; i++) {
+        const w = warehouses[i % warehouses.length];
+        const mode = stockModes[i % stockModes.length];
+        const sku = `800000${String(300000 + i).padStart(6, '0')}`;
+        const productName = [
+          'Uticon 插座 ST-', 'SEKAI 台扇', 'Broco 开关1621', 'Aqua 空调耗材', 'Helukabel 和柔3x1.5'
+        ][i % 5] + ` #${i + 1}`;
+
+        const dt = new Date(now - i * 17 * 60 * 1000); // 每条相隔17分钟
+        list.push({
+          skuId: sku,
+          productName: productName,
+          warehouseName: w.name,
+          warehouseCode: w.code,
+          stockMode: mode,
+          salableInTransit: (i % 2 === 0),
+          erpName: erps[i % erps.length],
+          updatedBy: updaters[i % updaters.length],
+          updatedAt: formatDateTime(dt)
+        });
+      }
+      return list;
+    }
+
+    // 分页
+    function paginate(data, page, size) {
+      const start = (page - 1) * size;
+      return data.slice(start, start + size);
+    }
+
+    // 批量按钮启用
+    function updateBatchButtons() {
+      const hasSelection = state.selectedSet.size > 0;
+      btnBatchBind.disabled = !hasSelection;
+      btnBatchUnbind.disabled = !hasSelection;
+      btnBatchSalable.disabled = !hasSelection;
+    }
+
+    // 勾选当前页全选
+    function toggleAllSelect(checked) {
+      const checkboxes = tableBody.querySelectorAll('input[type="checkbox"][data-sku]');
+      checkboxes.forEach(cb => {
+        cb.checked = checked;
+        const sku = cb.getAttribute('data-sku');
+        if (checked) {
+          state.selectedSet.add(sku);
+        } else {
+          state.selectedSet.delete(sku);
+        }
+      });
+      updateBatchButtons();
+    }
+
+    // 勾选行
+    function toggleRowSelect(skuId, checked) {
+      if (checked) state.selectedSet.add(skuId);
+      else state.selectedSet.delete(skuId);
+
+      // 同步表头全选状态（仅针对当前页）
+      const checkboxes = tableBody.querySelectorAll('input[type="checkbox"][data-sku]');
+      const allChecked = Array.from(checkboxes).length > 0 && Array.from(checkboxes).every(cb => cb.checked);
+      selectAll.checked = allChecked;
+
+      updateBatchButtons();
+    }
+
+    // 表格渲染
+    function renderTable(pageData) {
+      tableBody.innerHTML = '';
+      const frag = document.createDocumentFragment();
+
+      if (!pageData.length) {
+        const tr = document.createElement('tr');
+        const td = document.createElement('td');
+        td.colSpan = 10;
+        td.className = 'text-center text-muted py-4';
+        td.textContent = '暂无数据';
+        tr.appendChild(td);
+        tableBody.appendChild(tr);
+        return;
+      }
+
+      pageData.forEach(row => {
+        const tr = document.createElement('tr');
+
+        // 选择框列
+        const tdSel = document.createElement('td');
+        const cb = document.createElement('input');
+        cb.type = 'checkbox';
+        cb.setAttribute('data-sku', row.skuId);
+        cb.checked = state.selectedSet.has(row.skuId);
+        cb.addEventListener('change', (e) => toggleRowSelect(row.skuId, e.target.checked));
+        tdSel.appendChild(cb);
+        tr.appendChild(tdSel);
+
+        // 普通列
+        const cols = [
+          row.skuId,
+          row.productName,
+          `${row.warehouseName} [${row.warehouseCode}]`,
+          row.stockMode,
+          row.salableInTransit ? '开启' : '关闭',
+          row.erpName,
+          row.updatedBy,
+          row.updatedAt
+        ];
+        cols.forEach(val => {
+          const td = document.createElement('td');
+          td.textContent = val;
+          tr.appendChild(td);
+        });
+
+        // 操作列
+        const tdAct = document.createElement('td');
+        const edit = document.createElement('a');
+        edit.href = 'javascript:void(0)';
+        edit.className = 'text-primary me-2';
+        edit.textContent = '编辑';
+        edit.addEventListener('click', () => {
+          openEditModal(row);
+        });
+
+        const unbind = document.createElement('a');
+        unbind.href = 'javascript:void(0)';
+        unbind.className = 'text-danger';
+        unbind.textContent = '解绑';
+        unbind.addEventListener('click', () => {
+          alert(`解绑占位：SKU ${row.skuId}`);
+        });
+
+        tdAct.appendChild(edit);
+        tdAct.appendChild(unbind);
+        tr.appendChild(tdAct);
+
+        frag.appendChild(tr);
+      });
+
+      tableBody.appendChild(frag);
+    }
+
+    // 分页栏渲染
+    function renderPagination(total, current, size) {
+      const totalPages = Math.max(1, Math.ceil(total / size));
+      const container = document.querySelector('.pagination');
+      container.innerHTML = '';
+
+      function createItem(label, disabled, active, onClick) {
+        const li = document.createElement('li');
+        li.className = `page-item${disabled ? ' disabled' : ''}${active ? ' active' : ''}`;
+        const a = document.createElement('a');
+        a.className = 'page-link';
+        a.textContent = label;
+        a.href = 'javascript:void(0)';
+        if (!disabled) a.addEventListener('click', onClick);
+        li.appendChild(a);
+        return li;
+      }
+
+      // 上一页
+      container.appendChild(createItem('上一页', current === 1, false, () => changePage(current - 1)));
+
+      // 页码
+      for (let p = 1; p <= totalPages; p++) {
+        container.appendChild(createItem(String(p), false, p === current, () => changePage(p)));
+      }
+
+      // 下一页
+      container.appendChild(createItem('下一页', current === totalPages, false, () => changePage(current + 1)));
+    }
+
+    // 切换页
+    function changePage(page) {
+      state.page.current = page;
+      const pageData = paginate(state.filteredData, state.page.current, state.page.size);
+      renderTable(pageData);
+      renderPagination(state.page.total, state.page.current, state.page.size);
+      // 切页后取消表头全选
+      selectAll.checked = false;
+    }
+
+    // 初始化
+    function init() {
+      state.rawData = generateMockData(120);
+      state.filteredData = state.rawData.slice();
+      state.page.total = state.filteredData.length;
+      state.page.current = 1;
+
+      const firstPageData = paginate(state.filteredData, state.page.current, state.page.size);
+      renderTable(firstPageData);
+      renderPagination(state.page.total, state.page.current, state.page.size);
+      updateBatchButtons();
+    }
+
+    // 解析与校验（任务3）
+    function parseSkuText(text) {
+      if (!text) return [];
+      const arr = text.split(/[,\n\r]+/).map(s => s.trim()).filter(Boolean);
+      return Array.from(new Set(arr));
+    }
+
+    function validateFilters(filters) {
+      if (filters.skuText && filters.skuText.length > 2000) {
+        return { ok: false, message: '国际SKU字符总数不可超过2000' };
+      }
+      if (filters.skuList.length > 100) {
+        return { ok: false, message: '国际SKU数量不可超过100个' };
+      }
+      for (const s of filters.skuList) {
+        if (s.length > 64) return { ok: false, message: '单个SKU长度不可超过64' };
+        if (!/^[A-Za-z0-9]+$/.test(s)) return { ok: false, message: 'SKU仅支持字母数字' };
+      }
+      if (filters.timeStart && filters.timeEnd) {
+        const st = new Date(filters.timeStart).getTime();
+        const et = new Date(filters.timeEnd).getTime();
+        if (Number.isFinite(st) && Number.isFinite(et) && st > et) {
+          return { ok: false, message: '开始时间不能大于结束时间' };
+        }
+      }
+      return { ok: true };
+    }
+
+    function applyFilters(filters, data) {
+      const { skuList, warehouseCode, stockMode, salableInTransit, timeStart, timeEnd } = filters;
+      const st = timeStart ? new Date(timeStart).getTime() : null;
+      const et = timeEnd ? new Date(timeEnd).getTime() : null;
+
+      return data.filter(item => {
+        if (skuList.length) {
+          const hit = skuList.some(s => item.skuId.includes(s));
+          if (!hit) return false;
+        }
+        if (warehouseCode && item.warehouseCode !== warehouseCode) return false;
+        if (stockMode && item.stockMode !== stockMode) return false;
+        if (salableInTransit) {
+          const want = salableInTransit === 'on';
+          if (item.salableInTransit !== want) return false;
+        }
+        if (st !== null || et !== null) {
+          const t = new Date(item.updatedAt.replace(' ', 'T')).getTime();
+          if (st !== null && t < st) return false;
+          if (et !== null && t > et) return false;
+        }
+        return true;
+      });
+    }
+
+    // 单项操作函数（任务4）
+    let currentEditRow = null;
+
+    function openCreateBindModal() {
+      const ta = document.getElementById('createSkuTextarea');
+      const wh = document.getElementById('createWarehouseCode');
+      const mode = document.getElementById('createStockMode');
+      const sal = document.getElementById('createSalable');
+      if (ta) ta.value = '';
+      if (wh) wh.value = '';
+      if (mode) mode.value = '';
+      if (sal) sal.value = '';
+      const modal = new bootstrap.Modal(document.getElementById('createBindModal'));
+      modal.show();
+    }
+    function openEditModal(row) {
+      currentEditRow = row;
+      document.getElementById('editSkuId').textContent = row.skuId;
+      document.getElementById('editWarehouseCode').value = row.warehouseCode;
+      document.getElementById('editStockMode').value = row.stockMode;
+      document.getElementById('editSalable').value = row.salableInTransit ? 'on' : 'off';
+      const modal = new bootstrap.Modal(document.getElementById('editBindModal'));
+      modal.show();
+    }
+    function openUnbindConfirm(row) {
+      document.getElementById('unbindSingleSkuId').textContent = row.skuId;
+      const modal = new bootstrap.Modal(document.getElementById('unbindSingleModal'));
+      modal.show();
+    }
+
+    // 事件绑定（任务3）
+    btnToggle.addEventListener('click', function () {
+      const isHidden = filterBody.classList.toggle('d-none');
+      btnToggle.innerHTML = isHidden
+        ? '<i class="bi bi-chevron-down me-1"></i>展开筛选'
+        : '<i class="bi bi-chevron-up me-1"></i>收起筛选';
+    });
+
+    skuText.addEventListener('input', function () {
+      skuCharCount.textContent = skuText.value.length;
+    });
+
+    btnSearch.addEventListener('click', function () {
+      btnSearch.disabled = true;
+
+      const filters = {
+        skuText: skuText.value || '',
+        skuList: parseSkuText(skuText.value || ''),
+        warehouseCode: document.getElementById('warehouseCode').value || '',
+        stockMode: document.getElementById('stockMode').value || '',
+        salableInTransit: document.getElementById('salableInTransit').value || '',
+        timeStart: document.getElementById('timeStart').value || '',
+        timeEnd: document.getElementById('timeEnd').value || ''
+      };
+
+      const v = validateFilters(filters);
+      if (!v.ok) {
+        alert(v.message);
+        btnSearch.disabled = false;
+        return;
+      }
+
+      state.filteredData = applyFilters(filters, state.rawData);
+      state.page.total = state.filteredData.length;
+      state.page.current = 1;
+      state.selectedSet.clear();
+      selectAll.checked = false;
+
+      const pageData = paginate(state.filteredData, state.page.current, state.page.size);
+      renderTable(pageData);
+      renderPagination(state.page.total, state.page.current, state.page.size);
+
+      setTimeout(() => { btnSearch.disabled = false; }, 100);
+    });
+
+    btnReset.addEventListener('click', function () {
+      document.getElementById('warehouseCode').value = '';
+      document.getElementById('stockMode').value = '';
+      document.getElementById('salableInTransit').value = '';
+      document.getElementById('timeStart').value = '';
+      document.getElementById('timeEnd').value = '';
+      skuText.value = '';
+      skuCharCount.textContent = '0';
+
+      state.filteredData = state.rawData.slice();
+      state.page.total = state.filteredData.length;
+      state.page.current = 1;
+      state.selectedSet.clear();
+      selectAll.checked = false;
+      updateBatchButtons();
+      changePage(state.page.current);
+    });
+
+    // 全选
+    selectAll.addEventListener('change', function (e) {
+      toggleAllSelect(e.target.checked);
+    });
+
+    // 批量按钮与弹窗占位逻辑
+    btnBatchBind.addEventListener('click', function () {
+      document.getElementById('bindSelectedCount').textContent = String(state.selectedSet.size);
+      const modal = new bootstrap.Modal(document.getElementById('batchBindModal'));
+      modal.show();
+    });
+    document.getElementById('confirmBatchBind').addEventListener('click', function () {
+      const wh = document.getElementById('bindWarehouseCode').value;
+      const mode = document.getElementById('bindStockMode').value;
+      const salable = document.getElementById('bindSalable').value;
+      if (!wh || !mode || !salable) {
+        alert('请完整选择备货仓、备货模式与在途可售');
+        return;
+      }
+      bootstrap.Modal.getInstance(document.getElementById('batchBindModal')).hide();
+      alert(`批量绑仓提交成功（占位）：${state.selectedSet.size} 个SKU`);
+    });
+
+    btnBatchUnbind.addEventListener('click', function () {
+      document.getElementById('unbindSelectedCount').textContent = String(state.selectedSet.size);
+      const modal = new bootstrap.Modal(document.getElementById('batchUnbindModal'));
+      modal.show();
+    });
+    document.getElementById('confirmBatchUnbind').addEventListener('click', function () {
+      bootstrap.Modal.getInstance(document.getElementById('batchUnbindModal')).hide();
+      alert(`批量解绑提交成功（占位）：${state.selectedSet.size} 个SKU`);
+    });
+
+    btnBatchSalable.addEventListener('click', function () {
+      document.getElementById('salableSelectedCount').textContent = String(state.selectedSet.size);
+      const modal = new bootstrap.Modal(document.getElementById('batchSalableModal'));
+      modal.show();
+    });
+    document.getElementById('confirmBatchSalable').addEventListener('click', function () {
+      const val = document.getElementById('salableValue').value;
+      bootstrap.Modal.getInstance(document.getElementById('batchSalableModal')).hide();
+      alert(`批量更新在途可售提交成功（占位）：已选择 ${state.selectedSet.size} 个SKU，设置为 ${val === 'on' ? '开启' : '关闭'}`);
+    });
+
+    btnCreateBind.addEventListener('click', function () {
+      openCreateBindModal();
+    });
+
+    // 单项操作提交占位
+    document.getElementById('confirmCreateBind').addEventListener('click', function () {
+      const wh = document.getElementById('createWarehouseCode').value;
+      const mode = document.getElementById('createStockMode').value;
+      const salable = document.getElementById('createSalable').value;
+      if (!wh || !mode || !salable) { alert('请完整选择备货仓、备货模式与在途可售'); return; }
+      bootstrap.Modal.getInstance(document.getElementById('createBindModal')).hide();
+      alert('新增绑仓提交成功（占位）');
+    });
+    document.getElementById('confirmEditBind').addEventListener('click', function () {
+      if (!currentEditRow) { alert('未找到编辑目标'); return; }
+      bootstrap.Modal.getInstance(document.getElementById('editBindModal')).hide();
+      alert(`编辑提交成功（占位）：SKU ${currentEditRow.skuId}`);
+    });
+    document.getElementById('confirmUnbindSingle').addEventListener('click', function () {
+      const sku = document.getElementById('unbindSingleSkuId').textContent || '-';
+      bootstrap.Modal.getInstance(document.getElementById('unbindSingleModal')).hide();
+      alert(`解绑提交成功（占位）：SKU ${sku}`);
+    });
+
+    // 启动
+    init();
+  })();
+</script>
+</body>
+</html>

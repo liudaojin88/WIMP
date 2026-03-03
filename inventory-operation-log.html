@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>库存操作日志 - WIMP</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Microsoft YaHei', Arial, sans-serif;
+            background-color: #f8f9fa;
+            font-size: 0.9rem;
+        }
+        .page-title-bar {
+            background: #fffbe6;
+            border: 1px solid #ffe58f;
+            color: #ad8b00;
+            padding: 10px 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+        .card {
+            box-shadow: 0 3px 12px rgba(0,0,0,0.08);
+            border: none;
+            border-radius: 12px;
+        }
+        .card-header {
+            background: #fff;
+            border-bottom: 1px solid #eee;
+            font-weight: 600;
+        }
+        .filter-icon {
+            color: #52c41a;
+            margin-right: 8px;
+        }
+        .filter-actions .btn {
+            min-width: 80px;
+        }
+        .table thead th {
+            background: #fafafa;
+            font-weight: 600;
+        }
+        .pagination-info {
+            color: #6c757d;
+        }
+    </style>
+</head>
+<body>
+<div class="container-fluid p-4">
+    <div class="page-title-bar">
+        <span class="me-2">运维管理 / 库存操作日志</span>
+        <span class="text-muted">库存操作日志记录</span>
+    </div>
+
+    <div class="card mb-3">
+        <div class="card-header d-flex align-items-center">
+            <i class="bi bi-journal-check filter-icon"></i>
+            <span>库存操作日志记录</span>
+            <div class="ms-auto filter-actions">
+                <button id="btnToggle" class="btn btn-outline-secondary btn-sm">
+                    <i class="bi bi-chevron-up me-1"></i>收起筛选
+                </button>
+            </div>
+        </div>
+        <div class="card-body" id="filterBody">
+            <form id="filterForm">
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <label class="form-label">订单号</label>
+                        <input type="text" class="form-control" id="orderNo" placeholder="请输入" maxlength="64">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">业务单号</label>
+                        <input type="text" class="form-control" id="bizOrderNo" placeholder="请输入" maxlength="64">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">SKU ID</label>
+                        <input type="text" class="form-control" id="skuId" placeholder="请输入" maxlength="64">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">仓库编码</label>
+                        <input type="text" class="form-control" id="warehouseCode" placeholder="请输入" maxlength="64">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">跟进单号</label>
+                        <input type="text" class="form-control" id="trackingNo" placeholder="请输入" maxlength="64">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">渠道编码</label>
+                        <input type="text" class="form-control" id="channelCode" placeholder="请输入" maxlength="64">
+                    </div>
+                </div>
+                <div class="mt-3 d-flex gap-2">
+                    <button type="button" id="btnSearch" class="btn btn-primary">
+                        <i class="bi bi-search me-1"></i>查询
+                    </button>
+                    <button type="button" id="btnReset" class="btn btn-outline-secondary">
+                        <i class="bi bi-arrow-counterclockwise me-1"></i>重置
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover table-bordered align-middle">
+                    <thead>
+                        <tr>
+                            <th>订单号</th>
+                            <th>业务单号</th>
+                            <th>SKU ID</th>
+                            <th>请求数量</th>
+                            <th>流水类型</th>
+                            <th>流水维度名称</th>
+                            <th>仓库编码</th>
+                            <th>仓库名称</th>
+                            <th>渠道编码</th>
+                            <th>渠道名称</th>
+                            <th>创建时间</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody">
+                        <tr>
+                            <td colspan="12" class="text-center text-muted py-4">
+                                暂无数据，占位内容。请点击“查询”或后续任务将渲染数据。
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="d-flex justify-content-between align-items-center">
+                <div class="pagination-info">每页 20 条</div>
+                <nav aria-label="分页">
+                    <ul class="pagination mb-0">
+                        <li class="page-item disabled">
+                            <a class="page-link">上一页</a>
+                        </li>
+                        <li class="page-item active">
+                            <a class="page-link">1</a>
+                        </li>
+                        <li class="page-item disabled">
+                            <a class="page-link">下一页</a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 操作占位 Modal -->
+<div class="modal fade" id="actionModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">功能占位</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="关闭"></button>
+      </div>
+      <div class="modal-body" id="actionModalBody">该功能为占位，尚未接入后端。</div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">关闭</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 编辑流水 Modal -->
+<div class="modal fade" id="editFlowModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">编辑操作流水</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="关闭"></button>
+      </div>
+      <div class="modal-body">
+        <div class="row g-3">
+          <!-- 可编辑字段 -->
+          <div class="col-md-6">
+            <label class="form-label">订单号<span class="text-danger">*</span></label>
+            <input type="text" class="form-control" id="editOrderNo" maxlength="64" />
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">业务单号<span class="text-danger">*</span></label>
+            <input type="text" class="form-control" id="editBizOrderNo" maxlength="64" />
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">流水维度名称<span class="text-danger">*</span></label>
+            <select class="form-select" id="editFlowDim">
+              <option value="">请选择</option>
+              <option value="预占库存">预占库存</option>
+              <option value="现货库存扣减">现货库存扣减</option>
+              <option value="预占归还">预占归还</option>
+              <option value="订单取消现货归还">订单取消现货归还</option>
+              <option value="售后现货归还">售后现货归还</option>
+              <option value="库存初始化">库存初始化</option>
+              <option value="库存更新">库存更新</option>
+              <option value="库存追加">库存追加</option>
+              <option value="在途库存追加">在途库存追加</option>
+              <option value="在途库存归还">在途库存归还</option>
+              <option value="在途库存转现货">在途库存转现货</option>
+              <option value="在途预占转现货预占">在途预占转现货预占</option>
+              <option value="在途库存预占">在途库存预占</option>
+              <option value="在途库存预占回退">在途库存预占回退</option>
+              <option value="库存扣减">库存扣减</option>
+            </select>
+          </div>
+
+          <!-- 只读展示字段 -->
+          <div class="col-12"><hr /></div>
+          <div class="col-md-6">
+            <label class="form-label">SKU ID</label>
+            <p class="form-control-plaintext mb-0" id="roSkuId"></p>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">请求数量</label>
+            <p class="form-control-plaintext mb-0" id="roRequestQty"></p>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">仓库编码</label>
+            <p class="form-control-plaintext mb-0" id="roWarehouseCode"></p>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">仓库名称</label>
+            <p class="form-control-plaintext mb-0" id="roWarehouseName"></p>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">渠道编码</label>
+            <p class="form-control-plaintext mb-0" id="roChannelCode"></p>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">渠道名称</label>
+            <p class="form-control-plaintext mb-0" id="roChannelName"></p>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">创建时间</label>
+            <p class="form-control-plaintext mb-0" id="roCreateTime"></p>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">创建人</label>
+            <p class="form-control-plaintext mb-0" id="roCreateUser"></p>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">取消</button>
+        <button class="btn btn-primary btn-sm" id="confirmEditFlow">保存</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 删除确认 Modal -->
+<div class="modal fade" id="deleteConfirmModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">删除确认</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="关闭"></button>
+      </div>
+      <div class="modal-body">
+        确认删除该操作流水？此操作不可恢复。
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">取消</button>
+        <button type="button" class="btn btn-danger btn-sm" id="confirmDeleteFlow">确认删除</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+// 构建模拟数据与表格渲染（任务2）
+(function() {
+  /* ===== 模块结构说明 =====
+     1) 数据与状态: state/rawData/filteredData/pagination
+     2) 工具函数: pad, formatDateTime
+     3) 数据生成: generateMockData
+     4) 过滤与校验: isNumeric, applyFilters
+     5) 渲染: renderTable, renderPagination
+     6) 分页切换: paginate, changePage
+     7) 事件绑定: toggle/search/reset
+     8) 初始化: init()
+     安全插值: 所有用户或数据内容均使用 textContent 插入
+  */
+  // 页面状态
+  const state = {
+    rawData: [],
+    filteredData: [],
+    currentPage: 1,
+    pageSize: 20,
+    total: 0
+  };
+
+  // 工具：格式化时间
+  function pad(n) { return n < 10 ? '0' + n : '' + n; }
+  function formatDateTime(date) {
+    const y = date.getFullYear();
+    const m = pad(date.getMonth() + 1);
+    const d = pad(date.getDate());
+    const hh = pad(date.getHours());
+    const mm = pad(date.getMinutes());
+    const ss = pad(date.getSeconds());
+    return `${y}-${m}-${d} ${hh}:${mm}:${ss}`;
+  }
+
+  // 权限配置（模拟）
+  const permissions = {
+    edit: true,   // 无权限时设为 false
+    delete: true  // 无权限时设为 false
+  };
+
+  // 流水维度枚举（编码-值）
+  const FLOW_DIM_OPTIONS = [
+    { code: '1',  name: '预占库存' },
+    { code: '2',  name: '现货库存扣减' },
+    { code: '3',  name: '预占归还' },
+    { code: '4',  name: '订单取消现货归还' },
+    { code: '5',  name: '售后现货归还' },
+    { code: '6',  name: '库存初始化' },
+    { code: '7',  name: '库存更新' },
+    { code: '8',  name: '库存追加' },
+    { code: '9',  name: '在途库存追加' },
+    { code: '10', name: '在途库存归还' },
+    { code: '11', name: '在途库存转现货' },
+    { code: '12', name: '在途预占转现货预占' },
+    { code: '13', name: '在途库存预占' },
+    { code: '14', name: '在途库存预占回退' },
+    { code: '15', name: '库存扣减' }
+  ];
+
+  // 操作占位弹窗
+  function showAction(action, row) {
+    const body = document.getElementById('actionModalBody');
+    if (body) {
+      body.textContent = `操作：${action}（功能占位）。订单号：${row.orderNo}，SKU：${row.skuId}`;
+      const modal = new bootstrap.Modal(document.getElementById('actionModal'));
+      modal.show();
+    }
+  }
+
+  // 生成模拟数据（≥100条）
+  function generateMockData(count = 120) {
+    const flowTypes = ['预占库存', '现货库存扣减'];
+    const flowDims  = ['预占库存', '现货库存扣减'];
+    const warehouses = [
+      { code: 'C000000229', name: '泰国中心1号（梧莲班）' },
+      { code: 'C000000101', name: '越南中心A仓' },
+      { code: 'C000000088', name: '广州海外仓' },
+      { code: 'C000000055', name: '宁波保税仓' },
+      { code: 'C000000333', name: '上海中心B仓' }
+    ];
+    const channels = [
+      { code: 'CHGLOBAL', name: '全球渠道' },
+      { code: 'VN-B', name: 'B仓渠道' },
+      { code: 'CN-D', name: '国内直发' },
+      { code: 'SEA-01', name: '海运渠道1' },
+      { code: 'AIR-02', name: '空运渠道2' }
+    ];
+
+    const list = [];
+    const now = Date.now();
+    for (let i = 0; i < count; i++) {
+      const w = warehouses[i % warehouses.length];
+      const c = channels[i % channels.length];
+      const qty = (i % 60) + 1;
+      const flowType = flowTypes[i % flowTypes.length];
+      const flowDim  = flowDims[i % flowDims.length];
+      const dt = new Date(now - (i * 13 * 60 * 1000)); // 每条相隔13分钟
+      list.push({
+        orderNo: `2602${String(1412600000 + i).padStart(10, '0')}`,
+        bizOrderNo: `2022${String(1143900000 + i).padStart(10, '0')}`,
+        skuId: `80000${String(200000 + (i % 99999)).padStart(5, '0')}`,
+        requestQty: qty,
+        flowType,
+        flowDimensionName: flowDim,
+        warehouseCode: w.code,
+        warehouseName: w.name,
+        channelCode: c.code,
+        channelName: c.name,
+        trackingNo: `TRK${String(202600000000 + i)}`,
+        createTime: formatDateTime(dt),
+        createUser: ['system','ops1','ops2','ops3','ops4'][i % 5]
+      });
+    }
+    return list;
+  }
+
+  // 分页
+  function paginate(data, page, size) {
+    const start = (page - 1) * size;
+    return data.slice(start, start + size);
+  }
+
+  // 校验与过滤
+  function isNumeric(str) {
+    if (typeof str !== 'string') return false;
+    const s = str.trim();
+    if (!s) return false;
+    return /^\d+$/.test(s);
+  }
+
+  function applyFilters(filters, data) {
+    const orderNo = (filters.orderNo || '').trim();
+    const bizOrderNo = (filters.bizOrderNo || '').trim();
+    const skuId = (filters.skuId || '').trim();
+    const warehouseCode = (filters.warehouseCode || '').trim();
+    const trackingNo = (filters.trackingNo || '').trim();
+    const channelCode = (filters.channelCode || '').trim();
+
+    return data.filter(item => {
+      if (orderNo && !item.orderNo.includes(orderNo)) return false;
+      if (bizOrderNo && !item.bizOrderNo.includes(bizOrderNo)) return false;
+      if (skuId && !item.skuId.includes(skuId)) return false;
+      if (warehouseCode && !item.warehouseCode.includes(warehouseCode)) return false;
+      if (channelCode && !item.channelCode.includes(channelCode)) return false;
+      if (trackingNo) {
+        if (!item.trackingNo) return false;
+        if (!item.trackingNo.includes(trackingNo)) return false;
+      }
+      return true;
+    });
+  }
+
+  // 表格渲染
+  function renderTable(pageData) {
+    const tbody = document.getElementById('tableBody');
+    const frag = document.createDocumentFragment();
+    tbody.innerHTML = '';
+
+    if (!pageData.length) {
+      const tr = document.createElement('tr');
+      const td = document.createElement('td');
+      td.colSpan = 12;
+      td.className = 'text-center text-muted py-4';
+      td.textContent = '暂无数据';
+      tr.appendChild(td);
+      tbody.appendChild(tr);
+      return;
+    }
+
+    pageData.forEach(row => {
+      const tr = document.createElement('tr');
+
+      const cols = [
+        row.orderNo,
+        row.bizOrderNo,
+        row.skuId,
+        String(row.requestQty),
+        row.flowType,
+        row.flowDimensionName,
+        row.warehouseCode,
+        row.warehouseName,
+        row.channelCode,
+        row.channelName,
+        row.createTime
+      ];
+
+      cols.forEach(val => {
+        const td = document.createElement('td');
+        td.textContent = val;
+        tr.appendChild(td);
+      });
+
+      // 操作列
+      const actionTd = document.createElement('td');
+      const editLink = document.createElement('a');
+      editLink.href = 'javascript:void(0)';
+      editLink.className = 'text-primary me-2';
+      editLink.textContent = '编辑';
+
+      const delLink = document.createElement('a');
+      delLink.href = 'javascript:void(0)';
+      delLink.className = 'text-danger';
+      delLink.textContent = '删除';
+
+      // 权限判断 + 事件
+      editLink.addEventListener('click', () => {
+        if (!permissions.edit) { alert('无操作权限'); return; }
+        openEditFlowModal(row);
+      });
+      delLink.addEventListener('click', () => {
+        if (!permissions.delete) { alert('无操作权限'); return; }
+        prepareDeleteFlow(row);
+      });
+      actionTd.appendChild(editLink);
+      actionTd.appendChild(delLink);
+      tr.appendChild(actionTd);
+
+      frag.appendChild(tr);
+    });
+
+    tbody.appendChild(frag);
+  }
+
+  // 分页栏渲染
+  function renderPagination(total, currentPage, pageSize) {
+    const totalPages = Math.max(1, Math.ceil(total / pageSize));
+    const container = document.querySelector('.pagination');
+    container.innerHTML = '';
+
+    function createItem(label, disabled, active, onClick) {
+      const li = document.createElement('li');
+      li.className = `page-item${disabled ? ' disabled' : ''}${active ? ' active' : ''}`;
+      const a = document.createElement('a');
+      a.className = 'page-link';
+      a.textContent = label;
+      a.href = 'javascript:void(0)';
+      if (!disabled) a.addEventListener('click', onClick);
+      li.appendChild(a);
+      return li;
+    }
+
+    // 上一页
+    container.appendChild(createItem('上一页', currentPage === 1, false, () => changePage(currentPage - 1)));
+
+    // 页码（简单展示全部页码，数据量适中）
+    for (let p = 1; p <= totalPages; p++) {
+      container.appendChild(createItem(String(p), false, p === currentPage, () => changePage(p)));
+    }
+
+    // 下一页
+    container.appendChild(createItem('下一页', currentPage === totalPages, false, () => changePage(currentPage + 1)));
+  }
+
+  // 切换页
+  function changePage(page) {
+    state.currentPage = page;
+    const pageData = paginate(state.filteredData, state.currentPage, state.pageSize);
+    renderTable(pageData);
+    renderPagination(state.total, state.currentPage, state.pageSize);
+  }
+
+  // ===== 编辑/删除逻辑 =====
+  let currentEditRow = null;
+  let deleteTargetRow = null;
+
+  function openEditFlowModal(row) {
+    currentEditRow = row;
+    // 可编辑
+    document.getElementById('editOrderNo').value = row.orderNo || '';
+    document.getElementById('editBizOrderNo').value = row.bizOrderNo || '';
+    document.getElementById('editFlowDim').value = row.flowDimensionName || '';
+    // 只读
+    document.getElementById('roSkuId').value = row.skuId || '';
+    document.getElementById('roRequestQty').value = String(row.requestQty || '');
+    document.getElementById('roWarehouseCode').value = row.warehouseCode || '';
+    document.getElementById('roWarehouseName').value = row.warehouseName || '';
+    document.getElementById('roChannelCode').value = row.channelCode || '';
+    document.getElementById('roChannelName').value = row.channelName || '';
+    document.getElementById('roCreateTime').value = row.createTime || '';
+    document.getElementById('roCreateUser').value = row.createUser || '-';
+
+    const modal = new bootstrap.Modal(document.getElementById('editFlowModal'));
+    modal.show();
+  }
+
+  document.getElementById('confirmEditFlow').addEventListener('click', function() {
+    if (!currentEditRow) return;
+    const orderNo = document.getElementById('editOrderNo').value.trim();
+    const bizOrderNo = document.getElementById('editBizOrderNo').value.trim();
+    const flowDim = document.getElementById('editFlowDim').value.trim();
+    if (!orderNo) { alert('订单号为必填'); return; }
+    if (!bizOrderNo) { alert('业务单号为必填'); return; }
+    if (!flowDim) { alert('流水维度名称为必选'); return; }
+    // 更新行数据
+    currentEditRow.orderNo = orderNo;
+    currentEditRow.bizOrderNo = bizOrderNo;
+    currentEditRow.flowDimensionName = flowDim;
+
+    // 重新渲染当前页
+    const pageData = paginate(state.filteredData, state.currentPage, state.pageSize);
+    renderTable(pageData);
+
+    bootstrap.Modal.getInstance(document.getElementById('editFlowModal')).hide();
+    alert('保存成功（前端占位）');
+  });
+
+  function prepareDeleteFlow(row) {
+    deleteTargetRow = row;
+    const modal = new bootstrap.Modal(document.getElementById('deleteConfirmModal'));
+    modal.show();
+  }
+
+  document.getElementById('confirmDeleteFlow').addEventListener('click', function() {
+    if (!deleteTargetRow) return;
+    // 从 rawData 与 filteredData 删除
+    state.rawData = state.rawData.filter(r => r !== deleteTargetRow);
+    state.filteredData = state.filteredData.filter(r => r !== deleteTargetRow);
+    state.total = state.filteredData.length;
+
+    // 处理当前页越界
+    const totalPages = Math.max(1, Math.ceil(state.total / state.pageSize));
+    if (state.currentPage > totalPages) state.currentPage = totalPages;
+
+    const pageData = paginate(state.filteredData, state.currentPage, state.pageSize);
+    renderTable(pageData);
+    renderPagination(state.total, state.currentPage, state.pageSize);
+
+    bootstrap.Modal.getInstance(document.getElementById('deleteConfirmModal')).hide();
+    alert('删除成功（前端占位）');
+  });
+
+  // 初始化：生成数据并首屏渲染
+  function init() {
+    state.rawData = generateMockData(120);
+    state.filteredData = state.rawData.slice();
+    state.total = state.filteredData.length;
+    state.currentPage = 1;
+
+    const firstPageData = paginate(state.filteredData, state.currentPage, state.pageSize);
+    renderTable(firstPageData);
+    renderPagination(state.total, state.currentPage, state.pageSize);
+  }
+
+  // 绑定现有筛选区域的折叠、查询、重置按钮（查询与校验逻辑在任务3完善）
+  const filterBody = document.getElementById('filterBody');
+  const btnToggle = document.getElementById('btnToggle');
+  const btnSearch = document.getElementById('btnSearch');
+  const btnReset = document.getElementById('btnReset');
+
+  btnToggle.addEventListener('click', function() {
+    const isHidden = filterBody.classList.toggle('d-none');
+    btnToggle.innerHTML = isHidden
+      ? '<i class="bi bi-chevron-down me-1"></i>展开筛选'
+      : '<i class="bi bi-chevron-up me-1"></i>收起筛选';
+  });
+
+  // 任务3：查询过滤与校验
+  btnSearch.addEventListener('click', function() {
+    // 按钮禁用，避免重复触发
+    btnSearch.disabled = true;
+
+    // 读取筛选项并校验
+    const filters = {
+      orderNo: document.getElementById('orderNo').value || '',
+      bizOrderNo: document.getElementById('bizOrderNo').value || '',
+      skuId: document.getElementById('skuId').value || '',
+      warehouseCode: document.getElementById('warehouseCode').value || '',
+      trackingNo: document.getElementById('trackingNo').value || '',
+      channelCode: document.getElementById('channelCode').value || ''
+    };
+
+    // 长度限制
+    for (const k in filters) {
+      if (filters[k] && filters[k].length > 64) {
+        alert('输入超出长度限制（≤64）：' + k);
+        btnSearch.disabled = false;
+        return;
+      }
+    }
+
+    // SKU 数字串校验（非空时）
+    if (filters.skuId && !isNumeric(filters.skuId)) {
+      alert('SKU ID 必须为数字字符串');
+      btnSearch.disabled = false;
+      return;
+    }
+
+    // 应用过滤并渲染第一页
+    state.filteredData = applyFilters(filters, state.rawData);
+    state.total = state.filteredData.length;
+    state.currentPage = 1;
+
+    const pageData = paginate(state.filteredData, state.currentPage, state.pageSize);
+    renderTable(pageData);
+    renderPagination(state.total, state.currentPage, state.pageSize);
+
+    // 恢复按钮
+    setTimeout(() => { btnSearch.disabled = false; }, 100);
+  });
+
+  btnReset.addEventListener('click', function() {
+    ['orderNo','bizOrderNo','skuId','warehouseCode','trackingNo','channelCode'].forEach(id => {
+      const input = document.getElementById(id);
+      if (input) input.value = '';
+    });
+    // 重置为全量数据第一页
+    state.filteredData = state.rawData.slice();
+    state.total = state.filteredData.length;
+    state.currentPage = 1;
+    changePage(state.currentPage);
+  });
+
+  // 执行初始化
+  init();
+})();
+</script>
+</body>
+</html>

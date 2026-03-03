@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>时效设置编辑 - 履约管理</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Microsoft YaHei', Arial, sans-serif;
+        }
+        .sidebar {
+            min-height: 100vh;
+            background: #fff;
+            border-right: 1px solid #e9ecef;
+            padding: 20px 0;
+        }
+        .nav-group-title {
+            padding: 8px 20px;
+            font-size: 12px;
+            color: #6c757d;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .nav-link {
+            color: #495057;
+            padding: 10px 20px;
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+            border-radius: 6px;
+        }
+        .nav-link.active {
+            background-color: #e7f1ff;
+            color: #0d6efd;
+            font-weight: 600;
+        }
+        .nav-link i { margin-right: 10px; }
+        .page-header {
+            padding: 16px 20px;
+            background-color: #fff;
+            border-bottom: 1px solid #e9ecef;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .page-title { font-size: 20px; font-weight: 600; margin: 0; }
+        .content-wrapper { padding: 20px; }
+        .section-card {
+            background: #fff;
+            border-radius: 8px;
+            padding: 16px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            margin-bottom: 16px;
+        }
+        .section-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+        .table-card {
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            padding: 0;
+        }
+        .table > :not(caption) > * > * { vertical-align: middle; }
+        .table thead th {
+            background-color: #f5f7fa;
+            font-weight: 600;
+            text-align: center;
+        }
+        .table tbody td { text-align: center; }
+        .required::before { content: '*'; color: #dc3545; margin-right: 4px; }
+        .helper-text { color: #6c757d; font-size: 12px; }
+        .address-form label { font-size: 13px; }
+        .tab-content-card { border: 1px solid #e9ecef; border-top: none; border-radius: 0 0 8px 8px; }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-dark bg-dark px-4 py-3">
+        <div class="d-flex align-items-center">
+            <span class="navbar-brand mb-0 h1">JDI京东工业</span>
+            <span class="text-white-50 ms-3">工业国际运营平台</span>
+        </div>
+        <div class="flex-grow-1 px-4">
+            <div class="input-group">
+                <input type="text" class="form-control form-control-sm" placeholder="搜索">
+                <button class="btn btn-outline-light btn-sm" type="button"><i class="bi bi-search"></i></button>
+            </div>
+        </div>
+        <div class="d-flex align-items-center gap-3 text-white">
+            <a class="text-white text-decoration-none" href="#">帮助与反馈</a>
+            <a class="text-white text-decoration-none" href="#">值班信息</a>
+            <div class="d-flex align-items-center gap-2">
+                <i class="bi bi-person-circle fs-5"></i>
+                <span>liudaojin1</span>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-12 col-md-2 col-lg-2 sidebar">
+                <div class="nav-group-title">主要功能</div>
+                <a href="dashboard.html" class="nav-link">
+                    <i class="bi bi-house-door"></i><span>系统首页</span>
+                </a>
+                <a href="vietnam-order-list.html" class="nav-link">
+                    <i class="bi bi-list-ul"></i><span>越南订单列表</span>
+                </a>
+
+                <div class="nav-group-title mt-3">履约管理</div>
+                <a href="vietnam-delivery-list.html" class="nav-link">
+                    <i class="bi bi-truck"></i><span>越南末端派送列表</span>
+                </a>
+                <a href="cross-border-batch-management.html" class="nav-link">
+                    <i class="bi bi-box-seam"></i><span>跨境批次发运管理</span>
+                </a>
+                <a href="fulfillment-strategy-expiry.html" class="nav-link">
+                    <i class="bi bi-clipboard-check"></i><span>履约策略中心</span>
+                </a>
+                <a href="fulfillment-product-binding.html" class="nav-link">
+                    <i class="bi bi-bag"></i><span>商品绑仓配置</span>
+                </a>
+                <a href="fulfillment-timeliness-setting.html" class="nav-link active">
+                    <i class="bi bi-clock-history"></i><span>时效设置</span>
+                </a>
+
+                <div class="nav-group-title mt-3">库存中心</div>
+                <a href="inventory-management.html" class="nav-link">
+                    <i class="bi bi-box"></i><span>库存管理</span>
+                </a>
+                <a href="inventory-channel-management.html" class="nav-link">
+                    <i class="bi bi-diagram-2"></i><span>库存渠道管理</span>
+                </a>
+                <a href="inventory-transfer-list.html" class="nav-link">
+                    <i class="bi bi-arrow-left-right"></i><span>库存调拨列表</span>
+                </a>
+                <a href="inventory-transfer-create.html" class="nav-link">
+                    <i class="bi bi-plus-square"></i><span>新建渠道调拨</span>
+                </a>
+                <a href="inventory-operation-log.html" class="nav-link">
+                    <i class="bi bi-journal-text"></i><span>库存操作日志</span>
+                </a>
+            </div>
+
+            <div class="col-12 col-md-10 col-lg-10 p-0">
+                <div class="page-header">
+                    <div class="d-flex align-items-center gap-2">
+                        <button class="btn btn-outline-secondary btn-sm" id="backBtn">
+                            <i class="bi bi-arrow-left"></i> 返回
+                        </button>
+                        <h1 class="page-title mb-0">时效设置编辑</h1>
+                    </div>
+                    <div class="d-flex align-items-center gap-2">
+                        <button class="btn btn-outline-secondary btn-sm" id="cancelBtn">取消</button>
+                        <button class="btn btn-primary btn-sm" id="saveBtn">保存</button>
+                    </div>
+                </div>
+
+                <div class="content-wrapper">
+                    <div class="section-card">
+                        <div class="section-title">基础配置</div>
+                        <div class="mb-3">
+                            <label class="form-label required">适用国家/地区地址</label>
+                            <div id="countryGroup" class="d-flex flex-wrap gap-3"></div>
+                        </div>
+                        <div class="mb-3">
+                            <ul class="nav nav-tabs" id="countryTabs"></ul>
+                            <div class="tab-content tab-content-card" id="countryTabContent"></div>
+                        </div>
+                        <div class="mb-2">
+                            <label class="form-label required">履约模式</label>
+                            <select class="form-select form-select-sm" id="modeSelect" style="max-width: 240px;">
+                                <option value="">请选择</option>
+                                <option value="跨境直发">跨境直发</option>
+                                <option value="备货发货">备货发货</option>
+                                <option value="本土直发">本土直发</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="table-card">
+                        <div class="p-3">
+                            <div class="section-title mb-0">时效设置</div>
+                            <div class="helper-text">请填写各环节对客时效区间及规则，数值单位为天。</div>
+                        </div>
+                        <table class="table mb-0">
+                            <thead>
+                                <tr>
+                                    <th style="width: 12%;">环节</th>
+                                    <th style="width: 18%;">描述</th>
+                                    <th style="width: 18%;">对客时效区间(d)</th>
+                                    <th style="width: 12%;">参与时效计算标识</th>
+                                    <th style="width: 20%;">超期判定规则(d)</th>
+                                    <th style="width: 20%;">异常判定规则(d)</th>
+                                </tr>
+                            </thead>
+                            <tbody id="stageBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const countryOptions = [
+            '沙特阿拉伯','阿联酋','埃及','乌干达共和国','刚果共和国','美国','中国香港(政企)','澳大利亚','乌兹别克斯坦',
+            '中国香港','印度尼西亚','中国','巴西','马来西亚','匈牙利','泰国','越南'
+        ];
+        const locationOptions = {
+            '中国': { province: ['广东省','浙江省'], city: { '广东省': ['广州','深圳'], '浙江省': ['杭州','宁波'] }, district: { '广州': ['天河区','白云区'], '深圳': ['南山区','福田区'], '杭州': ['西湖区','滨江区'], '宁波': ['海曙区','鄞州区'] } },
+            '中国香港': { province: ['中国香港'], city: { '中国香港': ['中西区','九龙'] }, district: { '中西区': ['中环'], '九龙': ['旺角'] } },
+            '泰国': { province: ['曼谷府'], city: { '曼谷府': ['曼谷'] }, district: { '曼谷': ['曼谷一区'] } },
+            '越南': { province: [], city: {}, district: {} }
+        };
+
+        function defaultStages() {
+            return [
+                { name: '订单确认', desc: '订单审核-订单确认', min: 0, max: 3, participate: '否', overdueRule: '', overdueDays: '', abnormalRule: '', abnormalDays: '' },
+                { name: '商品发货', desc: '订单确认-商品发货', min: '', max: '', participate: '是', overdueRule: '', overdueDays: '', abnormalRule: '', abnormalDays: '' },
+                { name: '国内货物运输', desc: '商品发货-集运中心收货', min: 5, max: 10, participate: '是', overdueRule: '', overdueDays: '', abnormalRule: '', abnormalDays: '' },
+                { name: '集运中心操作', desc: '集运中心收货-集运中心发货', min: 20, max: 30, participate: '是', overdueRule: '', overdueDays: '', abnormalRule: '', abnormalDays: '' },
+                { name: '出口报关', desc: '集运中心发货-起运港提货', min: 2, max: 5, participate: '是', overdueRule: '', overdueDays: '', abnormalRule: '', abnormalDays: '' },
+                { name: '国内货物运输2', desc: '起运港提货-起运国离港', min: 2, max: 5, participate: '是', overdueRule: '', overdueDays: '', abnormalRule: '', abnormalDays: '' },
+                { name: '干线运输', desc: '起运国航班-目的国到港', min: 35, max: 50, participate: '是', overdueRule: '', overdueDays: '', abnormalRule: '', abnormalDays: '' }
+            ];
+        }
+
+        const editRecord = (() => {
+            try {
+                const cache = localStorage.getItem('timelinessEditRecord');
+                if (cache) return JSON.parse(cache);
+            } catch (e) {}
+            return {
+                countries: ['中国'],
+                mode: '跨境直发',
+                stages: defaultStages(),
+                addressMap: {}
+            };
+        })();
+
+        const state = {
+            countries: editRecord.countries || [],
+            mode: editRecord.mode || '',
+            stages: (editRecord.stages || defaultStages()).map(s => ({ ...s })),
+            addressMap: editRecord.addressMap || {}
+        };
+
+        function countryHasAddress(c) {
+            return (state.addressMap[c] || []).length > 0;
+        }
+
+        function renderCountries() {
+            const box = document.getElementById('countryGroup');
+            box.innerHTML = countryOptions.map((c, idx) => {
+                const checked = state.countries.includes(c) ? 'checked' : '';
+                const suffix = countryHasAddress(c) ? '（部分）' : '';
+                return `
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="checkbox" id="country-${idx}" value="${c}" ${checked}>
+                        <label class="form-check-label" for="country-${idx}">${c}${suffix}</label>
+                    </div>
+                `;
+            }).join('');
+            box.querySelectorAll('input[type="checkbox"]').forEach(input => {
+                input.addEventListener('change', () => {
+                    const val = input.value;
+                    if (input.checked) {
+                        if (!state.countries.includes(val)) state.countries.push(val);
+                    } else {
+                        if (countryHasAddress(val)) {
+                            alert('该国家存在适用地址，不允许去除。请先删除地址。');
+                            input.checked = true;
+                            return;
+                        }
+                        state.countries = state.countries.filter(v => v !== val);
+                    }
+                    renderCountryTabs();
+                    renderCountries();
+                });
+            });
+        }
+
+        function renderCountryTabs() {
+            const tabs = document.getElementById('countryTabs');
+            const content = document.getElementById('countryTabContent');
+            if (!state.countries.length) {
+                tabs.innerHTML = '';
+                content.innerHTML = '<div class="p-3 text-muted">请先选择国家</div>';
+                return;
+            }
+            tabs.innerHTML = state.countries.map((c, idx) => `
+                <li class="nav-item">
+                    <button class="nav-link ${idx === 0 ? 'active' : ''}" data-bs-toggle="tab" data-bs-target="#tab-${idx}" type="button">${c}${countryHasAddress(c) ? '（部分）' : ''}</button>
+                </li>
+            `).join('');
+            content.innerHTML = state.countries.map((c, idx) => {
+                const addresses = state.addressMap[c] || [];
+                return `
+                <div class="tab-pane fade ${idx === 0 ? 'show active' : ''}" id="tab-${idx}">
+                    <div class="p-3 border-bottom">
+                        <div class="row g-3 address-form">
+                            <div class="col-md-4">
+                                <label class="form-label">州/省</label>
+                                ${renderSelectHtml(`prov-${idx}`, getProvinces(c))}
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">城市</label>
+                                ${renderSelectHtml(`city-${idx}`, [])}
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">县/区</label>
+                                ${renderSelectHtml(`dist-${idx}`, [])}
+                            </div>
+                            <div class="col-12 d-flex justify-content-end">
+                                <button class="btn btn-primary btn-sm" data-country="${c}" data-idx="${idx}" onclick="addAddress(event)">新增地址</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="p-3">
+                        <div class="fw-semibold mb-2">已添加的地址</div>
+                        ${addresses.length ? addresses.map((a,i)=>`
+                            <div class="d-flex align-items-center justify-content-between border rounded p-2 mb-2">
+                                <div>${a.province||''}${a.city?'-'+a.city:''}${a.district?'-'+a.district:''}</div>
+                                <button class="btn btn-link btn-sm text-danger" data-country="${c}" data-idx="${i}" onclick="removeAddress(event)">删除</button>
+                            </div>
+                        `).join('') : '<div class="text-muted">暂无地址</div>'}
+                    </div>
+                </div>`;
+            }).join('');
+
+            // 初始化省份联动
+            state.countries.forEach((c, idx) => {
+                const provSelect = document.getElementById(`prov-${idx}`);
+                const citySelect = document.getElementById(`city-${idx}`);
+                const distSelect = document.getElementById(`dist-${idx}`);
+                setSelectOptions(provSelect, getProvinces(c));
+                setSelectOptions(citySelect, []);
+                setSelectOptions(distSelect, []);
+                provSelect.addEventListener('change', () => {
+                    setSelectOptions(citySelect, getCities(c, provSelect.value));
+                    setSelectOptions(distSelect, []);
+                });
+                citySelect.addEventListener('change', () => {
+                    setSelectOptions(distSelect, getDistricts(citySelect.value));
+                });
+            });
+        }
+
+        function renderSelectHtml(id, options) {
+            return `<select class="form-select form-select-sm" id="${id}">${options.map(o=>`<option value="${o}">${o}</option>`).join('')}</select>`;
+        }
+
+        function setSelectOptions(selectEl, opts) {
+            selectEl.innerHTML = '<option value="">请选择</option>' + (opts||[]).map(o=>`<option value="${o}">${o}</option>`).join('');
+        }
+
+        function getProvinces(country) {
+            return (locationOptions[country] && locationOptions[country].province) || [];
+        }
+        function getCities(country, province) {
+            const c = locationOptions[country];
+            if (!c || !c.city) return [];
+            return c.city[province] || [];
+        }
+        function getDistricts(city) {
+            for (const k of Object.keys(locationOptions)) {
+                const dmap = locationOptions[k].district || {};
+                if (dmap[city]) return dmap[city];
+            }
+            return [];
+        }
+
+        function addAddress(event) {
+            const country = event.currentTarget.dataset.country;
+            const idx = event.currentTarget.dataset.idx;
+            const prov = document.getElementById(`prov-${idx}`).value;
+            const city = document.getElementById(`city-${idx}`).value;
+            const dist = document.getElementById(`dist-${idx}`).value;
+            if (!prov && (city || dist)) { alert('请先选择州/省'); return; }
+            if (!city && dist) { alert('请先选择城市'); return; }
+            if (!prov && !city && !dist) { alert('请至少填写一项地址信息'); return; }
+            state.addressMap[country] = state.addressMap[country] || [];
+            state.addressMap[country].push({ province: prov, city: city, district: dist });
+            if (!state.countries.includes(country)) state.countries.push(country);
+            renderCountryTabs();
+            renderCountries();
+        }
+
+        function removeAddress(event) {
+            const country = event.currentTarget.dataset.country;
+            const idx = Number(event.currentTarget.dataset.idx);
+            const arr = state.addressMap[country] || [];
+            arr.splice(idx,1);
+            if (arr.length === 0) {
+                delete state.addressMap[country];
+            }
+            renderCountryTabs();
+            renderCountries();
+        }
+
+        function renderMode() {
+            document.getElementById('modeSelect').value = state.mode || '';
+            document.getElementById('modeSelect').addEventListener('change', (e) => {
+                state.mode = e.target.value;
+            });
+        }
+
+        function renderStages() {
+            const tbody = document.getElementById('stageBody');
+            tbody.innerHTML = state.stages.map((s, idx) => `
+                <tr>
+                    <td>${s.name || ''}</td>
+                    <td class="text-start">${s.desc || ''}</td>
+                    <td>
+                        <div class="input-group input-group-sm">
+                            <input type="number" class="form-control" data-idx="${idx}" data-field="min" value="${s.min ?? ''}" placeholder="最小">
+                            <span class="input-group-text">至</span>
+                            <input type="number" class="form-control" data-idx="${idx}" data-field="max" value="${s.max ?? ''}" placeholder="最大">
+                        </div>
+                    </td>
+                    <td>
+                        <select class="form-select form-select-sm" data-idx="${idx}" data-field="participate">
+                            <option value="是" ${s.participate === '是' ? 'selected' : ''}>是</option>
+                            <option value="否" ${s.participate === '否' ? 'selected' : ''}>否</option>
+                        </select>
+                    </td>
+                    <td>
+                        <div class="input-group input-group-sm">
+                            <select class="form-select" data-idx="${idx}" data-field="overdueRule">
+                                <option value="" ${!s.overdueRule ? 'selected' : ''}>请选择</option>
+                                <option value="固定阈值" ${s.overdueRule === '固定阈值' ? 'selected' : ''}>固定阈值</option>
+                            </select>
+                            <input type="number" class="form-control" data-idx="${idx}" data-field="overdueDays" value="${s.overdueDays ?? ''}" placeholder="天数">
+                        </div>
+                    </td>
+                    <td>
+                        <div class="input-group input-group-sm">
+                            <select class="form-select" data-idx="${idx}" data-field="abnormalRule">
+                                <option value="" ${!s.abnormalRule ? 'selected' : ''}>请选择</option>
+                                <option value="固定阈值" ${s.abnormalRule === '固定阈值' ? 'selected' : ''}>固定阈值</option>
+                            </select>
+                            <input type="number" class="form-control" data-idx="${idx}" data-field="abnormalDays" value="${s.abnormalDays ?? ''}" placeholder="天数">
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+
+            tbody.querySelectorAll('input, select').forEach(el => {
+                el.addEventListener('input', handleFieldChange);
+                el.addEventListener('change', handleFieldChange);
+            });
+        }
+
+        function handleFieldChange(e) {
+            const idx = Number(e.target.dataset.idx);
+            const field = e.target.dataset.field;
+            if (Number.isNaN(idx) || !field) return;
+            let value = e.target.value;
+            if (['min','max','overdueDays','abnormalDays'].includes(field)) {
+                value = value === '' ? '' : Number(value);
+            }
+            state.stages[idx][field] = value;
+        }
+
+        function validateForm() {
+            if (!state.countries.length) {
+                alert('请至少选择一个适用国家/地区地址');
+                return false;
+            }
+            if (!state.mode) {
+                alert('请选择履约模式');
+                return false;
+            }
+            for (let i = 0; i < state.stages.length; i++) {
+                const s = state.stages[i];
+                const min = Number(s.min);
+                const max = Number(s.max);
+                if (Number.isNaN(min) || Number.isNaN(max)) {
+                    alert(`请填写环节【${s.name}】的最小/最大时效`);
+                    return false;
+                }
+                if (min > max) {
+                    alert(`环节【${s.name}】最小时效不能大于最大时效`);
+                    return false;
+                }
+                if (s.overdueRule && (s.overdueDays === '' || Number.isNaN(Number(s.overdueDays)) || Number(s.overdueDays) < 0)) {
+                    alert(`环节【${s.name}】请填写超期判定天数`);
+                    return false;
+                }
+                if (s.abnormalRule && (s.abnormalDays === '' || Number.isNaN(Number(s.abnormalDays)) || Number(s.abnormalDays) < 0)) {
+                    alert(`环节【${s.name}】请填写异常判定天数`);
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        function saveForm() {
+            if (!validateForm()) return;
+            alert('保存成功（前端占位，无后端提交）');
+        }
+
+        document.getElementById('saveBtn').addEventListener('click', saveForm);
+        document.getElementById('cancelBtn').addEventListener('click', () => history.back());
+        document.getElementById('backBtn').addEventListener('click', () => history.back());
+
+        function init() {
+            renderCountries();
+            renderCountryTabs();
+            renderMode();
+            renderStages();
+        }
+
+        init();
+    </script>
+</body>
+</html>

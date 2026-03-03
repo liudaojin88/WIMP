@@ -1,0 +1,274 @@
+{
+  "task-ced4a28b-6759-46d4-894e-45e3c6134a14": [
+    {
+      "message": "创建页面基础结构与样式",
+      "status": "IN_PROGRESS",
+      "specName": "inventory-operation-log-v3",
+      "specTaskId": "1",
+      "chatId": "task-ced4a28b-6759-46d4-894e-45e3c6134a14",
+      "_from": "specTask",
+      "_t": 1771733271590
+    },
+    {
+      "message": "构建模拟数据与表格渲染",
+      "status": "IN_PROGRESS",
+      "specName": "inventory-operation-log-v3",
+      "specTaskId": "2",
+      "chatId": "task-ced4a28b-6759-46d4-894e-45e3c6134a14",
+      "_from": "specTask",
+      "_t": 1771733467486
+    },
+    {
+      "message": "实现操作列占位交互与空态",
+      "status": "IN_PROGRESS",
+      "specName": "inventory-operation-log-v3",
+      "specTaskId": "4",
+      "chatId": "task-ced4a28b-6759-46d4-894e-45e3c6134a14",
+      "_from": "specTask",
+      "_t": 1771733954678
+    },
+    {
+      "message": "集成侧边栏导航与标题映射",
+      "status": "IN_PROGRESS",
+      "specName": "inventory-operation-log-v3",
+      "specTaskId": "5",
+      "chatId": "task-ced4a28b-6759-46d4-894e-45e3c6134a14",
+      "_from": "specTask",
+      "_t": 1771734121127
+    },
+    {
+      "message": "集成侧边栏导航与标题映射",
+      "status": "FINISHED",
+      "specName": "inventory-operation-log-v3",
+      "specTaskId": "5",
+      "chatId": "task-ced4a28b-6759-46d4-894e-45e3c6134a14",
+      "_from": "specTask",
+      "_t": 1771736710838
+    },
+    {
+      "message": "创建页面基础结构与样式",
+      "status": "IN_PROGRESS",
+      "specName": "product-warehouse-binding-v3",
+      "specTaskId": "1",
+      "chatId": "task-ced4a28b-6759-46d4-894e-45e3c6134a14",
+      "_from": "specTask",
+      "_t": 1771737552992
+    },
+    {
+      "message": "创建页面基础结构与样式",
+      "status": "FINISHED",
+      "specName": "product-warehouse-binding-v3",
+      "specTaskId": "1",
+      "chatId": "task-ced4a28b-6759-46d4-894e-45e3c6134a14",
+      "_from": "specTask",
+      "_t": 1771738792222
+    },
+    {
+      "message": "创建页面基础结构与样式",
+      "status": "STOPPED",
+      "specName": "inventory-operation-log-v3",
+      "specTaskId": "1",
+      "chatId": "task-ced4a28b-6759-46d4-894e-45e3c6134a14",
+      "_t": 1772505760391,
+      "_from": "list"
+    },
+    {
+      "message": "构建模拟数据与表格渲染",
+      "status": "STOPPED",
+      "specName": "inventory-operation-log-v3",
+      "specTaskId": "2",
+      "chatId": "task-ced4a28b-6759-46d4-894e-45e3c6134a14",
+      "_t": 1772505760391,
+      "_from": "list"
+    },
+    {
+      "message": "实现操作列占位交互与空态",
+      "status": "STOPPED",
+      "specName": "inventory-operation-log-v3",
+      "specTaskId": "4",
+      "chatId": "task-ced4a28b-6759-46d4-894e-45e3c6134a14",
+      "_t": 1772505760391,
+      "_from": "list"
+    },
+    {
+      "message": "集成侧边栏导航与标题映射",
+      "status": "FINISHED",
+      "specName": "inventory-operation-log-v3",
+      "specTaskId": "5",
+      "chatId": "task-ced4a28b-6759-46d4-894e-45e3c6134a14",
+      "_t": 1772505760391,
+      "_from": "list"
+    },
+    {
+      "message": "创建页面基础结构与样式",
+      "status": "FINISHED",
+      "specName": "product-warehouse-binding-v3",
+      "specTaskId": "1",
+      "chatId": "task-ced4a28b-6759-46d4-894e-45e3c6134a14",
+      "_t": 1772505760391,
+      "_from": "list"
+    },
+    {
+      "message": "创建页面基础结构与样式",
+      "status": "STOPPED",
+      "specName": "product-warehouse-binding-v3",
+      "specTaskId": "1",
+      "chatId": "task-ced4a28b-6759-46d4-894e-45e3c6134a14",
+      "id": "task-ced4a28b-6759-46d4-894e-45e3c6134a14",
+      "_t": 1772507024209
+    },
+    {
+      "message": "创建页面基础结构与样式",
+      "status": "STOPPED",
+      "specName": "product-warehouse-binding-v3",
+      "specTaskId": "1",
+      "chatId": "task-ced4a28b-6759-46d4-894e-45e3c6134a14",
+      "id": "task-ced4a28b-6759-46d4-894e-45e3c6134a14",
+      "_t": 1772509607095
+    },
+    {
+      "message": "创建页面基础结构与样式",
+      "status": "STOPPED",
+      "specName": "product-warehouse-binding-v3",
+      "specTaskId": "1",
+      "chatId": "task-ced4a28b-6759-46d4-894e-45e3c6134a14",
+      "id": "task-ced4a28b-6759-46d4-894e-45e3c6134a14",
+      "_t": 1772509609879
+    },
+    {
+      "message": "新建时效设置页面骨架与导航入口",
+      "status": "IN_PROGRESS",
+      "specName": "fulfillment-timeliness-setting-v3",
+      "specTaskId": "1",
+      "chatId": "task-ced4a28b-6759-46d4-894e-45e3c6134a14",
+      "_from": "specTask",
+      "_t": 1772510511410
+    },
+    {
+      "message": "创建页面基础结构与样式",
+      "status": "STOPPED",
+      "specName": "product-warehouse-binding-v3",
+      "specTaskId": "1",
+      "chatId": "task-ced4a28b-6759-46d4-894e-45e3c6134a14",
+      "id": "task-ced4a28b-6759-46d4-894e-45e3c6134a14",
+      "_t": 1772512729391
+    },
+    {
+      "message": "创建页面基础结构与样式",
+      "status": "STOPPED",
+      "specName": "product-warehouse-binding-v3",
+      "specTaskId": "1",
+      "chatId": "task-ced4a28b-6759-46d4-894e-45e3c6134a14",
+      "id": "task-ced4a28b-6759-46d4-894e-45e3c6134a14",
+      "_t": 1772512731665
+    },
+    {
+      "message": "创建页面基础结构与样式",
+      "status": "STOPPED",
+      "specName": "product-warehouse-binding-v3",
+      "specTaskId": "1",
+      "chatId": "task-ced4a28b-6759-46d4-894e-45e3c6134a14",
+      "id": "task-ced4a28b-6759-46d4-894e-45e3c6134a14",
+      "_t": 1772512733190
+    },
+    {
+      "message": "创建页面基础结构与样式",
+      "status": "IN_PROGRESS",
+      "specName": "product-warehouse-binding-v3",
+      "specTaskId": "1",
+      "chatId": "task-ced4a28b-6759-46d4-894e-45e3c6134a14",
+      "id": "task-ced4a28b-6759-46d4-894e-45e3c6134a14",
+      "_t": 1772512734090
+    },
+    {
+      "message": "创建页面基础结构与样式",
+      "status": "FINISHED",
+      "specName": "product-warehouse-binding-v3",
+      "specTaskId": "1",
+      "chatId": "task-ced4a28b-6759-46d4-894e-45e3c6134a14",
+      "id": "task-ced4a28b-6759-46d4-894e-45e3c6134a14",
+      "_t": 1772512769814
+    },
+    {
+      "message": "新建时效设置页面骨架与导航入口",
+      "status": "IN_PROGRESS",
+      "specName": "fulfillment-timeliness-setting-v3",
+      "specTaskId": "1",
+      "chatId": "task-ced4a28b-6759-46d4-894e-45e3c6134a14",
+      "_from": "specTask",
+      "_t": 1772513194486
+    },
+    {
+      "message": "新建时效设置页面骨架与导航入口",
+      "status": "FINISHED",
+      "specName": "fulfillment-timeliness-setting-v3",
+      "specTaskId": "1",
+      "chatId": "task-ced4a28b-6759-46d4-894e-45e3c6134a14",
+      "_from": "specTask",
+      "_t": 1772513331382
+    },
+    {
+      "message": "创建页面基础结构与样式",
+      "status": "FINISHED",
+      "specName": "product-warehouse-binding-v3",
+      "specTaskId": "1",
+      "chatId": "task-ced4a28b-6759-46d4-894e-45e3c6134a14",
+      "id": "task-ced4a28b-6759-46d4-894e-45e3c6134a14",
+      "_t": 1772513331789
+    },
+    {
+      "message": "时效设置编辑页",
+      "status": "IN_PROGRESS",
+      "specName": "fulfillment-timeliness-setting-v3",
+      "specTaskId": "5",
+      "chatId": "task-ced4a28b-6759-46d4-894e-45e3c6134a14",
+      "_from": "specTask",
+      "_t": 1772514211314
+    },
+    {
+      "message": "时效设置编辑页",
+      "status": "FINISHED",
+      "specName": "fulfillment-timeliness-setting-v3",
+      "specTaskId": "5",
+      "chatId": "task-ced4a28b-6759-46d4-894e-45e3c6134a14",
+      "_from": "specTask",
+      "_t": 1772514390202
+    },
+    {
+      "message": "页面骨架与导航入口",
+      "status": "IN_PROGRESS",
+      "specName": "customer-delivery-rule",
+      "specTaskId": "1",
+      "chatId": "task-ced4a28b-6759-46d4-894e-45e3c6134a14",
+      "_from": "specTask",
+      "_t": 1772516743405
+    },
+    {
+      "message": "页面骨架与导航入口",
+      "status": "FINISHED",
+      "specName": "customer-delivery-rule",
+      "specTaskId": "1",
+      "chatId": "task-ced4a28b-6759-46d4-894e-45e3c6134a14",
+      "_from": "specTask",
+      "_t": 1772516881527
+    },
+    {
+      "message": "页面骨架与导航入口",
+      "status": "IN_PROGRESS",
+      "specName": "calendar-maintenance",
+      "specTaskId": "1",
+      "chatId": "task-ced4a28b-6759-46d4-894e-45e3c6134a14",
+      "_from": "specTask",
+      "_t": 1772518043956
+    },
+    {
+      "message": "页面骨架与导航入口",
+      "status": "FINISHED",
+      "specName": "calendar-maintenance",
+      "specTaskId": "1",
+      "chatId": "task-ced4a28b-6759-46d4-894e-45e3c6134a14",
+      "_from": "specTask",
+      "_t": 1772518158086
+    }
+  ]
+}
