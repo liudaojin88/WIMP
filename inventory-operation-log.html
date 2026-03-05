@@ -57,7 +57,10 @@
         <div class="card-header d-flex align-items-center">
             <i class="bi bi-journal-check filter-icon"></i>
             <span>库存操作日志记录</span>
-            <div class="ms-auto filter-actions">
+            <div class="ms-auto filter-actions d-flex gap-2">
+                <button id="btnCreateFlow" class="btn btn-primary btn-sm" style="display:none;">
+                    <i class="bi bi-plus-circle me-1"></i>新建库存流水
+                </button>
                 <button id="btnToggle" class="btn btn-outline-secondary btn-sm">
                     <i class="bi bi-chevron-up me-1"></i>收起筛选
                 </button>
@@ -104,7 +107,15 @@
     </div>
 
     <div class="card">
+
         <div class="card-body">
+          <div >
+            <button id="btnCreateFlow" class="btn btn-primary btn-sm" style="display:none;">
+                <i class="bi bi-plus-circle me-1">新建库存流水</i>
+            </button>
+    
+        </div>
+            <!-- 表格区域 -->
             <div class="table-responsive">
                 <table class="table table-hover table-bordered align-middle">
                     <thead>
@@ -119,6 +130,7 @@
                             <th>仓库名称</th>
                             <th>渠道编码</th>
                             <th>渠道名称</th>
+                            <th>出入库时间</th>
                             <th>创建时间</th>
                             <th>操作</th>
                         </tr>
@@ -208,6 +220,10 @@
               <option value="在途库存预占回退">在途库存预占回退</option>
               <option value="库存扣减">库存扣减</option>
             </select>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">出入库时间<span class="text-danger">*</span></label>
+            <input type="datetime-local" class="form-control" id="editFlowTime" />
           </div>
 
           <!-- 只读展示字段 -->
@@ -312,7 +328,8 @@
   // 权限配置（模拟）
   const permissions = {
     edit: true,   // 无权限时设为 false
-    delete: true  // 无权限时设为 false
+    delete: true,  // 无权限时设为 false
+    createFlow: true // 是否有新建库存流水权限
   };
 
   // 流水维度枚举（编码-值）
@@ -385,6 +402,7 @@
         channelName: c.name,
         trackingNo: `TRK${String(202600000000 + i)}`,
         createTime: formatDateTime(dt),
+        flowTime: formatDateTime(dt), // 出入库时间，默认等于创建时间
         createUser: ['system','ops1','ops2','ops3','ops4'][i % 5]
       });
     }
@@ -458,6 +476,7 @@
         row.warehouseName,
         row.channelCode,
         row.channelName,
+        row.flowTime || row.createTime, // 出入库时间，默认等于创建时间
         row.createTime
       ];
 
@@ -546,15 +565,26 @@
     document.getElementById('editOrderNo').value = row.orderNo || '';
     document.getElementById('editBizOrderNo').value = row.bizOrderNo || '';
     document.getElementById('editFlowDim').value = row.flowDimensionName || '';
+    
+    // 出入库时间 - 从创建时间解析
+    const createTime = row.createTime || '';
+    if (createTime) {
+      // 将 "2026-01-09 16:30:00" 转换为 "2026-01-09T16:30:00"
+      const datetimeLocal = createTime.replace(' ', 'T');
+      document.getElementById('editFlowTime').value = datetimeLocal;
+    } else {
+      document.getElementById('editFlowTime').value = '';
+    }
+    
     // 只读
-    document.getElementById('roSkuId').value = row.skuId || '';
-    document.getElementById('roRequestQty').value = String(row.requestQty || '');
-    document.getElementById('roWarehouseCode').value = row.warehouseCode || '';
-    document.getElementById('roWarehouseName').value = row.warehouseName || '';
-    document.getElementById('roChannelCode').value = row.channelCode || '';
-    document.getElementById('roChannelName').value = row.channelName || '';
-    document.getElementById('roCreateTime').value = row.createTime || '';
-    document.getElementById('roCreateUser').value = row.createUser || '-';
+    document.getElementById('roSkuId').textContent = row.skuId || '';
+    document.getElementById('roRequestQty').textContent = String(row.requestQty || '');
+    document.getElementById('roWarehouseCode').textContent = row.warehouseCode || '';
+    document.getElementById('roWarehouseName').textContent = row.warehouseName || '';
+    document.getElementById('roChannelCode').textContent = row.channelCode || '';
+    document.getElementById('roChannelName').textContent = row.channelName || '';
+    document.getElementById('roCreateTime').textContent = row.createTime || '';
+    document.getElementById('roCreateUser').textContent = row.createUser || '-';
 
     const modal = new bootstrap.Modal(document.getElementById('editFlowModal'));
     modal.show();
@@ -565,13 +595,19 @@
     const orderNo = document.getElementById('editOrderNo').value.trim();
     const bizOrderNo = document.getElementById('editBizOrderNo').value.trim();
     const flowDim = document.getElementById('editFlowDim').value.trim();
+    const flowTime = document.getElementById('editFlowTime').value.trim();
+    
     if (!orderNo) { alert('订单号为必填'); return; }
     if (!bizOrderNo) { alert('业务单号为必填'); return; }
     if (!flowDim) { alert('流水维度名称为必选'); return; }
+    if (!flowTime) { alert('出入库时间为必填'); return; }
+    
     // 更新行数据
     currentEditRow.orderNo = orderNo;
     currentEditRow.bizOrderNo = bizOrderNo;
     currentEditRow.flowDimensionName = flowDim;
+    // 将 datetime-local 格式转换回显示格式
+    currentEditRow.createTime = flowTime.replace('T', ' ');
 
     // 重新渲染当前页
     const pageData = paginate(state.filteredData, state.currentPage, state.pageSize);
@@ -687,8 +723,148 @@
     changePage(state.currentPage);
   });
 
+  // 显示/隐藏新建库存流水按钮
+  if (permissions.createFlow) {
+    const btnCreateFlow = document.getElementById('btnCreateFlow');
+    if (btnCreateFlow) {
+      btnCreateFlow.style.display = 'inline-block';
+    }
+  }
+  
+  // 显示新建库存流水弹窗
+  function showCreateFlowModal() {
+    const modalHtml = `
+      <div class="modal fade" id="createFlowModal" tabindex="-1" aria-labelledby="createFlowModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="createFlowModalLabel">新建库存流水</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <form id="createFlowForm">
+                <div class="row g-3">
+                  <div class="col-md-6">
+                    <label class="form-label">订单号 <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control" id="orderNoInput" required maxlength="64">
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label">业务单号 <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control" id="bizOrderNoInput" required maxlength="64">
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label">仓库名称 <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control" id="warehouseNameInput" readonly>
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label">SKU ID <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control" id="skuIdInput" list="skuList" required maxlength="64">
+                    <datalist id="skuList">
+                      <option value="SKU001">SKU001 - 商品A</option>
+                      <option value="SKU002">SKU002 - 商品B</option>
+                      <option value="SKU003">SKU003 - 商品C</option>
+                    </datalist>
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label">请求数量</label>
+                    <input type="number" class="form-control" id="requestQtyInput" min="0">
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label">流水维度名称 <span class="text-danger">*</span></label>
+                    <select class="form-select" id="flowDimensionSelect" required>
+                      <option value="">请选择</option>
+                      <option value="采购入库">采购入库</option>
+                      <option value="销售出库">销售出库</option>
+                      <option value="调拨入库">调拨入库</option>
+                      <option value="调拨出库">调拨出库</option>
+                      <option value="盘点调整">盘点调整</option>
+                      <option value="退货入库">退货入库</option>
+                      <option value="其他">其他</option>
+                    </select>
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label">渠道 <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control" id="channelInput" list="channelList" required maxlength="64">
+                    <datalist id="channelList">
+                      <option value="CH001">CH001 - 线上渠道</option>
+                      <option value="CH002">CH002 - 线下渠道</option>
+                      <option value="CH003">CH003 - 第三方平台</option>
+                    </datalist>
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label">出入库时间 <span class="text-danger">*</span></label>
+                    <input type="datetime-local" class="form-control" id="flowTimeInput" required>
+                  </div>
+                </div>
+              </form>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+              <button type="button" class="btn btn-primary" id="btnSaveFlow">保存</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+    
+    // 移除已存在的模态框
+    const existingModal = document.getElementById('createFlowModal');
+    if (existingModal) {
+      existingModal.remove();
+    }
+    
+    // 添加模态框到body
+    document.body.insertAdjacentHTML('beforeend', modalHtml);
+    
+    // 初始化模态框
+    const modal = new bootstrap.Modal(document.getElementById('createFlowModal'));
+    modal.show();
+    
+    // 订单号输入事件 - 模拟自动带出仓库名称
+    document.getElementById('orderNoInput').addEventListener('input', function() {
+      if (this.value.trim()) {
+        // 模拟根据订单号获取仓库名称
+        document.getElementById('warehouseNameInput').value = '上海仓库';
+      } else {
+        document.getElementById('warehouseNameInput').value = '';
+      }
+    });
+    
+    // SKU ID输入事件 - 模拟根据仓库筛选SKU
+    document.getElementById('skuIdInput').addEventListener('focus', function() {
+      // 这里可以根据选择的仓库动态更新SKU列表
+      // 当前使用静态列表作为示例
+    });
+    
+    // 保存按钮事件
+    document.getElementById('btnSaveFlow').addEventListener('click', function() {
+      const form = document.getElementById('createFlowForm');
+      if (form.checkValidity()) {
+        alert('库存流水创建成功！');
+        modal.hide();
+        // 刷新表格
+        applyFilters();
+      } else {
+        form.reportValidity();
+      }
+    });
+    
+    // 模态框关闭后移除DOM元素
+    document.getElementById('createFlowModal').addEventListener('hidden.bs.modal', function() {
+      this.remove();
+    });
+  }
+  
   // 执行初始化
   init();
+  
+  // 新建库存流水按钮事件
+  const btnCreateFlow = document.getElementById('btnCreateFlow');
+  if (btnCreateFlow) {
+    btnCreateFlow.addEventListener('click', function() {
+      showCreateFlowModal();
+    });
+  }
 })();
 </script>
 </body>
